@@ -7,9 +7,14 @@ reach 5ca7?
 regex: lea  l_xxxx, with xxxx < 0x8000 => LOAD_ROM_ADDRESS macro
 reach 5d03?
 break on all jump table entrypoints, figure them all out
-STORE_POINTER => STORE_RAM/ROM_POINTER
-detect a0/d6/d5 mixed code
 
-figure out which is a pointer or not, rename as ram/rom pointers or word
+
+
 
 8810: when is it set?
+
+A0 then d6 or d5 2/3 lines after:
+  check if LOAD_D5D6_FROM_A0
+d6 or d5 then a0 2/3 lines after:
+  check if LOAD_A0_FROM_D5D6
+
