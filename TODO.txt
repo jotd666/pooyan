@@ -11,4 +11,4 @@ STORE_POINTER => STORE_RAM/ROM_POINTER
 detect a0/d6/d5 mixed code
 
 finish rst_38
-2f93 unreachable
+76d4 reached???
