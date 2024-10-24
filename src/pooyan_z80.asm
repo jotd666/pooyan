@@ -2237,29 +2237,7 @@ audio_shit_0E8F:
 11F6: 34          inc  (hl)
 11F7: F1          pop  af
 11F8: C9          ret
-11F9: 50          ld   d,b
-11FA: 4C          ld   c,h
-11FB: 48          ld   c,b
-11FC: 44          ld   b,h
-11FD: 40          ld   b,b
-11FE: 3C          inc  a
-11FF: 38 30       jr   c,$1231
-1201: 2E 2C       ld   l,$2C
-1203: 2A 28 26    ld   hl,($2628)
-1206: 24          inc  h
-1207: 24          inc  h
-1208: 22 14 14    ld   ($1414),hl
-120B: 16 16       ld   d,$16
-120D: 18 18       jr   $1227
-120F: 1A          ld   a,(de)
-1210: 1A          ld   a,(de)
-1211: 1B          dec  de
-1212: 1B          dec  de
-1213: 1C          inc  e
-1214: 1C          inc  e
-1215: 1D          dec  e
-1216: 1D          dec  e
-1217: 1E 1E       ld   e,$1E
+
 1219: DD 21 E0 8A ld   ix,$8AE0
 121D: 11 18 00    ld   de,$0018
 1220: 06 0E       ld   b,$0E
@@ -11920,10 +11898,10 @@ jump_table_763E:
 7712: E6 03       and  $03
 7714: EF          rst  $28
 jump_table_7715:
-	.word	$771D          dec  e
-	.word	$7740          ld   b,b
-	.word	$7790          sub  b
-	.word	$7881          add  a,c
+	.word	$771D
+	.word	$7740
+	.word	$7790
+	.word	$7881
 771D: DD 35 11    dec  (ix+$11)
 7720: C0          ret  nz
 7721: 21 57 8D    ld   hl,$8D57
@@ -12119,7 +12097,7 @@ jump_table_7715:
 7901: 02          ld   (bc),a
 7902: 94          sub  h
 7903: 03          inc  bc
-7904: 21 05 EB    ld   hl,$EB05
+7904: 21 05 EB    ld   hl,$EB05 bogus & useless
 7907: 05          dec  b
 7908: 2A 09 40    ld   hl,($4009)
 790B: 0A          ld   a,(bc)
