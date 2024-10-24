@@ -4,5 +4,11 @@ reverse 15A7
 rst 38 calls a1 => D3/D4
 write to FFF0
 reach 5ca7?
+regex: lea  l_xxxx, with xxxx < 0x8000 => LOAD_ROM_ADDRESS macro
 reach 5d03?
+break on all jump table entrypoints, figure them all out
 STORE_POINTER => STORE_RAM/ROM_POINTER
+detect a0/d6/d5 mixed code
+
+finish rst_38
+2f93 unreachable

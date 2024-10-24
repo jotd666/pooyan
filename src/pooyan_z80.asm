@@ -11512,6 +11512,7 @@ jump_table_6DAA:
 6F7D: 3A 07 89    ld   a,($8907)
 6F80: FE 03       cp   $03
 6F82: C2 98 6F    jp   nz,$6F98
+; protection checksum again...
 6F85: 21 32 0B    ld   hl,$0B32
 6F88: 11 71 70    ld   de,$7071
 6F8B: 06 79       ld   b,$79
