@@ -3,4 +3,6 @@ reverse 0C55 (push start)
 reverse 15A7
 rst 38 calls a1 => D3/D4
 write to FFF0
+reach 5ca7?
+reach 5d03?
 STORE_POINTER => STORE_RAM/ROM_POINTER

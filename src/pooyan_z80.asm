@@ -9282,36 +9282,7 @@ table_55B5:
 5DBD: CD 2B 0F    call $0F2B
 5DC0: F1          pop  af
 5DC1: C9          ret
-5DC2: 60          ld   h,b
-5DC3: 20 60       jr   nz,$5E25
-5DC5: 20 40       jr   nz,$5E07
-5DC7: 20 40       jr   nz,$5E09
-5DC9: 40          ld   b,b
-5DCA: 40          ld   b,b
-5DCB: 40          ld   b,b
-5DCC: 40          ld   b,b
-5DCD: 40          ld   b,b
-5DCE: 20 40       jr   nz,$5E10
-5DD0: 20 40       jr   nz,$5E12
-5DD2: 20 40       jr   nz,$5E14
-5DD4: 20 60       jr   nz,$5E36
-5DD6: 20 60       jr   nz,$5E38
-5DD8: 20 40       jr   nz,$5E1A
-5DDA: 20 60       jr   nz,$5E3C
-5DDC: 20 60       jr   nz,$5E3E
-5DDE: 20 60       jr   nz,$5E40
-5DE0: 20 60       jr   nz,$5E42
-5DE2: 20 60       jr   nz,$5E44
-5DE4: 20 60       jr   nz,$5E46
-5DE6: 20 60       jr   nz,$5E48
-5DE8: 20 60       jr   nz,$5E4A
-5DEA: 20 60       jr   nz,$5E4C
-5DEC: 10 60       djnz $5E4E
-5DEE: 10 60       djnz $5E50
-5DF0: 10 60       djnz $5E52
-5DF2: 10 60       djnz $5E54
-5DF4: EE 0C       xor  $0C
-5DF6: 60          ld   h,b
+
 5DF7: 3A 32 8D    ld   a,($8D32)
 5DFA: A7          and  a
 5DFB: C0          ret  nz
