@@ -151,7 +151,7 @@ bootup_0092:
 00E9: 7E          ld   a,(hl)
 00EA: B7          or   a
 00EB: 18 16       jr   $0103
-
+; unreached?
 00ED: 57          ld   d,a
 00EE: E6 0F       and  $0F
 00F0: 5F          ld   e,a
@@ -1079,6 +1079,7 @@ init_title_screens_08B3:
 08BA: CD E3 02    call $02E3
 08BD: 21 51 8E    ld   hl,title_sub_state_8E51
 08C0: 34          inc  (hl)
+; another ROM check!
 08C1: 01 D5 64    ld   bc,$64D5
 08C4: 2E 00       ld   l,$00
 08C6: 65          ld   h,l
@@ -1155,7 +1156,8 @@ title_display_play_08E9:
 0942: 20 FD       jr   nz,$0941
 0944: DD 21 38 08 ld   ix,$0838
 0948: 06 07       ld   b,$07
-094A: 21 76 09    ld   hl,$0976
+; another code checksum or rom compare...
+094A: 21 76 09    ld   hl,code_bits_table_0976
 094D: 78          ld   a,b
 094E: CD 45 0C    call $0C45
 0951: 3E 1C       ld   a,$1C
@@ -1167,7 +1169,7 @@ title_display_play_08E9:
 0959: 4F          ld   c,a
 095A: DD 7E 00    ld   a,(ix+$00)
 095D: B9          cp   c
-095E: 20 16       jr   nz,$0976
+095E: 20 16       jr   nz,$0976		; bogus address: crashes
 0960: DD 2B       dec  ix
 0962: 10 E6       djnz $094A
 0964: 01 D9 07    ld   bc,$07D9
@@ -1308,8 +1310,7 @@ title_display_play_08E9:
 0A61: CD 40 0A    call $0A40
 0A64: C9          ret
 
-0AC9: 41          ld   b,c
-0ACA: 8D          adc  a,l
+0AC8: 21 41 8D    ld   hl,$8D41                                      
 0ACB: 35          dec  (hl)
 0ACC: 20 03       jr   nz,$0AD1
 0ACE: CD 28 0A    call $0A28
@@ -1456,6 +1457,7 @@ title_display_play_08E9:
 0BD0: 11 E0 FF    ld   de,$FFE0
 0BD3: 21 FE 8E    ld   hl,$8EFE
 0BD6: 34          inc  (hl)
+; * another rom checksum!!
 0BD7: 21 BC 86    ld   hl,$86BC
 0BDA: 01 C2 20    ld   bc,$20C2
 0BDD: 0A          ld   a,(bc)
@@ -1609,7 +1611,10 @@ jump_table_0C56:
 0CE9: 10 F7       djnz $0CE2
 0CEB: 7B          ld   a,e
 0CEC: FE D3       cp   $D3
-; looks like code was patched
+; looks like code was patched, to remove a zillionth checksum check
+; but maybe they got fed of that shit! Personally I am
+; and once the hackers understood that you should not tamper
+; with any code or message, the game has no other protection...
 0CEE: 00          nop
 0CEF: 00          nop
 0CF0: 00          nop
@@ -1942,6 +1947,9 @@ audio_shit_0E8F:
 0F9B: E6 03       and  $03
 0F9D: C6 1E       add  a,$1E
 0F9F: C3 C3 0F    jp   $0FC3
+
+ 0FA0  jp   $3A0F                                          C3 0F 3A
+
 0FA2: 3A 07 89    ld   a,($8907)
 0FA5: 0F          rrca
 0FA6: E6 03       and  $03
@@ -3646,7 +3654,7 @@ table_1754:
 1E5A: C6 16       add  a,$16
 1E5C: 6F          ld   l,a
 1E5D: 78          ld   a,b
-1E5E: B6          or   (hl)
+1E5E: B6          or   (hl)   ; rom_check_failed_89FB flag == 1: cannot move
 1E5F: A7          and  a
 1E60: DD 21 80 8A ld   ix,top_basket_object_8A80
 1E64: 20 3C       jr   nz,$1EA2
@@ -5626,6 +5634,7 @@ table_2774:
 313F: 22 4B 8F    ld   ($8F4B),hl
 3142: CD 19 0F    call $0F19
 3145: CD 3E 32    call $323E
+* another ROM compare code. Fails: RAM erased
 3148: 11 AC 68    ld   de,$68AC
 314B: 21 78 32    ld   hl,$3278
 314E: 06 40       ld   b,$40
@@ -5644,6 +5653,7 @@ table_2774:
 315F: 23          inc  hl
 3160: 10 F8       djnz $315A
 3162: C9          ret
+* erase RAM if compare fails
 3163: AF          xor  a
 3164: 21 00 88    ld   hl,$8800
 3167: 11 01 88    ld   de,$8801
@@ -7598,6 +7608,7 @@ jump_table_40E1:
 5114: BE          cp   (hl)
 5115: C2 2C 46    jp   nz,$462C
 5118: C9          ret
+; * illegal shit
 5119: ED          db   $ed
 511A: 1B          dec  de
 511B: 3A 07 89    ld   a,($8907)
@@ -9495,6 +9506,7 @@ table_55B5:
 64B3: FF          rst  $38
 64B4: 21 52 8F    ld   hl,$8F52
 64B7: 34          inc  (hl)
+; another damn rom checksum!
 64B8: 11 C2 0B    ld   de,$0BC2
 64BB: 21 D0 64    ld   hl,$64D0
 64BE: 1A          ld   a,(de)
@@ -10238,6 +10250,7 @@ jump_table_6AA4:
 6ABE: 32 56 8F    ld   ($8F56),a
 6AC1: DD 34 02    inc  (ix+$02)
 6AC4: C9          ret
+
 6AC5: 3A 2D 89    ld   a,($892D)
 6AC8: FE 02       cp   $02
 6ACA: C0          ret  nz
@@ -10894,12 +10907,13 @@ jump_table_6DAA:
 6FBA: 34          inc  (hl)
 6FBB: 2E 48       ld   l,$48
 6FBD: 36 80       ld   (hl),$80
+; another code compare ROM check method!
 6FBF: DD 21 C5 6A ld   ix,$6AC5
 6FC3: 21 ED 6F    ld   hl,$6FED
 6FC6: 06 44       ld   b,$44
 6FC8: DD 7E 00    ld   a,(ix+$00)
 6FCB: BE          cp   (hl)
-6FCC: 20 14       jr   nz,$6FE2
+6FCC: 20 14       jr   nz,$6FE2		; code compare failed!
 6FCE: DD 2C       inc  ixl
 6FD0: DD 7D       ld   a,ixl
 6FD2: A7          and  a
