@@ -347,8 +347,7 @@ jump_table_0242:
 	.word	$05EE
 	.word	$0644
 
-0255: 3F          ccf
-0256: 88          adc  a,b
+0254: 3A 3F 88    ld   a,($883F)         
 0257: 47          ld   b,a
 0258: E6 0F       and  $0F
 025A: CA 61 02    jp   z,$0261
@@ -846,6 +845,7 @@ update_sprite_shadow_0321:
 060E: 32 9F 86    ld   (video_address_of_credit_unit_869F),a
 0611: FE 02       cp   $02
 0613: C0          ret  nz
+; checksum performed if number of credits = 2
 0614: 11 C8 64    ld   de,$64C8
 0617: 01 1F 00    ld   bc,$001F
 061A: 1A          ld   a,(de)
@@ -856,6 +856,7 @@ update_sprite_shadow_0321:
 061F: 20 F9       jr   nz,$061A
 0621: FE 8C       cp   $8C
 0623: C8          ret  z
+; sneaky 8a3c address, checksum failed
 0624: 21 1E 45    ld   hl,$451E
 0627: 29          add  hl,hl
 0628: 34          inc  (hl)
@@ -2165,11 +2166,14 @@ audio_shit_0E8F:
 115E: CD CF 0E    call $0ECF
 1161: 3E 06       ld   a,$06
 1163: 32 0A 88    ld   (in_game_sub_state_880A),a
+; if one of those 2 checksums fail, do something probably nasty
 1166: 21 3C 8A    ld   hl,$8A3C
 1169: 3A 2B 88    ld   a,($882B)
 116C: 86          add  a,(hl)
 116D: A7          and  a
 116E: C8          ret  z
+; supposed to do something nasty. Game keeps running
+; but difficulty seems super hard (TBC)
 116F: 18 1C       jr   $118D
 1171: 21 07 8D    ld   hl,$8D07
 1174: 7E          ld   a,(hl)
@@ -8212,6 +8216,7 @@ table_55B5:
 584A: DD 36 07 02 ld   (ix+$07),$02
 584E: 11 47 38    ld   de,$3847
 5851: CD 1E 38    call $381E
+; another checksum routine
 5854: 21 B5 0B    ld   hl,$0BB5
 5857: 06 52       ld   b,$52
 5859: AF          xor  a
