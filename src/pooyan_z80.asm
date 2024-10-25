@@ -43,6 +43,7 @@ rst_10:
 0012: 10 FC       djnz $0010
 0014: C9          ret
 
+; fill area, unused
 rst_18:
 0018: 77          ld   (hl),a
 0019: 23          inc  hl
@@ -326,7 +327,7 @@ bootup_0092:
 022F: 3E C0       ld   a,$C0
 0231: 32 A1 88    ld   ($88A1),a
 0234: 7B          ld   a,e
-0235: 21 42 02    ld   hl,$0242
+0235: 21 42 02    ld   hl,jump_table_0242
 0238: 09          add  hl,bc
 0239: 5E          ld   e,(hl)
 023A: 23          inc  hl
@@ -335,21 +336,17 @@ bootup_0092:
 023F: E5          push hl
 0240: EB          ex   de,hl
 0241: E9          jp   (hl)
-0242: 9B          sbc  a,e
-0243: 03          inc  bc
-0244: C2 03 E9    jp   nz,$E903
-0247: 03          inc  bc
-0248: 96          sub  (hl)
-0249: 04          inc  b
-024A: 52          ld   d,d
-024B: 05          dec  b
-024C: 6B          ld   l,e
-024D: 05          dec  b
-024E: B2          or   d
-024F: 05          dec  b
-0250: EE 05       xor  $05
-0252: 44          ld   b,h
-0253: 06 3A       ld   b,$3A
+jump_table_0242:
+	.word	$039B 
+	.word	$03C2 
+	.word	$03E9 
+	.word	$0496 
+	.word	$0552 
+	.word	$056B 
+	.word	$05B2 
+	.word	$05EE
+	.word	$0644
+
 0255: 3F          ccf
 0256: 88          adc  a,b
 0257: 47          ld   b,a
@@ -6325,10 +6322,10 @@ table_35C7:
 3689: FD 19       add  iy,de
 368B: 10 F3       djnz $3680
 368D: C9          ret
-368E: 28 28       jr   z,$36B8
-3690: 20 20       jr   nz,$36B2
-3692: 18 18       jr   $36AC
-3694: 10 10       djnz $36A6
+28 28       
+20 20       
+18 18       
+10 10       
 3696: DD CB 07 56 bit  2,(ix+$07)
 369A: 28 13       jr   z,$36AF
 369C: 21 7B 8D    ld   hl,$8D7B
@@ -7474,12 +7471,13 @@ jump_table_40E1:
 4374: D8          ret  c
 4375: C3 53 35    jp   $3553
 4378: C9          ret
-4379: 10 11       djnz $438C
-437B: 12          ld   (de),a
-437C: 13          inc  de
-437D: 14          inc  d
-437E: 15          dec  d
-437F: 16 17       ld   d,$17
+4379: 
+10 11      
+12         
+13         
+14         
+15         
+16 17      
 4381: 06 1D       ld   b,$1D
 4383: 3A 20 89    ld   a,($8920)
 4386: 2A 43 8F    ld   hl,($8F43)
@@ -8012,12 +8010,13 @@ table_55B5:
 55CF: DD 19       add  ix,de
 55D1: 10 C1       djnz $5594
 55D3: C9          ret
-55D4: 0B          dec  bc
-55D5: 0F          rrca
-55D6: 13          inc  de
-55D7: 10 18       djnz $55F1
-55D9: 20 20       jr   nz,$55FB
-55DB: 18 10       jr   $55ED
+55D4: 
+0B        
+0F        
+13        
+10 18     
+20 20     
+18 10     
 
 55DD: 
 	.byte	28 18       
@@ -9406,15 +9405,9 @@ table_55B5:
 63F7: 19          add  hl,de
 63F8: 10 90       djnz $638A
 63FA: C9          ret
-63FB: 4F          ld   c,a
-63FC: 34          inc  (hl)
-63FD: 06 4F       ld   b,$4F
-63FF: 33          inc  sp
-6400: 06 42       ld   b,$42
-6402: 37          scf
-6403: 28 3A       jr   z,$643F
-6405: 50          ld   d,b
-6406: 8F          adc  a,a
+
+
+6404: 3A 50 8F    ld   a,($8F50)                                      
 6407: A7          and  a
 6408: 20 06       jr   nz,$6410
 640A: 3A 07 89    ld   a,($8907)
@@ -9739,12 +9732,13 @@ jump_table_64FF:
 66B9: 06 03       ld   b,$03
 66BB: CD 14 25    call $2514
 66BE: C9          ret
-66BF: 03          inc  bc
-66C0: 03          inc  bc
-66C1: 03          inc  bc
-66C2: 09          add  hl,bc
-66C3: 09          add  hl,bc
-66C4: 09          add  hl,bc
+66BF: 
+03 
+03 
+03 
+09 
+09 
+09 
 66C5: 11 18 00    ld   de,$0018
 66C8: 06 03       ld   b,$03
 66CA: D9          exx
