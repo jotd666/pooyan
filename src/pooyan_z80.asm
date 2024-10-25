@@ -23,7 +23,7 @@ sprite_code_0f = $f
 
 
 0000: AF          xor  a
-0001: 32 80 A1    ld   (mainlatch_a180),a
+0001: 32 80 A1    ld   (interrupt_control_a180),a
 0004: C3 92 00    jp   bootup_0092
 
 
@@ -255,7 +255,7 @@ bootup_0092:
 01AA: AF          xor  a
 01AB: CD 8F 0E    call audio_shit_0E8F
 01AE: 3E 01       ld   a,$01
-01B0: 32 80 A1    ld   (mainlatch_a180),a
+01B0: 32 80 A1    ld   (interrupt_control_a180),a
 01B3: 21 00 8A    ld   hl,$8A00
 01B6: 06 0A       ld   b,$0A
 01B8: 36 00       ld   (hl),$00
@@ -917,7 +917,7 @@ irq_066D:
 0677: DD E5       push ix
 0679: FD E5       push iy
 067B: AF          xor  a
-067C: 32 80 A1    ld   (mainlatch_a180),a
+067C: 32 80 A1    ld   (interrupt_control_a180),a
 067F: 21 40 88    ld   hl,sprite_shadow_ram_8840
 0682: DD 21 10 94 ld   ix,$9410
 0686: 11 10 90    ld   de,$9010
@@ -988,7 +988,7 @@ continue_06FA:
 070B: D1          pop  de
 070C: C1          pop  bc
 070D: 3E 01       ld   a,$01
-070F: 32 80 A1    ld   (mainlatch_a180),a
+070F: 32 80 A1    ld   (interrupt_control_a180),a
 0712: F1          pop  af
 0713: C9          ret
 
@@ -11439,7 +11439,7 @@ jump_table_7448:
 7497: 10 ED       djnz $7486
 7499: C9          ret
 749A: AF          xor  a
-749B: 32 80 A1    ld   (mainlatch_a180),a
+749B: 32 80 A1    ld   (interrupt_control_a180),a
 749E: C3 92 00    jp   bootup_0092
 
 ; unreachable?

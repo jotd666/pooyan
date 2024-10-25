@@ -8,6 +8,7 @@ regex: lea  l_xxxx, with xxxx < 0x8000 => LOAD_ROM_ADDRESS macro
 reach 5d03?
 break on all jump table entrypoints, figure them all out
 
+i register, revert what I did with D7, store as a global
 
 
 
