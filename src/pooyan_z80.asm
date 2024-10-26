@@ -11810,6 +11810,7 @@ jump_table_7715:
 776E: 21 B1 41    ld   hl,$41B1
 7771: CD 45 0C    call $0C45
 7774: CD 1E 38    call $381E
+; another code checksum...
 7777: 11 B3 0B    ld   de,$0BB3
 777A: 06 05       ld   b,$05
 777C: AF          xor  a
