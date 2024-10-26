@@ -1673,6 +1673,7 @@ jump_table_0C56:
 0D88: D8          ret  c
 0D89: D6 02       sub  $02
 0D8B: 32 02 88    ld   (nb_credits_8802),a
+; code checksum if 2 player mode
 0D8E: 21 6B 77    ld   hl,$776B
 0D91: 06 14       ld   b,$14
 0D93: 58          ld   e,b
@@ -3290,6 +3291,7 @@ table_1754:
 1B5C: 32 0A 88    ld   (in_game_sub_state_880A),a
 1B5F: AF          xor  a
 1B60: 32 08 88    ld   ($8808),a
+; another code checksum!
 1B63: 11 93 55    ld   de,$5593
 1B66: 01 00 22    ld   bc,$2200
 1B69: 1A          ld   a,(de)
@@ -3301,7 +3303,7 @@ table_1754:
 1B70: 10 F7       djnz $1B69
 1B72: FE 7C       cp   $7C
 1B74: 28 04       jr   z,$1B7A
-1B76: 21 1E 88    ld   hl,$881E
+1B76: 21 1E 88    ld   hl,checksum_failed_881E
 1B79: 34          inc  (hl)
 1B7A: 11 F2 1F    ld   de,$1FF2
 1B7D: 21 F0 89    ld   hl,$89F0
@@ -3582,6 +3584,7 @@ table_1754:
 1DA6: C9          ret
 1DA7: CD A6 6D    call $6DA6
 1DAA: 21 4C 58    ld   hl,$584C
+; another rom checksum
 1DAD: 7D          ld   a,l
 1DAE: D6 24       sub  $24
 1DB0: 6F          ld   l,a
@@ -3692,7 +3695,7 @@ table_1754:
 1EA2: DD 36 07 00 ld   (ix+$07),$00
 1EA6: C9          ret
 
-1EAD: 3A 1E 88    ld   a,($881E)         
+1EAD: 3A 1E 88    ld   a,(checksum_failed_881E)         
 1EB0: A7          and  a
 1EB1: 20 5E       jr   nz,$1F11
 1EB3: 21 5F 85    ld   hl,$855F
@@ -3747,6 +3750,7 @@ table_1754:
 1F11: CD 18 1F    call $1F18
 1F14: CD C9 34    call $34C9
 1F17: C9          ret
+; if any rom checksum failed, return
 1F18: 21 E7 89    ld   hl,$89E7
 1F1B: 06 07       ld   b,$07
 1F1D: 7E          ld   a,(hl)
@@ -3756,7 +3760,7 @@ table_1754:
 1F21: 10 FA       djnz $1F1D
 1F23: 0E 00       ld   c,$00
 1F25: 2E 01       ld   l,$01
-1F27: 7E          ld   a,(hl)
+1F27: 7E          ld   a,(hl)	; number of wolves
 1F28: D6 0A       sub  $0A
 1F2A: 38 22       jr   c,$1F4E
 1F2C: 0C          inc  c
@@ -4287,7 +4291,7 @@ rom_corrupt_20A4:
 241E: CD 01 21    call $2101
 2421: CD A6 25    call $25A6
 2424: CD 8B 30    call $308B
-2427: 3A 1E 88    ld   a,($881E)
+2427: 3A 1E 88    ld   a,(checksum_failed_881E)
 242A: A7          and  a
 242B: C0          ret  nz
 242C: DD 21 80 8A ld   ix,top_basket_object_8A80
@@ -5297,10 +5301,7 @@ table_2774:
 2DB3: 2E 16       ld   l,$16
 2DB5: 36 10       ld   (hl),$10
 2DB7: C9          ret
-2DB8: 97          sub  a
-2DB9: 93          sub  e
-2DBA: 8F          adc  a,a
-2DBB: 8A          adc  a,d
+
 2DBC: 21 16 8F    ld   hl,$8F16
 2DBF: 7E          ld   a,(hl)
 2DC0: A7          and  a
@@ -5636,7 +5637,7 @@ table_2774:
 3145: CD 3E 32    call $323E
 * another ROM compare code. Fails: RAM erased
 3148: 11 AC 68    ld   de,$68AC
-314B: 21 78 32    ld   hl,$3278
+314B: 21 78 32    ld   hl,code_clone_3278
 314E: 06 40       ld   b,$40
 3150: 7B          ld   a,e
 3151: BE          cp   (hl)
@@ -5790,7 +5791,7 @@ table_2774:
 325E: 35          dec  (hl)
 325F: 3A E5 89    ld   a,($89E5)
 3262: A7          and  a
-3263: 20 13       jr   nz,$3278
+3263: 20 13       jr   nz,code_clone_3278
 3265: C9          ret
 3266: 21 99 07    ld   hl,$0799
 3269: 01 00 20    ld   bc,$2000
@@ -5802,6 +5803,9 @@ table_2774:
 3272: FE DC       cp   $DC
 3274: C2 99 07    jp   nz,$0799
 3277: C9          ret
+
+; copy of actually called code in $68AC
+code_clone_3278:
 3278: AC          xor  h
 3279: 68          ld   l,b
 327A: 21 55 8F    ld   hl,$8F55
@@ -5837,16 +5841,15 @@ table_2774:
 32AA: 23          inc  hl
 32AB: 10 FA       djnz $32A7
 32AD: C3 D4 76    jp   $76D4
+
+
 32B0: 7A          ld   a,d
 32B1: 23          inc  hl
 32B2: BE          cp   (hl)
 32B3: C8          ret  z
 32B4: 10 FA       djnz $32B0
 32B6: C3 29 38    jp   $3829
-32B9: 43          ld   b,e
-32BA: 95          sub  l
-32BB: 89          adc  a,c
-32BC: 87          add  a,a
+
 32BD: 3A 24 8F    ld   a,($8F24)
 32C0: A7          and  a
 32C1: C8          ret  z
@@ -5861,6 +5864,7 @@ table_2774:
 32CF: CD AD 0F    call $0FAD
 32D2: 21 24 8F    ld   hl,$8F24
 32D5: 34          inc  (hl)
+; another rom checksum!
 32D6: 21 79 07    ld   hl,$0779
 32D9: 01 00 20    ld   bc,$2000
 32DC: 7E          ld   a,(hl)
@@ -5871,6 +5875,7 @@ table_2774:
 32E2: E6 47       and  $47
 32E4: C2 40 1F    jp   nz,$1F40
 32E7: C9          ret
+
 32E8: 21 84 8A    ld   hl,lift_speed_8A84
 32EB: 34          inc  (hl)
 32EC: 34          inc  (hl)
@@ -6807,6 +6812,7 @@ table_35C7:
 3C72: 3A 1F 88    ld   a,($881F)
 3C75: A7          and  a
 3C76: C0          ret  nz
+; rom checksum only called when cocktail mode when 16 wolves!
 3C77: 3A 01 89    ld   a,(nb_wolves_8901)
 3C7A: FE 10       cp   $10
 3C7C: D0          ret  nc
@@ -6869,13 +6875,13 @@ table_35C7:
 3D0A: DD 74 15    ld   (ix+$15),h
 3D0D: F1          pop  af
 3D0E: C9          ret
-3D0F: 40          ld   b,b
-3D10: 83          add  a,e
-3D11: 10 40       djnz $3D53
-3D13: 89          adc  a,c
-3D14: 10 FF       djnz $3D15
-3D16: 0F          rrca
-3D17: 3D          dec  a
+40      
+83      
+10 40   
+89      
+10 FF   
+0F      
+3D      
 3D18: 06 20       ld   b,$20
 3D1A: DD 4E 17    ld   c,(ix+$17)
 3D1D: 3A 45 8D    ld   a,($8D45)
@@ -7260,6 +7266,7 @@ jump_table_40E1:
 4111: 3A 5F 8A    ld   a,($8A5F)
 4114: A7          and  a
 4115: C0          ret  nz
+; another rom code check
 4116: 21 7F 55    ld   hl,$557F
 4119: 06 38       ld   b,$38
 411B: AF          xor  a
@@ -7366,6 +7373,7 @@ jump_table_40E1:
 4267: FE 02       cp   $02
 4269: D0          ret  nc
 426A: CD 53 35    call $3553
+; another rom code checksum
 426D: 11 B9 0B    ld   de,$0BB9
 4270: 21 83 42    ld   hl,$4283
 4273: 1A          ld   a,(de)
@@ -7691,6 +7699,7 @@ jump_table_40E1:
 5313: FE 04       cp   $04
 5315: D8          ret  c
 5316: 32 6E 8D    ld   ($8D6E),a
+; another rom check
 5319: 11 F3 0B    ld   de,$0BF3
 531C: 06 17       ld   b,$17
 531E: AF          xor  a
@@ -7989,6 +7998,7 @@ table_5407:   FF  20 18  0C  0C	0B
 5595: DD 7E 00    ld   a,(ix+$00)
 5598: DD B6 01    or   (ix+$01)
 559B: 20 31       jr   nz,$55CE
+; another rom checksum
 559D: 11 AD 0B    ld   de,$0BAD
 55A0: 21 B5 55    ld   hl,table_55B5
 55A3: 06 08       ld   b,$08
@@ -7999,7 +8009,7 @@ table_5407:   FF  20 18  0C  0C	0B
 55AA: 23          inc  hl
 55AB: 10 F8       djnz $55A5
 55AD: 18 0E       jr   $55BD
-55AF: 21 1E 88    ld   hl,$881E
+55AF: 21 1E 88    ld   hl,checksum_failed_881E
 55B2: 34          inc  (hl)
 55B3: 18 08       jr   $55BD
 
@@ -8430,6 +8440,7 @@ table_55B5:
 5B06: 3A 07 89    ld   a,($8907)
 5B09: FE 05       cp   $05
 5B0B: C0          ret  nz
+; another code checksum
 5B0C: FD 21 15 53 ld   iy,$5315
 5B10: FD 55       ld   d,iyl
 5B12: FD 5C       ld   e,iyh
@@ -8447,10 +8458,12 @@ table_55B5:
 5B22: 84          add  a,h
 5B23: C6 7F       add  a,$7F
 5B25: C8          ret  z
+; checksum failed (881E)
 5B26: 26 88       ld   h,$88
 5B28: 2E 1E       ld   l,$1E
 5B2A: 34          inc  (hl)
 5B2B: C9          ret
+
 5B2C: 3A 75 8D    ld   a,($8D75)
 5B2F: A7          and  a
 5B30: C8          ret  z
@@ -9522,19 +9535,8 @@ table_55B5:
 64CD: 34          inc  (hl)
 64CE: F1          pop  af
 64CF: C9          ret
-64D0: 51          ld   d,c
-64D1: 3A 3B 20    ld   a,($203B)
-64D4: 3D          dec  a
-64D5: 88          adc  a,b
-64D6: 05          dec  b
-64D7: 3A 41 20    ld   a,($2041)
-64DA: A7          and  a
-64DB: 88          adc  a,b
-64DC: 06 3A       ld   b,$3A
-64DE: 01 42 37    ld   bc,$3742
-64E1: 28 CD       jr   z,$64B0
-64E3: 13          inc  de
-64E4: 6B          ld   l,e
+
+64E2: CD 13 6B    call $6B13                                          
 64E5: DD 21 78 8C ld   ix,$8C78
 64E9: CD FB 64    call $64FB
 64EC: DD 21 E0 8A ld   ix,$8AE0
@@ -10737,7 +10739,7 @@ jump_table_6DAA:
 6E71: CD 64 0E    call $0E64
 6E74: C9          ret
 
-6E75: 21 1E 88    ld   hl,$881E
+6E75: 21 1E 88    ld   hl,checksum_failed_881E
 6E78: 3A F0 8E    ld   a,(checksum_failed_8EF0)
 6E7B: B6          or   (hl)
 6E7C: C2 92 4C    jp   nz,$4C92	; crash!

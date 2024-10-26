@@ -20,3 +20,5 @@ d6 or d5 then a0 2/3 lines after:
   check if LOAD_A0_FROM_D5D6
 
 converter: lf address >= 0xFC00 consider as negative data
+converter: postproc: 	move.b	d0,(ax) and addq.w #1,ax => (ax)+
+converter: postproc: 	subq.w #1,ax and move.b d0,(ax) => -(ax)

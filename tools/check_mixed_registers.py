@@ -46,7 +46,7 @@ while i < len(lines):
                                 break
                             next_regs = extract_regs(next_line)
                             if r2 in next_regs:
-                                print(f"*****a0/d6 mixup line {i+1}")
+                                print(f"*****{r1}/{r2} mixup line {i+1}")
                                 for k in range(i,j+1):
                                     print(lines[k],end="")
                                 nb_hits += 1
