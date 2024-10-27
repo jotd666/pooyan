@@ -2468,12 +2468,12 @@ audio_shit_0E8F:
 1484: FD 72 0D    ld   (iy+$0d),d
 1487: FD 36 11 28 ld   (iy+$11),$28
 148B: C3 E3 0E    jp   $0EE3
-148E: 10 11       djnz $14A1
-1490: 12          ld   (de),a
-1491: 13          inc  de
-1492: 14          inc  d
-1493: 15          dec  d
-1494: 16 17       ld   d,$17
+10 11     
+12        
+13        
+14        
+15        
+16 17     
 1496: CD 06 40    call $4006
 1499: DD 7E 0A    ld   a,(ix+$0a)
 149C: ED 44       neg
