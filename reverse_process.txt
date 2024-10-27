@@ -1,0 +1,39 @@
+1) disassemble ROM with MAME:
+ 
+dasm pooyan_z80.asm,0,8000
+
+2) identify centralized code (or specific code) that handles jump tables (jp (hl) or such, or rst routine doing this)
+
+3) convert jump table data to addresses
+
+4) add entrypoints, correct them (sometimes data before hides the entrypoint address, use MAME at the entrypoint
+   address to correct it
+   
+5) try to locate non-code (locate "nop" or exotic stuff like "ret pe" blocks). This is time-consuming
+   but worth it as only real code remains in the end
+   
+6) special case for that game: there are a lot of rom checksums/checks, and a lot of copied code which is not
+called but used to compare with code. Locate those, mark as non-code as well (saves double reversing!)
+
+7) use a script to generate breakpoints for all jumps of all identified jump tables: ex:
+
+softreset
+bpclear
+bpset 4562
+bpset 4234
+..
+
+8) run MAME in debug mode with this script: you reach the jump entries, and something happens on-screen
+   in the meantime, making it easy to identify what the routines do. Name them, and remove from breakpoint
+   list. Repeat, play the game, run the demo, until all entries are more or less solved/named.
+   Trick: to know what a routine is doing, just disable it (don't RET the code as there are checksums all over
+   and it would crash/freeze, rather use a breakpoint which changes the PC to a ret instruction)
+   ex: bpset xxxx,,{PC=$3389;g}
+   
+9) locate the low-level routines such as write char, write char block, write char column...
+
+10) get cheat xml file and name the data such as lives, or other game-related variables (saves
+    some reversing)
+	
+11) With those steps, the code should be pretty well structured. Now you can now reverse more code,
+    reverse data, until it's complete enough to be used.
