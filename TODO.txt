@@ -2,22 +2,18 @@ reverse title around 08A0 (title sub state)
 reverse 0C55 (push start)
 reverse 15A7
 
-write to FFF0
+
 reach 5ca7?
-regex: lea  l_xxxx, with xxxx < 0x8000 => LOAD_ROM_ADDRESS macro
 reach 5d03?
 break on all jump table entrypoints, figure them all out
 
 i register, revert what I did with D7, store as a global
 
-
+lea l_xxxx, where xxxx in rom: check if label defined / count then replace by access to ROM binary
+LOAD_ROM_ADDRESS
 
 8810: when is it set?
 
-A0 then d6 or d5 2/3 lines after:
-  check if LOAD_D5D6_FROM_A0
-d6 or d5 then a0 2/3 lines after:
-  check if LOAD_A0_FROM_D5D6
 
 converter: lf address >= 0xFC00 consider as negative data
 converter: postproc: 	move.b	d0,(ax) and addq.w #1,ax => (ax)+

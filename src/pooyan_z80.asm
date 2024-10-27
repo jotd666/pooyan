@@ -2896,15 +2896,7 @@ table_1754:
 183B: 23          inc  hl
 183C: 18 F5       jr   $1833
 183E: C9          ret
-183F: 92          sub  d
-1840: 98          sbc  a,b
-1841: A3          and  e
-1842: A7          and  a
-1843: A6          and  (hl)
-1844: 99          sbc  a,c
-1845: A5          and  l
-1846: A1          and  c
-1847: 43          ld   b,e
+
 1848: 3A 07 89    ld   a,($8907)
 184B: CB 4F       bit  1,a
 184D: 28 5A       jr   z,$18A9
@@ -4814,6 +4806,7 @@ table_2774:
 2932: AF          xor  a
 2933: 32 9C 8A    ld   ($8A9C),a
 2936: 32 9E 8A    ld   ($8A9E),a
+; you gotta love those zillions of rom code compare checks
 2939: 21 59 08    ld   hl,$0859
 293C: 01 00 20    ld   bc,$2000
 293F: 7E          ld   a,(hl)
