@@ -14,5 +14,6 @@ for line in lines:
     if m:
         result.add(int(m.group(1),0x10))
 
-for r in sorted(result):
-    print(f"bpset ${r:04x}")
+with open("K:\Emulation\MAME\bkpts.txt","w") as f:
+    for r in sorted(result):
+        f.write(f"bpset ${r:04x}\n")
