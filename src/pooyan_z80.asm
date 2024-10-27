@@ -784,7 +784,7 @@ update_sprite_shadow_0321:
 05B0: 18 F1       jr   $05A3
 05B2: 87          add  a,a
 05B3: F5          push af
-05B4: 21 0D 7A    ld   hl,$7A0D
+05B4: 21 0D 7A    ld   hl,string_table_7A0D
 05B7: E6 7F       and  $7F
 05B9: 5F          ld   e,a
 05BA: 16 00       ld   d,$00
@@ -11411,6 +11411,7 @@ jump_table_7448:
 7468: 22 43 8F    ld   ($8F43),hl
 746B: 21 21 89    ld   hl,$8921
 746E: 34          inc  (hl)
+; 2 consecutive rom checks
 746F: 21 9A 74    ld   hl,$749A
 7472: 11 00 00    ld   de,$0000
 7475: 06 08       ld   b,$08
@@ -11895,6 +11896,7 @@ jump_table_7715:
 
 7881: DD 35 11    dec  (ix+$11)
 7884: C0          ret  nz
+; another rom compare check
 7885: FD 21 00 79 ld   iy,$7900
 7889: 21 79 07    ld   hl,$0779
 788C: 11 00 00    ld   de,$0000
@@ -11920,6 +11922,7 @@ jump_table_7715:
 78B2: FD 6F       ld   iyl,a
 78B4: 0D          dec  c
 78B5: 20 DA       jr   nz,$7891
+; end romcheck
 78B7: 3E 02       ld   a,$02
 78B9: 32 51 8E    ld   (title_sub_state_8E51),a
 78BC: FD 21 48 85 ld   iy,$8548
@@ -12118,6 +12121,288 @@ jump_table_7715:
 7A07: C2 85 1A    jp   nz,$1A85
 7A0A: C9          ret
 
+string_table_7A0D:
+	.word	str_7a8d
+	.word	str_7a9a
+	.word	str_7aae
+	.word	str_7abb
+	.word	str_7ac8
+	.word	str_7ad5
+	.word	str_7ae2
+	.word	str_7af2
+	.word	str_7b12
+	.word	str_7b2e
+	.word	str_7b3f
+	.word	str_7b53
+	.word	str_7b5a
+	.word	str_7b69
+	.word	str_7b7b
+	.word	str_7b8b
+	.word	str_7bc8
+	.word	str_7be7
+	.word	str_7bf8
+	.word	str_7c08
+	.word	str_7c14
+	.word	str_7c1f
+	.word	str_7c2b
+	.word	str_7c3e
+	.word	str_7c4a
+	.word	str_7c5c
+	.word	str_7c71
+	.word	str_7c85
+	.word	str_7c8b
+	.word	str_7c91
+	.word	str_7c97
+	.word	str_7ca8
+	.word	str_7cae
+	.word	str_7cb4
+	.word	str_7cba
+	.word	str_7cc0
+	.word	str_7cc6
+	.word	str_7ccd
+	.word	str_7cde
+	.word	str_7cef
+	.word	str_7cfe
+	.word	str_7d0a
+	.word	str_7d26
+	.word	str_7d42
+	.word	str_7d53
+	.word	str_7d68
+	.word	str_7d76
+	.word	str_7d82
+	.word	str_7d98
+	.word	str_7dac
+	.word	str_7dc4
+	.word	str_7de2
+	.word	str_7e0d
+	.word	str_7e46
+	.word	str_7e56
+	.word	str_7e56
+	.word	str_7e56
+	.word	str_7e56
+	.word	str_7e56
+	.word	str_7e56
+	.word	str_7e56
+	.word	str_7e56
+	.word	str_7e56
+	.word	str_7e5a
+
+str_7a8d:
+	.byte	150,134
+	.ascii	"GAME@@OVER?"
+str_7a9a:
+	.byte	238,134
+	.ascii	"PUSH@START@BUTTON?"
+str_7aae:
+	.byte	148,134
+	.ascii	"PLAYER@ONE?"
+str_7abb:
+	.byte	148,134
+	.ascii	"PLAYER@TWO?"
+str_7ac8:
+	.byte	128,134
+	.ascii	"HIGH@SCORE?"
+str_7ad5:
+	.byte	191,135
+	.ascii	"@CREDIT@@@?"
+str_7ae2:
+	.byte	191,135
+	.ascii	"@FREE@PLAY@@@?"
+str_7af2:
+	.byte	56,135
+	.ascii	"ONE@DAY\\\."
+	.byte	218,134
+	.ascii	"IN@THE@FOREST\\\?"
+str_7b12:
+	.byte	209,134
+	.ascii	"BONUS@POINT."
+	.byte	180,134
+	.ascii	"200X@@w@@00?"
+str_7b2e:
+	.byte	202,134
+	.ascii	"YOUR@PLAY@TIME?"
+str_7b3f:
+	.byte	25,135
+	.ascii	"NBR@OF@PIGS@TAKEN?"
+str_7b53:
+	.byte	36,134
+	.ascii	"PLAY?"
+str_7b5a:
+	.byte	169,134
+	.ascii	"[@@POOYAN@@[?"
+str_7b69:
+	.byte	196,134
+	.ascii	"[@@CHARACTER@@[?"
+str_7b7b:
+	.byte	163,134
+	.ascii	"[@@POO@YAN@@[?"
+str_7b8b:
+	.byte	43,135
+	.ascii	"WHEN@7@WOLVES@JOIN."
+	.byte	45,135
+	.ascii	"ON@THE@CLIFFsTHEY."
+	.byte	47,135
+	.ascii	"DROP@GIAHT@ROCK;;?"
+str_7bc8:
+	.byte	175,134
+	.ascii	"@NICE@@SHOOT."
+	.byte	210,134
+	.ascii	"@BONUS@@POINT?"
+str_7be7:
+	.byte	188,134
+	.ascii	":@KONAMI@@1982?"
+str_7bf8:
+	.byte	174,134
+	.ascii	"@MAMAs@HELP@;?"
+str_7c08:
+	.byte	230,133
+	.ascii	"OHs@BOY@;?"
+str_7c14:
+	.byte	86,135
+	.ascii	"@MAMA@@;?"
+str_7c1f:
+	.byte	25,135
+	.ascii	"@MAMA@@;;?"
+str_7c2b:
+	.byte	117,135
+	.ascii	"1ST@BONUS@AFTER@?"
+str_7c3e:
+	.byte	117,133
+	.ascii	"50000@PTS?"
+str_7c4a:
+	.byte	209,134
+	.ascii	"ONE@PLAYER@ONLY?"
+str_7c5c:
+	.byte	241,134
+	.ascii	"ONE@OR@TWO@PLAYERS?"
+str_7c71:
+	.byte	4,135
+	.ascii	"[@SCORE@RANKING@[?"
+str_7c85:
+	.byte	39,135
+	.ascii	"1ST?"
+str_7c8b:
+	.byte	41,135
+	.ascii	"2ND?"
+str_7c91:
+	.byte	43,135
+	.ascii	"3RD?"
+str_7c97:
+	.byte	45,135
+	.ascii	"4TH@@@@@@@@@@@?"
+str_7ca8:
+	.byte	47,135
+	.ascii	"5TH?"
+str_7cae:
+	.byte	49,135
+	.ascii	"6TH?"
+str_7cb4:
+	.byte	51,135
+	.ascii	"7TH?"
+str_7cba:
+	.byte	53,135
+	.ascii	"8TH?"
+str_7cc0:
+	.byte	55,135
+	.ascii	"9TH?"
+str_7cc6:
+	.byte	89,135
+	.ascii	"10TH?"
+str_7ccd:
+	.byte	189,134
+	.ascii	":@KONAMI@@1982?"
+str_7cde:
+	.byte	209,134
+	.ascii	"@BONUS@@STAGE@?"
+str_7cef:
+	.byte	172,134
+	.ascii	"@@PERFECT@@@?"
+str_7cfe:
+	.byte	117,133
+	.ascii	"30000@PTS?"
+str_7d0a:
+	.byte	120,135
+	.ascii	"AND@BONUS@EVERY@70000@PTS?"
+str_7d26:
+	.byte	120,135
+	.ascii	"AND@BONUS@EVERY@80000@PTS?"
+str_7d42:
+	.byte	208,134
+	.ascii	"2ND@PHASE@GETS?"
+str_7d53:
+	.byte	18,135
+	.ascii	"HARDER@AS@YOU@LOSE?"
+str_7d68:
+	.byte	148,134
+	.ascii	"MORE@PIGS@;?"
+str_7d76:
+	.byte	22,134
+	.ascii	"?"
+str_7d82:
+	.byte	56,135
+	.ascii	"?"
+str_7d98:
+	.byte	117,135
+	.ascii	"ABOUT@10@SECONDS;?"
+str_7dac:
+	.byte	146,134
+	.ascii	"@ONE@WOLF."
+	.byte	116,134
+	.ascii	"@@400@PTS?"
+str_7dc4:
+	.byte	146,134
+	.ascii	"@TWO@WOLVES."
+	.byte	116,134
+	.ascii	"@@400800@PTS?"
+str_7de2:
+	.byte	146,134
+	.ascii	"@SOME@WOLVES."
+	.byte	116,134
+	.ascii	"@@400800@."
+	.byte	86,134
+	.ascii	"@@@1600@PTS?"
+str_7e0d:
+	.byte	205,134
+	.ascii	"BONUS@@POINT."
+	.byte	16,135
+	.ascii	"MEAT@@@@@@@@00@PTS."
+	.byte	18,135
+	.ascii	"WOLF@@@@@@@@00@PTS?"
+str_7e46:
+	.byte	163,134
+	.ascii	"BONUS@@STAGE@?"
+str_7e56:
+	.byte	0,132
+	.ascii	"@?"
+str_7e56:
+	.byte	0,132
+	.ascii	"@?"
+str_7e56:
+	.byte	0,132
+	.ascii	"@?"
+str_7e56:
+	.byte	0,132
+	.ascii	"@?"
+str_7e56:
+	.byte	0,132
+	.ascii	"@?"
+str_7e56:
+	.byte	0,132
+	.ascii	"@?"
+str_7e56:
+	.byte	0,132
+	.ascii	"@?"
+str_7e56:
+	.byte	0,132
+	.ascii	"@?"
+str_7e56:
+	.byte	0,132
+	.ascii	"@?"
+str_7e5a:
+	.byte	137,134
+	.ascii	"DOUBLE."
+	.byte	77,134
+	.ascii	"PERFECT?"
 
 
 7E6D: 3A 88 89    ld   a,($8988)

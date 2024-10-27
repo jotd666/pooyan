@@ -37,8 +37,11 @@ for i in range(0,0x80,2):
     slist.append({"offset":offset,"x":x,"y":y,"str":sparts})
 
 with open("string_list.txt","w") as f:
-    for sd in slist:
-        f.write("str_{:04x}:\n".format(sd["offset"]))
+    for i,o in enumerate(olist):
+        f.write(f"\t.long\tstr_{i:02x}_{o:04x}\n")
+    f.write("\n")
+    for i,sd in enumerate(slist):
+        f.write("str_{:02x}_{:04x}:\n".format(i,sd["offset"]))
         for x,y,s in zip(sd["x"],sd["y"],sd["str"]):
             f.write(f"\t.byte\t{x},{y}\n")
             f.write(f'\t.ascii\t"{s}"\n')

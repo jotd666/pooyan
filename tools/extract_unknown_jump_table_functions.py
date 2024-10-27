@@ -14,6 +14,9 @@ for line in lines:
     if m:
         result.add(int(m.group(1),0x10))
 
-with open("K:\Emulation\MAME\bkpts.txt","w") as f:
+with open(r"K:\Emulation\MAME\bkpts.txt","w") as f:
+    f.write("bpclear\n")
     for r in sorted(result):
         f.write(f"bpset ${r:04x}\n")
+
+print(len(result))
