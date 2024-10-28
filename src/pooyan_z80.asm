@@ -1210,6 +1210,7 @@ title_display_play_08E9:
 099C: 06 19       ld   b,$19
 099E: CD CE 02    call $02CE
 09A1: C0          ret  nz
+; rom checksum but in the end, the result (A) is dropped...
 09A2: 16 0D       ld   d,$0D
 09A4: 21 65 0A    ld   hl,$0A65
 09A7: 01 C9 07    ld   bc,$07C9
@@ -1562,6 +1563,7 @@ jump_table_0C56:
 0C8E: C0          ret  nz
 0C8F: 2C          inc  l
 0C90: 34          inc  (hl)
+; another checksum loop
 0C91: 21 79 07    ld   hl,$0779
 0C94: 01 00 00    ld   bc,$0000
 0C97: 7E          ld   a,(hl)
@@ -1575,6 +1577,7 @@ jump_table_0C56:
 0CA3: 79          ld   a,c
 0CA4: FE 0C       cp   $0C
 0CA6: 20 F0       jr   nz,$0C98
+; end of checksum loop
 0CA8: 01 79 07    ld   bc,$0779
 0CAB: CD 5D 07    call $075D
 0CAE: 32 0D 88    ld   ($880D),a
@@ -4946,7 +4949,7 @@ table_2774:
 2A92: DD 34 02    inc  (ix+$02)
 2A95: C9          ret
 
-2A96: 21 DF 67    ld   hl,$67DF
+2A96: 21 DF 67    ld   hl,$67DF			; another rom compare check
 2A99: 11 23 2B    ld   de,$2B23
 2A9C: 06 20       ld   b,$20
 2A9E: 1A          ld   a,(de)
@@ -5841,7 +5844,7 @@ code_clone_3278:
 32B2: BE          cp   (hl)
 32B3: C8          ret  z
 32B4: 10 FA       djnz $32B0
-32B6: C3 29 38    jp   $3829
+32B6: C3 29 38    jp   $3829		; bogus
 
 32BD: 3A 24 8F    ld   a,($8F24)
 32C0: A7          and  a
@@ -6536,7 +6539,7 @@ table_35C7:
 39AF: CD 06 40    call $4006
 39B2: 3A 07 89    ld   a,($8907)
 39B5: E6 01       and  $01
-39B7: CA 87 3B    jp   z,$3B87
+39B7: CA 87 3B    jp   z,$3B87		; anti-cheat? bogus
 39BA: DD 7E 0A    ld   a,(ix+$0a)
 39BD: ED 44       neg
 39BF: 47          ld   b,a
@@ -7230,7 +7233,6 @@ table_35C7:
 40DF: D0          ret  nc
 40E0: EF          rst  $28
 jump_table_40E1:
-     .word	$40E1
 	 .word	$4103
 	 .word	$4137 
 	 .word	$416F  
@@ -7585,7 +7587,7 @@ jump_table_40E1:
 4A4C: CD 07 33    call $3307
 4A4F: C9          ret
 
-
+; another ROM check
 50F1: 3A FB 89    ld   a,($89FB)
 50F4: A7          and  a
 50F5: 20 22       jr   nz,$5119
@@ -7629,6 +7631,7 @@ jump_table_40E1:
 513C: C0          ret  nz
 513D: CD E8 56    call $56E8
 5140: C9          ret
+
 5141: CD B0 53    call $53B0
 5144: 18 EF       jr   $5135
 5146: CD 50 51    call $5150
@@ -7772,6 +7775,8 @@ jump_table_40E1:
 table_53A6:
   14 24 34 44 54 64 74 84 94 A4 A7 C8
 
+53B0: A7          and  a                                              
+53B1: C8          ret  z                                              
 53B2: 3A 59 8D    ld   a,($8D59)
 53B5: A7          and  a
 53B6: C0          ret  nz
@@ -8616,7 +8621,8 @@ table_55B5:
 5C7B: FD 36 0E 00 ld   (iy+$0e),$00
 5C7F: C9          ret
 
-5D0C: 21 E0 8A    ld   hl,$8AE0
+                                    
+5D0B: DD 21 E0 8A ld   ix,$8AE0
 5D0F: 11 18 00    ld   de,$0018
 5D12: 06 06       ld   b,$06
 5D14: D9          exx
@@ -9660,12 +9666,13 @@ jump_table_64FF:
 6612: DD 77 D2    ld   (ix-$2e),a
 6615: 32 30 89    ld   ($8930),a
 6618: 32 2E 89    ld   ($892E),a
+; ram check!!
 661B: FD 21 BC 82 ld   iy,$82BC
 661F: 11 00 00    ld   de,$0000
 6622: 06 0A       ld   b,$0A
 6624: FD 7E 00    ld   a,(iy+$00)
 6627: FD BE E0    cp   (iy-$20)
-662A: C2 84 52    jp   nz,$5284
+662A: C2 84 52    jp   nz,$5284		; bogus!!!
 662D: 83          add  a,e
 662E: 5F          ld   e,a
 662F: 30 01       jr   nc,$6632
@@ -9697,9 +9704,9 @@ jump_table_64FF:
 6659: 10 F1       djnz $664C
 665B: 7B          ld   a,e
 665C: FE 2A       cp   $2A
-665E: C2 14 60    jp   nz,$6014
+665E: C2 14 60    jp   nz,$6014		; bogus
 6661: 15          dec  d
-6662: C2 05 20    jp   nz,$2005
+6662: C2 05 20    jp   nz,$2005	; bogus
 6665: C9          ret
 
 6666: 11 E8 FF    ld   de,$FFE8
@@ -10009,6 +10016,7 @@ jump_table_6834:
 68D3: 21 EB 68    ld   hl,$68EB
 68D6: 06 04       ld   b,$04
 68D8: 7B          ld   a,e
+; rom check!!!
 68D9: BE          cp   (hl)
 68DA: 28 06       jr   z,$68E2
 68DC: 23          inc  hl
@@ -10016,6 +10024,7 @@ jump_table_6834:
 68DF: C3 D4 76    jp   $76D4
 68E2: 7A          ld   a,d
 68E3: 23          inc  hl
+; rom check!!!
 68E4: BE          cp   (hl)
 68E5: C8          ret  z
 68E6: 10 FA       djnz $68E2
@@ -10831,6 +10840,10 @@ jump_table_6DAA:
 6F37: 30 04       jr   nc,$6F3D
 6F39: CD 06 40    call $4006
 6F3C: C9          ret
+6F3D: EF          rst  $28                                            
+	.word	$3E69  
+	.word	$3E9C  
+
 
 6F42: 21 51 8F    ld   hl,$8F51                                       
 6F45: 34          inc  (hl)
@@ -11861,20 +11874,21 @@ jump_table_7715:
 77E7: DD 36 01 01 ld   (ix+$01),$01
 77EB: DD 36 02 03 ld   (ix+$02),$03
 77EF: DD 36 11 80 ld   (ix+$11),$80
+; RAM check?
 77F3: 21 BC 82    ld   hl,$82BC
 77F6: 11 E0 FF    ld   de,$FFE0
 77F9: 01 00 0A    ld   bc,$0A00
 77FC: 7E          ld   a,(hl)
 77FD: 19          add  hl,de
 77FE: BE          cp   (hl)
-77FF: 20 74       jr   nz,$7875
+77FF: 20 74       jr   nz,$7875	; bogus
 7801: 81          add  a,c
 7802: 4F          ld   c,a
 7803: 10 F7       djnz $77FC
 7805: C6 83       add  a,$83
 7807: 21 0E 78    ld   hl,$780E
 780A: BE          cp   (hl)
-780B: C2 34 23    jp   nz,$2334
+780B: C2 34 23    jp   nz,$2334		; bogus
 780E: C9          ret
 780F: 01 E0 FF    ld   bc,$FFE0
 7812: 1A          ld   a,(de)
@@ -12027,6 +12041,7 @@ jump_table_7715:
 795F: C9          ret
 7960: 11 09 06    ld   de,$0609
 7963: FF          rst  $38
+; another rom check!!
 7964: DD 21 01 29 ld   ix,$2901
 7968: 21 00 00    ld   hl,$0000
 796B: 5D          ld   e,l
@@ -12103,7 +12118,7 @@ jump_table_7715:
 79E9: 21 AC 68    ld   hl,$68AC
 79EC: 11 00 00    ld   de,$0000
 79EF: 7E          ld   a,(hl)
-79F0: FE C9       cp   $C9
+79F0: FE C9       cp   $C9		; check for RET there! another rom check!!!
 79F2: 28 08       jr   z,$79FC
 79F4: 83          add  a,e
 79F5: 30 01       jr   nc,$79F8
