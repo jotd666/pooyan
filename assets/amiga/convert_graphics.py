@@ -3,6 +3,7 @@ import os,sys,bitplanelib
 
 this_dir = os.path.dirname(os.path.abspath(__file__))
 
+src_dir = os.path.join(this_dir,"..","..","src","amiga")
 
 sprite_names = dict()
 
@@ -106,4 +107,6 @@ sprites_path = os.path.join(this_dir,os.path.pardir,"pooyan")
 
 sprite_sheet_dict = {i:Image.open(os.path.join(sprites_path,f"sprites_pal_{i:02x}.png")) for i in [0]}
 
+with open(os.path.join(src_dir,"palette.68k"),"w") as f:
+    pass
 
