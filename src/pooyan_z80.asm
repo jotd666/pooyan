@@ -7113,6 +7113,7 @@ table_35C7:
 3FB1: 36 00       ld   (hl),$00
 3FB3: 3E 01       ld   a,$01
 3FB5: CD C9 34    call $34C9
+; another rom check
 3FB8: 01 8B 42    ld   bc,$428B
 3FBB: 2E 00       ld   l,$00
 3FBD: 65          ld   h,l

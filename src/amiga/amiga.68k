@@ -25,11 +25,12 @@ BORDERBLANK = 1
 SPRITE_X_CORRECTION = 0
 SPRITE_Y_CORRECTION = 0
 
+Y_MAX = 256
 
 
 BASE_BPLCON2_VALUE = 0x0064		| sprites above all playfields
-HIDDEN_BOBS_BPLCON2_VALUE = 0x0046
 SCREEN_TILE_ADDRESS = 0x8400
+COLOR_TILE_ADDRESS = 0x8000
 COLOR_TILE_ADDRESS = 0x8000
 
 
@@ -62,7 +63,6 @@ ONE_TICK = 1
 	
 
 OPT_ENABLE_DOUBLE_BUFFERING = 0
-OPT_ENABLE_ELEVATOR_DOUBLE_BUFFERING = 1
 
 _custom = 0xDFF000
 
@@ -169,7 +169,7 @@ start:
 		.global osd_read_dsw1
 		.global osd_read_dsw0
 		.global osd_read_inputs_1
-		.global osd_read_inputs_2
+		.global osd_read_inputs_0
 
 	
 	.include	"ReadJoypad.i"
@@ -305,25 +305,15 @@ _user:
 	move.l	#-1,184(A0)	| pr_WindowPtr: no more system requesters (insert volume, write protected...)
 
 .no_forbid:
-	* align bitplanes
-	lea		elev_screen_buffer_1,a0
-	move.l	a0,elev_screen_data_1
-	move.l	a0,elev_drawed_screen_ptr
-	move.l	a0,elev_displayed_screen_ptr
+
 	
 	lea		bg_screen_buffer_1,a0
 	addq	#2,a0	| leave 16 bits hidden for left side clipping
 	move.l	a0,playfield_drawed_screen_ptr
 	move.l	a0,playfield_displayed_screen_ptr
 
-	lea		panel_screen_buffer,a0
-	move.l	a0,panel_screen_ptr
-	
-	.ifne	OPT_ENABLE_ELEVATOR_DOUBLE_BUFFERING
-	lea		elev_screen_buffer_2,a0
-	move.l	a0,elev_screen_data_2
-	move.l	a0,elev_displayed_screen_ptr
-	.endif
+
+
 	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
 	lea		bg_screen_buffer_2,a0
 	move.l	a0,bg_screen_data_2
@@ -333,8 +323,7 @@ _user:
 	* set them even if reset by game afterwards
 	* avoiding ugly stripe bitplane effect at startup
 
-	bsr		set_playfield_bitplanes
-	bsr		set_elev_bitplanes
+	bsr		set_static_bitplanes
 
 
 	move.l	cheat_flags,d0
@@ -346,23 +335,18 @@ _user:
 	st.b	cheat_used
 2:
 	btst	#0,d0
-	jeq		0f
-	bset	#6,dip_switches_3		| "NO HIT" original cheat
-0:
+*	jeq		0f
+*	bset	#6,dip_switches_3		| "NO HIT" original cheat
+*0:
 	BTST	#1,d0
 	sne		infinite_lives_flag
 	btst	#2,d0
-	sne		all_documents_collected_flag
 0:
 1:
 	move.b	difficulty_level+3,d0
 	and.b	#3,d0
-	or.b	d0,dip_switches_3
 	
-	move.l	start_floor_option,d1
-	lea		start_floor_table(pc),A0
-	move.b	(a0,d1.w),d1
-	move.b	d1,start_floor
+
 	
 	move.l	misc_options,d1
 	btst	#0,d1
@@ -381,7 +365,7 @@ _user:
 	btst	#0,d0
 	beq.b	0f
 	st		cheat_used
-	bset	#6,dip_switches_2
+	*bset	#6,dip_switches_2
 0:
 	btst	#1,d0
 	beq.b	0f
@@ -390,14 +374,13 @@ _user:
 0:
 	btst	#2,d0
 	beq.b	0f
-	st		infinite_time_flag
 	st		cheat_used
 0:
 	move.l	cheat_flags,d0
 	btst	#3,d0
 	beq.b	0f
 	st		cheat_used
-	bset	#5,dip_switches_2
+	*bset	#5,dip_switches_2
 0:
 	
 	jsr	 _detect_controller_types 
@@ -652,8 +635,7 @@ _vblank:
 	addq.b	#1,d0
 	cmp.b	#5,d0
 	bne.b	1f
-	jbsr	update_elevator_sound
-	jbsr		elevator_irq
+	jbsr		pooyan_irq
 	clr.b	interrupt_mode	
 	clr.b	d0
 1:
@@ -665,16 +647,10 @@ _vblank:
 	
 	subq.w	#1,delay_timer
 		
-	jbsr	update_elevator_sound
-	jbsr		elevator_irq
+	jbsr		pooyan_irq
 
 
-	GET_RAM_START_IN_A6
-	tst.b	(player_structure_851A+7,a6)	| player floor: basement
-	jne		0f
-1:
-	jbsr	erase_bonus_overlay
-0:
+
 
 	bsr		really_update_sprites
 	
@@ -773,11 +749,9 @@ osd_update_sprites:
 is_game_playing:
 	movem.l	d0/a6,-(a7)
 	GET_RAM_START_IN_A6
-	tst.b	this_is_a_demo_game_823B(a6)
-	jne		0f
-	tst.b	current_gfx_bank
-	jne		1f
-0:
+	*tst.b	this_is_a_demo_game_823B(a6)
+	*jne		0f
+	
 	moveq	#0,d0
 1:
 	movem.l	(a7)+,d0/a6
@@ -872,37 +846,37 @@ update_bobs_and_hw_sprites:
 	
 	lea		sprite_ram_9000,a0	
 
-    lea sprite_translation_table,A6
-	lea		hw_sprite_table,a4
-	lea	HW_SpriteYTable_16(pc),a1
-	lea	game_sprites+2,a2			| copperlist
-
-	| start by the end (drawing priority), except for last sprite
-	| which has top priority (strange hardware!)
-	move.l	a0,-(a7)
-	add.w	#(NB_TARGET_SPRITES-1)*4,a0		| last sprite
-	* last sprite
-	jbsr	update_one_hw_sprite
-	move.l	(a7)+,a0
-	moveq	#NB_TARGET_SPRITES-2,d7
-1:
-	jbsr	update_one_hw_sprite
-	addq.w	#4,a0
-	cmp.l	#game_sprites_end,a2
-	bcc		2f	
-	dbf		d7,1b
-
-	* pad last sprite entries with blank
-	move.l	#blank_sprite,d0
-1:
-	move.w	d0,(4,a2)
-	swap	d0
-	move.w	d0,(a2)
-	swap	d0
-	addq	#8,a2
-	cmp.l	#game_sprites_end,a2
-	bcs		1b
-2:
+*    lea sprite_translation_table,A6
+*	lea		hw_sprite_table,a4
+*	lea	HW_SpriteYTable_16(pc),a1
+*	lea	game_sprites+2,a2			| copperlist
+*
+*	| start by the end (drawing priority), except for last sprite
+*	| which has top priority (strange hardware!)
+*	move.l	a0,-(a7)
+*	add.w	#(NB_TARGET_SPRITES-1)*4,a0		| last sprite
+*	* last sprite
+*	jbsr	update_one_hw_sprite
+*	move.l	(a7)+,a0
+*	moveq	#NB_TARGET_SPRITES-2,d7
+*1:
+*	jbsr	update_one_hw_sprite
+*	addq.w	#4,a0
+*	cmp.l	#game_sprites_end,a2
+*	bcc		2f	
+*	dbf		d7,1b
+*
+*	* pad last sprite entries with blank
+*	move.l	#blank_sprite,d0
+*1:
+*	move.w	d0,(4,a2)
+*	swap	d0
+*	move.w	d0,(a2)
+*	swap	d0
+*	addq	#8,a2
+*	cmp.l	#game_sprites_end,a2
+*	bcs		1b
+*2:
 	***********************
 	* erase previous BOBs *
 	***********************
@@ -1084,19 +1058,7 @@ update_one_hw_sprite:
 	move.b	(TARGET_SPRITE_CODE,a0),d2
 	jeq	2f
 
-	cmp.b	#0x4E,d2
-	jne		0f
 	move.b	(TARGET_SPRITE_X,a0),d0
-	cmp.b	#0xE8,D0
-	jcs	0f
-	* check if basement
-	move.l	a6,-(a7)
-	GET_RAM_START_IN_A6
-	tst.b	(player_structure_851A+7,a6)	| player floor: basement
-	movem.l	(a7)+,a6
-	jeq		2f	| skip head sprite wrapping when car is leaving
-
-0:
 	add.w	d2,d2
 	add.w	d2,d2
 	btst    #2,(TARGET_SPRITE_ATTRIBUTES,a0)
@@ -1480,8 +1442,8 @@ platform_init:
 	bne		0f
 	* disable extra mid-screen interrupt, as it would be too fast (NTSC)
 	move.w	#0x1FE,intreq_block_game
-	move.w	#0x1FE,intreq_block_intro
 0:
+    move.w #0x200+(NB_PLAYFIELD_PLANES<<12),bplcon0(a5)
 
  	*         VVHH
     move.w #0x1C81,diwstrt(a5)
@@ -1502,41 +1464,14 @@ platform_init:
     move.w d0,bpl2mod(a5)
 
 	
-	lea		sprite_buffer,a0
-	lea		sprite_table,a1
-	moveq	#7,d0
-0:
-	move.l	a0,(_chip_data,a1)
-	st.b	(_previous_y_position,a1)	| invalidate
-	add.w	#SPRITE_STRUCT_SIZE,a1
-	add.w	#LETTER_COLUMN_SPRITE_SIZE,a0
-	dbf		d0,0b
+
 	
 	* set sprite registers in copperlist
 	
 	* attached sprites for main character & car
 	lea		game_sprites,a0
-	bsr		init_game_sprite_bank
+	*bsr		init_game_sprite_bank
 	
-	* ELEVATOR letters sprite columns
-	lea		title_sprites,a0
-	lea		sprite_table,a1
-	bsr		init_title_sprite_bank
-
-
-	* set title sprite colors, 4 times the same 4 colors
-	lea		title_sprite_colors+2,a1
-	moveq	#3,d0
-0:
-	lea		title_palette,a0
-	moveq	#3,d1
-1:
-	move.w	(a0)+,d2
-	move.w	d2,(a1)
-	addq	#4,a1
-	dbf		d1,1b
-	dbf		d0,0b
-
 
 
 
@@ -1601,23 +1536,6 @@ load_palette:
 
 
 
-osd_set_level_palette:
-	add.b	level_color+3,d0
-	and.b	#3,d0
-	
-	move.b	d0,level_palette
-	move.l	d0,-(a7)
-	* force re-set of color bank
-	moveq	#0,d0
-	jbsr	osd_set_color_bank
-	move.l	(a7)+,d0
-	rts
-	
-osd_is_vblank_interrupt_enabled:
-	move.w	_custom+intenar,d0
-	btst	#5,d0			| check vblank interrupt
-	rts
-	
 
 
 * 60Hz VBLANK interrupt (also keyboard)
@@ -1632,100 +1550,10 @@ osd_interrupt_control:
 	rts
 
 
-
-* < D0: 0: normal colors, 1: dark colors
-osd_set_color_bank:
-	movem.l	d0-d1/a0-a1,-(a7)
-	tst.b	d0
-	jne		1f
-
-	moveq	#0,d0
-	move.b	level_palette,d0
-	add.w	d0,d0
-	add.w	d0,d0
-	
-	move.w	d0,-(a7)
-	lea		elevator_palettes(pc),a0
-	move.l	(a0,d0.w),a0
-	
-	move.w	#TOTAL_NB_COLORS,d0
-	lea		elevator_colors,a1
-	bsr		load_palette
-	
-	move.w	(a7)+,d0
-	
-	lea		level_palettes,a0
-	move.l	(a0,d0.w),a0
-
-	move.w	#TOTAL_NB_COLORS,d0
-	lea		playfield_tiles_colors,a1
-	bsr		load_palette
-
-
-	
-	
-	moveq	#0,d0
-	move.b	level_palette,d0
-
-	
-	lea		hw_sprites_palette(pc),a0
-	lea		game_sprite_colors,a1
-	
-	move.w	#16,d0
-	bsr		load_palette
-
-
-	* also change back brick color
-	moveq	#0,d0
-	move.b	level_palette,d0
-
-
-
-0:
-	movem.l	(a7)+,d0-d1/a0-a1
-	rts
-1:
-	* dark mode
-	
-	lea		hw_sprites_palette_dark(pc),a0
-	move.w	#16,d0
-	lea		game_sprite_colors,a1
-	bsr		load_palette
-
-	lea		dark_palette,a0
-	move.w	#TOTAL_NB_COLORS,d0
-	lea		playfield_tiles_colors,a1
-	bsr		load_palette
-
-* wall/sprites TODO
-*	lea		sprite_wall_colors,a0
-*	move.w	#0x1FE,(a1)
-*	
-
-	jra		0b
-	
-osd_get_gfx_bank:
-	move.b	current_gfx_bank,d0
+osd_w_colorram:
 	rts
 	
-set_playfield_bitplanes:
-	* set bitplanes
-    moveq #NB_PLAYFIELD_PLANES-1,d1
-    move.l	playfield_drawed_screen_ptr(pc),d0
 	
-    lea	playfield_bitplanes+2,a0
-	move.l	#SCREEN_PLANE_SIZE,d2
-
-20:
-    swap d0
-    move.w d0,(a0)
-    swap d0
-    move.w d0,(4,a0)    
-    addq.w  #8,a0
-    add.l d2,d0		| LONG!
-    dbf d1,20b
-    rts
-		
 * a0=screen address (preserved), d0=tile (preserved)
 * a6=ram base
 * should preserve all registers
@@ -1798,7 +1626,7 @@ update_bg_tile:
 	
 	* updating bitplanes
 	move.l	#SCREEN_PLANE_SIZE,d5
-	move.w	#NB_TITLE_PLANES-1,d4
+	move.w	#NB_PLAYFIELD_PLANES-1,d4
 	move.l	playfield_drawed_screen_ptr,a1
 	add.w	d0,a1
 	lea		mulNB_BYTES_PER_ROW_table,A2
@@ -1814,11 +1642,8 @@ update_bg_tile:
 	jne		12f
 	add.w	#0xC400,d7
 	lsr.w	#2,d2
-	lea		title_tile_not_registered_error,a0
-	tst.b	current_gfx_bank
-	jeq		111f
 	lea		game_tile_not_registered_error,a0	
-111:
+
 	jbsr	osd_break
 	jra		11f
 12:
@@ -2015,7 +1840,7 @@ HW_SpriteYTable_\height:
 
 set_static_bitplanes:
 	movem.l	a0-a1/d0-d2,-(a7)
- 	lea	title_bitplanes+2,a0
+ 	lea	bitplanes+2,a0
 	move.l	playfield_displayed_screen_ptr(pc),a0
     moveq #NB_PLAYFIELD_PLANES-1,d1
  	move.l	#SCREEN_PLANE_SIZE,d2
@@ -2032,31 +1857,6 @@ set_static_bitplanes:
     rts
 
 	
-* set_elev_bitplanes
-* what: sets bitplanes in copperlist
-* < A0: copperlist pointer on first bitplane nibble
-* < A1: first bg plane address
-
-set_elev_bitplanes:
-	movem.l	d0-d2,-(a7)
-    moveq #NB_PLAYFIELD_PLANES-1,d1
-
-
- 	move.l	#FG_SCREEN_PLANE_SIZE,d2
-    move.l	elev_displayed_screen_ptr(pc),d0
-	lea	elevator_bitplanes+2,a0 
-1:
-    swap d0
-    move.w d0,(a0)
-    swap d0
-    move.w d0,(4,a0)    
-    addq.w  #8,a0
-    add.l d2,d0
-    dbf d1,1b
-	movem.l	(a7)+,d0-d2
-    rts
-
-
 osd_debug_hook:
 	rts
 	
@@ -2078,19 +1878,8 @@ seed:
 	dc.l	0x12345678
 
 
-* d0=scroll value
-
-osd_set_main_scroll:
-	cmp.b	main_scroll_value,d0
-	jeq		0f
-	movem.l	d0-d2/a0,-(a7)
-	move.b	d0,main_scroll_value
-	jbsr	set_playfield_bitplanes 
-	movem.l	(a7)+,a0/d0-d2
-0:
-	rts
 	
-osd_read_inputs:
+osd_read_inputs_0:
 	moveq	#-1,d0
 	movem.l	a0/d1,-(a7)
 	lea		keyboard_table(pc),a0
@@ -2249,11 +2038,6 @@ handle_keyboard:
     bne.b   0f
 
     bsr	toggle_pause
-0:
-    cmp.b   #55,d0	| "M" key
-    bne.b   0f
-    eor.b   #1,music_off_flag
-	jbsr	osd_sound_stop
 0:
 
 	btst	#4,cheat_flags+3
@@ -2423,15 +2207,10 @@ difficulty_level:
 	.long	0
 dip_switches_1:
 		.byte	0
-dip_switches_2:
+dip_switches_0:
 		.byte	0
-dip_switches_3:
-		.byte	0
-current_gfx_bank:
-	.byte	-1
 
-level_palette:
-	.byte	0
+
 mid_screen_interrupt_count:
 	.byte	0
 	.align	2
@@ -2472,14 +2251,8 @@ delay_timer:
 	.word	0
 one_out_of_five:
 	.word	0
-elev_screen_data_1:
-	.long	0
 bg_screen_data_1:
 	.long	0
-	.ifne	OPT_ENABLE_ELEVATOR_DOUBLE_BUFFERING
-elev_screen_data_2:
-	.long	0
-	.endif
 	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
 bg_screen_data_2:
 	.long	0
@@ -2500,12 +2273,6 @@ playfield_displayed_screen_ptr:
 	.long	0
 panel_screen_ptr:
 	.long	0
-
-elev_drawed_screen_ptr:
-	.long	0
-elev_displayed_screen_ptr:
-	.long	0
-
 
 
 	.include	"sound_entries.68k"
@@ -2586,16 +2353,6 @@ tile_log_table:
 	.endr
 	.endm
 
-* game	
-.macro	DECL_EVEN_BITPLANES	bpoff_start,nb_planes
-	.set	bpoff,\bpoff_start
-	.rept	\nb_planes
-	dc.w  bplpt+bpoff,0
-	dc.w  bplpt+bpoff+2,0
-	.set	bpoff,bpoff+8
-	.endr
-	.endm
-
 	
 .macro	DECL_COLORS	offset,nb_colors
 	.set	colidx,\offset
@@ -2626,54 +2383,19 @@ debug_color:
 	dc.l	-2
 	
 
-title_copperlist:
-title_bitplanes:
-	DECL_BITPLANES	0,4
-	.word	bplcon2,0		| sprites don't have any priority
-	
-	* default color bank
-	* all sprites have the same palette no need to specify odd or even
-	* on color bank 1
-	* black color sprites
-	DECL_COLORS	16,16
-title_sprites:
-	DECL_SPRITES
-
-title_colors:
-	DECL_COLORS	0,16
-
-	.word	0x3C01,0xFFFE
-title_sprite_colors:
-	DECL_COLORS	16,16
-	
-    .word  0x100*120+1,0xFFFE	| mid screen wait
-intreq_block_intro:
-	.word	 intreq,0x8014  | call copper interrupt in the middle of a frame, also flag so copper interrupt knows that we're going to call copper int
-
-	* pal limit
-    .word  0xFFCF,0xFFFE       | PAL wait
-
-	* black color sprites
-	DECL_COLORS	16,16
-
-	
-	.word	 intreq,0x8010	| no bobs from now on, get more drawing time
-
-
-    .long    -2					
-	.ascii	"ENDCPLST"
-
 
 	
 	* main copperlist
 game_copperlist:
 	* all sprites have the same palette no need to specify odd or even
 	* on color bank 1
-	.word	bplcon2,HIDDEN_BOBS_BPLCON2_VALUE
 	
 	* black color background plane
 
 	* enable sprite colors now
+
+bitplanes:
+	DECL_BITPLANES	0,NB_PLAYFIELD_PLANES
 
 game_sprite_colors:
 	DECL_COLORS	16,16
@@ -2681,29 +2403,18 @@ game_sprites:
 	DECL_SPRITES
 game_sprites_end:
 
-elevator_bitplanes:
-	DECL_EVEN_BITPLANES	0,3
-panel_bitplanes:
-	DECL_EVEN_BITPLANES	4,3
-	DECL_COLORS	0,TOTAL_NB_COLORS*2	| all black
 
-elevator_colors:
 	DECL_COLORS	0,TOTAL_NB_COLORS
+
 
 	.word	0x2C01,0xFFFE
 
-panel_tiles_colors:
-	DECL_COLORS	8,TOTAL_NB_COLORS
 
 	* let the panel display!
 	.word	0x3C01,0xFFFE
 	* priority: BOBs playfield on top
 	.word	bplcon2,BASE_BPLCON2_VALUE
-playfield_bitplanes:
-	DECL_EVEN_BITPLANES	4,3
 
-playfield_tiles_colors:
-	DECL_COLORS	8,TOTAL_NB_COLORS
 
 
 	
@@ -2717,16 +2428,10 @@ intreq_block_game:
 	* purple 
 
 	.word	0xEC01,0xFFFE
-	* priority: BOBs playfield on bottom (hidden)
-	.word	bplcon2,HIDDEN_BOBS_BPLCON2_VALUE
+
 	| no bobs from now on, get a LOT of drawing time
 	.word	 intreq,0x8010
-panel_end_bitplanes:
-	DECL_EVEN_BITPLANES	4,3
-panel_end_tiles_colors:
-	DECL_COLORS	8,TOTAL_NB_COLORS
-brick_copper_color:
-	.word	0x1FE,0	
+
 	* pal limit
     .word  0xFFCF,0xFFFE       | PAL wait
 
