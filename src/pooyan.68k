@@ -188,14 +188,12 @@
 	.endm
 
 	.macro	LOAD_RXM_POINTER  src,dest
-	illegal   | TODO
 	move.l	d7,-(a7)
 	moveq	#0,d7
 	move.b	1+\src,d7
 	rol.w	#8,d7
 	move.b	\src,d7
-	add.l	a6,d7
-	sub.l	#0x8000,d7
+	jbsr	load_any_pointer
 	move.l	d7,\dest
 	move.l	(a7)+,d7
 	.endm
@@ -226,10 +224,9 @@
 	.endm
 	
 	.macro	STORE_RXM_POINTER  src,dest
-	ILLEGAL
 	move.l	d7,-(a7)
 	move.l	\src,d7
-	sub.l	#rom_base,d7
+	jbsr	store_any_pointer
 	move.b	d7,\dest
 	rol.w	#8,d7
 	move.b	d7,1+\dest
@@ -250,6 +247,27 @@
 	move.b	\src,\dest
 	.endm
 
+store_any_pointer:
+	sub.l	a6,d7
+	cmp.l	#0x1000,d7
+	jcs		0f
+	add.l	a6,d7
+	sub.l	#rom_base,d7
+	rts
+0:
+	* RAM
+	bset	#15,d7
+	rts
+	
+load_any_pointer:
+	bclr	#15,d7
+	jne	0f
+	add.l	#rom_base,d7
+	rts
+0:
+	add.l	a6,d7	
+	rts
+	
 read_ixl_in_d0:
 	move.l	a2,d0
 	sub.l	a6,d0

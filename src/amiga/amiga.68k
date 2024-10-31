@@ -72,7 +72,7 @@ OPT_ENABLE_MULTIPLEXED_SPRITES = 0
 * foreground is static and contains bobs
 
 
-NB_PLAYFIELD_PLANES = 4
+NB_PLAYFIELD_PLANES = 5
 TOTAL_NB_COLORS = 1<<NB_PLAYFIELD_PLANES
 NB_BYTES_PER_ROW = 40
 
@@ -306,6 +306,9 @@ _user:
 
 .no_forbid:
 
+	lea		_custom,a5
+	lea		debug_copperlist,a0
+	move.l	a0,cop1lc(a5)
 	
 	lea		bg_screen_buffer_1,a0
 	addq	#2,a0	| leave 16 bits hidden for left side clipping
@@ -325,6 +328,11 @@ _user:
 
 	bsr		set_static_bitplanes
 
+	move.w	#TOTAL_NB_COLORS,d0
+	lea		palette,a0
+	lea		game_colors,a1
+	bsr		load_palette
+	
 
 	move.l	cheat_flags,d0
 	jeq		1f
@@ -650,9 +658,7 @@ _vblank:
 	jbsr		pooyan_irq
 
 
-
-
-	bsr		really_update_sprites
+	*bsr		really_update_sprites
 	
 	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
 	bsr		switch_screen_buffers
@@ -937,7 +943,7 @@ update_one_bob:
 	moveq	#0,d2
 	move.b	(TARGET_SPRITE_CODE,a0),d2
 	jeq	2f
-	lea		sprite_translation_table,a3
+	*lea		sprite_translation_table,a3
 	add.w	d2,d2
 	add.w	d2,d2
 	btst    #2,(TARGET_SPRITE_ATTRIBUTES,a0)
@@ -1297,12 +1303,9 @@ switch_screen_buffers:
 	* let's switch screen buffers, background (chars)
 	* toggle fg planes (double buffering)
 	* also toggle previous sprite positions
-	lea		elev_drawed_screen_ptr(pc),a0
 	lea		bob_previous_positions_1(pc),a2
 	lea		bob_previous_positions_2(pc),a3
-	move.l	elev_screen_data_1,a1
 	move.l	bg_screen_data_1,a4
-	move.l	elev_screen_data_2,a5
 	move.l	bg_screen_data_2,a6
 	* also switch previous state memory
 	cmp.l	(a0),a1
@@ -1315,11 +1318,9 @@ switch_screen_buffers:
 2:
 	move.l	a1,(a0)
 	move.l	a6,playfield_displayed_screen_ptr
-	move.l	a5,elev_displayed_screen_ptr
 	move.l	a2,bob_previous_drawed_sprites
 
-	jbsr		set_elev_bitplanes
-	jbra		set_fg_bitplanes
+	jbra		set_bg_bitplanes
 	.endif
 	
 	
@@ -1464,6 +1465,9 @@ platform_init:
     move.w d0,bpl2mod(a5)
 
 	
+	lea		_custom,a5
+	lea		game_copperlist,a0
+	move.l	a0,cop1lc(a5)
 
 	
 	* set sprite registers in copperlist
@@ -1620,9 +1624,8 @@ update_bg_tile:
 	move.b	d0,d2
 	bsr		compute_tile_xy
 	
-	*move.l		character_tables,a0
+	lea		character_table,a0
 
-	*move.l	(a0),a0
 	
 	* updating bitplanes
 	move.l	#SCREEN_PLANE_SIZE,d5
@@ -1640,7 +1643,7 @@ update_bg_tile:
 	move.l	(a0,d2.w),d0
 	.ifndef	RELEASE
 	jne		12f
-	add.w	#0xC400,d7
+	add.w	#0x8400,d7
 	lsr.w	#2,d2
 	lea		game_tile_not_registered_error,a0	
 
@@ -1841,7 +1844,6 @@ HW_SpriteYTable_\height:
 set_static_bitplanes:
 	movem.l	a0-a1/d0-d2,-(a7)
  	lea	bitplanes+2,a0
-	move.l	playfield_displayed_screen_ptr(pc),a0
     moveq #NB_PLAYFIELD_PLANES-1,d1
  	move.l	#SCREEN_PLANE_SIZE,d2
     move.l	playfield_displayed_screen_ptr(pc),d0
@@ -2318,7 +2320,7 @@ _end_of_ng_code:
 
 
 
-	
+palette:	
 	.include "palette.68k"
 
 	
@@ -2397,21 +2399,16 @@ game_copperlist:
 bitplanes:
 	DECL_BITPLANES	0,NB_PLAYFIELD_PLANES
 
-game_sprite_colors:
-	DECL_COLORS	16,16
+*game_sprite_colors:
+*	DECL_COLORS	16,16
 game_sprites:
 	DECL_SPRITES
 game_sprites_end:
 
-
+game_colors:
 	DECL_COLORS	0,TOTAL_NB_COLORS
 
 
-	.word	0x2C01,0xFFFE
-
-
-	* let the panel display!
-	.word	0x3C01,0xFFFE
 	* priority: BOBs playfield on top
 	.word	bplcon2,BASE_BPLCON2_VALUE
 
@@ -2436,7 +2433,7 @@ intreq_block_game:
     .word  0xFFCF,0xFFFE       | PAL wait
 
 	* black color sprites
-	DECL_COLORS	16,16
+	*DECL_COLORS	16,16
 
 
 

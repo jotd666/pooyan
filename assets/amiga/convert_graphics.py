@@ -7,12 +7,13 @@ src_dir = os.path.join(this_dir,"..","..","src","amiga")
 
 sprite_names = dict()
 
-side = 8
+NB_TILES = 256
+NB_SPRITES = 64
 
-dump_it = True
+dump_it = False
+dump_dir = os.path.join(this_dir,"dumps")
 
 if dump_it:
-    dump_dir = os.path.join(this_dir,"dumps")
     if not os.path.exists(dump_dir):
         os.mkdir(dump_dir)
 
@@ -123,6 +124,7 @@ add_sprite_range(0x20,0x25,"baloon")  # 0: yellow
 
 sprites_path = os.path.join(this_dir,os.path.pardir,"pooyan")
 
+
 sprite_sheet_dict = {i:Image.open(os.path.join(sprites_path,f"sprites_pal_{i:02x}.png")) for i in [0]}
 tile_sheet_dict = {i:Image.open(os.path.join(sprites_path,f"tiles_pal_{i:02x}.png")) for i in [0]}
 
@@ -130,6 +132,57 @@ tile_sheet_dict = {i:Image.open(os.path.join(sprites_path,f"tiles_pal_{i:02x}.pn
 tile_palette,tile_set = load_tileset(tile_sheet_dict[0],0,8,None,"tiles",dump_dir,dump=dump_it,name_dict=None)
 sprite_palette,sprite_set = load_tileset(sprite_sheet_dict[0],0,16,None,"sprites",dump_dir,dump=dump_it,name_dict=sprite_names)
 
+full_palette = sorted(set(sprite_palette + tile_palette))
+
+nb_planes = 5
+nb_colors = 1<<5
+
+full_palette += (nb_colors-len(full_palette)) * [(0x10,0x20,0x30)]
+
+tile_table = [None]*NB_TILES
+sprite_table = [None]*NB_SPRITES
+
+for i,tile in enumerate(tile_set):
+    tile_entry = [None]*16
+    if tile:
+        tile_entry[0] = {"bitmap":bitplanelib.palette_image2raw(tile,None,full_palette)}
+    tile_table[i] = tile_entry
+
 with open(os.path.join(src_dir,"palette.68k"),"w") as f:
-    pass
+    bitplanelib.palette_dump(full_palette,f,bitplanelib.PALETTE_FORMAT_ASMGNU)
+
+with open(os.path.join(src_dir,"graphics.68k"),"w") as f:
+    f.write("\t.global\tcharacter_table\n")
+    f.write("\t.global\tbob_table\n")
+
+    f.write("character_table:\n")
+    for i,tile_entry in enumerate(tile_table):
+        f.write("\t.long\t")
+        if tile_entry:
+            f.write(f"tile_{i:02x}")
+        else:
+            f.write("0")
+        f.write("\n")
+
+    for i,tile_entry in enumerate(tile_table):
+        if tile_entry:
+            f.write(f"tile_{i:02x}:\n")
+            for j,t in enumerate(tile_entry):
+                f.write("\t.long\t")
+                if t:
+                    f.write(f"tile_{i:02x}_{j:02x}")
+                else:
+                    f.write("0")
+                f.write("\n")
+
+
+    for i,tile_entry in enumerate(tile_table):
+
+        if tile_entry:
+            for j,t in enumerate(tile_entry):
+                if t:
+                    f.write(f"tile_{i:02x}_{j:02x}:")
+                    dump_asm_bytes(t["bitmap"],f)
+
+    f.write("bob_table:\n")
 
