@@ -9,6 +9,14 @@ sprite_names = dict()
 
 side = 8
 
+dump_it = True
+
+if dump_it:
+    dump_dir = os.path.join(this_dir,"dumps")
+    if not os.path.exists(dump_dir):
+        os.mkdir(dump_dir)
+
+
 def dump_asm_bytes(*args,**kwargs):
     bitplanelib.dump_asm_bytes(*args,**kwargs,mit_format=True)
 
@@ -20,7 +28,7 @@ def ensure_empty(d):
     else:
         os.makedirs(d)
 
-def load_tileset(image_name,side,used_tiles,tileset_name,dumpdir,dump=False,name_dict=None):
+def load_tileset(image_name,palette_index,side,used_tiles,tileset_name,dumpdir,dump=False,name_dict=None):
 
     if isinstance(image_name,str):
         full_image_path = os.path.join(this_dir,os.path.pardir,"pooyan",
@@ -35,8 +43,8 @@ def load_tileset(image_name,side,used_tiles,tileset_name,dumpdir,dump=False,name
     tileset_1 = []
 
     if dump:
-        dump_subdir = os.path.join(dumpdir,tile_type,tileset_name)
-        if tile_offset == 0:
+        dump_subdir = os.path.join(dumpdir,tileset_name)
+        if palette_index == 0:
             ensure_empty(dump_subdir)
 
     tile_number = 0
@@ -59,11 +67,11 @@ def load_tileset(image_name,side,used_tiles,tileset_name,dumpdir,dump=False,name
                 if dump:
                     img = ImageOps.scale(img,5,resample=Image.Resampling.NEAREST)
                     if name_dict:
-                        name = name_dict.get(tile_number+tile_offset,"unknown")
+                        name = name_dict.get(tile_number,"unknown")
                     else:
                         name = "unknown"
 
-                    img.save(os.path.join(dump_subdir,f"{name}_{tile_number+tile_offset:02x}.png"))
+                    img.save(os.path.join(dump_subdir,f"{name}_{tile_number:02x}_{palette_index:02x}.png"))
 
             tile_number += 1
 
@@ -101,11 +109,26 @@ add_sprite(6,"falling_wolf")
 add_sprite(7,"basket_bottom")
 add_sprite_range(8,10,"pig_2")
 add_sprite(10,"basket_top")
+add_sprite(0x10,"meat")
+add_sprite(0x3A,"points_1600")
 
+add_sprite(0x11,"player_in_basket_top")
+add_sprite(0x1c,"strawberry")  # wrong CLUT
+add_sprite(0x12,"player_in_basket_bottom")
+add_sprite(0x14,"arrow")
+add_sprite(0x25,"player_in_basket_top_2")
+add_sprite(0x16,"player_in_basket_bottom_2")
+add_sprite_range(0x26,0x2A,"wolf")
+add_sprite_range(0x20,0x25,"baloon")  # 0: yellow
 
 sprites_path = os.path.join(this_dir,os.path.pardir,"pooyan")
 
 sprite_sheet_dict = {i:Image.open(os.path.join(sprites_path,f"sprites_pal_{i:02x}.png")) for i in [0]}
+tile_sheet_dict = {i:Image.open(os.path.join(sprites_path,f"tiles_pal_{i:02x}.png")) for i in [0]}
+
+
+tile_palette,tile_set = load_tileset(tile_sheet_dict[0],0,8,None,"tiles",dump_dir,dump=dump_it,name_dict=None)
+sprite_palette,sprite_set = load_tileset(sprite_sheet_dict[0],0,16,None,"sprites",dump_dir,dump=dump_it,name_dict=sprite_names)
 
 with open(os.path.join(src_dir,"palette.68k"),"w") as f:
     pass
