@@ -79,6 +79,9 @@ def load_tileset(image_name,palette_index,side,used_tiles,tileset_name,dumpdir,d
     return sorted(set(palette)),tileset_1
 
 
+tile_plane_cache = dict()
+sprite_plane_cache = dict()
+
 def paint_black(img,coords):
     for x,y in coords:
         img.putpixel((x,y),(0,0,0))
@@ -142,10 +145,30 @@ full_palette += (nb_colors-len(full_palette)) * [(0x10,0x20,0x30)]
 tile_table = [None]*NB_TILES
 sprite_table = [None]*NB_SPRITES
 
+next_cache_id = 1
+
 for i,tile in enumerate(tile_set):
     tile_entry = [None]*16
     if tile:
-        tile_entry[0] = {"bitmap":bitplanelib.palette_image2raw(tile,None,full_palette)}
+        bitplane_data = bitplanelib.palette_image2raw(tile,None,full_palette)
+
+        plane_size = len(bitplane_data) // nb_planes
+        bitplane_plane_ids = []
+        for j in range(nb_planes):
+            bitplane = bitplane_data[j:j+plane_size]
+            cache_id = tile_plane_cache.get(bitplane)
+            if cache_id is not None:
+                bitplane_plane_ids.append(cache_id)
+            else:
+                if any(bitplane):
+                    tile_plane_cache[bitplane] = next_cache_id
+                    bitplane_plane_ids.append(next_cache_id)
+                    next_cache_id += 1
+                else:
+                    bitplane_plane_ids.append(0)  # blank
+
+        tile_entry[0] = {"bitmap_planes":bitplane_plane_ids}
+
     tile_table[i] = tile_entry
 
 with open(os.path.join(src_dir,"palette.68k"),"w") as f:
@@ -177,12 +200,23 @@ with open(os.path.join(src_dir,"graphics.68k"),"w") as f:
 
 
     for i,tile_entry in enumerate(tile_table):
-
         if tile_entry:
             for j,t in enumerate(tile_entry):
                 if t:
-                    f.write(f"tile_{i:02x}_{j:02x}:")
-                    dump_asm_bytes(t["bitmap"],f)
+                    f.write(f"tile_{i:02x}_{j:02x}:\n")
+                    for bitplane_id in t["bitmap_planes"]:
+                        f.write("\t.long\t")
+                        if bitplane_id:
+                            f.write(f"tile_plane_{bitplane_id:02d}")
+                        else:
+                            f.write("0")
+                        f.write("\n")
+
+                    #dump_asm_bytes(t["bitmap"],f)
+
+    for k,v in tile_plane_cache.items():
+        f.write(f"tile_plane_{v:02d}:")
+        dump_asm_bytes(k,f)
 
     f.write("bob_table:\n")
 

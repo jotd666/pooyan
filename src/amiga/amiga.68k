@@ -30,8 +30,7 @@ Y_MAX = 256
 
 BASE_BPLCON2_VALUE = 0x0064		| sprites above all playfields
 SCREEN_TILE_ADDRESS = 0x8400
-COLOR_TILE_ADDRESS = 0x8000
-COLOR_TILE_ADDRESS = 0x8000
+SCREEN_COLOR_ADDRESS = 0x8000
 
 
 
@@ -68,16 +67,12 @@ _custom = 0xDFF000
 
 OPT_ENABLE_MULTIPLEXED_SPRITES = 0
 
-* background scrolls (in-game)
-* foreground is static and contains bobs
-
-
 NB_PLAYFIELD_PLANES = 5
 TOTAL_NB_COLORS = 1<<NB_PLAYFIELD_PLANES
 NB_BYTES_PER_ROW = 40
 
 
-NB_LINES = 256
+NB_LINES = 288
 NB_PLAYFIELD_LINES = NB_LINES
 
 
@@ -1555,8 +1550,41 @@ osd_interrupt_control:
 
 
 osd_w_colorram:
-	rts
-	
+    .ifeq OPT_DISABLE_BG_LAYER
+	movem.l	d0-d7/a0-a3,-(a7)
+	move.l	a0,d7		| save address
+	sub.l	a6,d7
+	jcs		0f
+	sub.w	#SCREEN_COLOR_ADDRESS-0x8000,d7
+	bcs.b	0f
+	.ifndef	RELEASE
+	cmp.w	#0x800,d7
+	bcs.b	1f
+
+	cmp.w	#0x400,d7
+	bcc.b	1f
+0:
+	* should not happen
+	add.w	#SCREEN_COLOR_ADDRESS-0x8000,d7
+	lea		write_colorram_out_of_range_error(pc),a0
+	jbsr	osd_break
+	nop	
+	bra.b	0f
+	.endif
+1:	
+	move.b	(a0),d1
+	cmp.b	d1,d0
+	beq.b	0f		| already the proper value
+3:
+	move.b	d0,(a0)	| update logical grid
+	move.b	d0,d1			| get color code
+	move.b	(0x400,a0),d0	| get tile code
+	jbsr	update_bg_tile
+
+0:
+	movem.l	(a7)+,d0-d7/a0-a3
+    .endif | OPT_DISABLE_BG_LAYER
+	rts	
 	
 * a0=screen address (preserved), d0=tile (preserved)
 * a6=ram base
@@ -1590,7 +1618,7 @@ osd_w_videoram:
 	beq.b	0f		| already the proper value
 3:
 	move.b	d0,(a0)	| update logical grid
-
+	move.b	(-0x400,a0),d1		| get color code
 	jbsr	update_bg_tile
 
 0:
@@ -1600,7 +1628,7 @@ osd_w_videoram:
 
 * < D7: 0-0x400
 * > D0: 
-compute_tile_xy:
+compute_tile_xy_landscape:
 	moveq	#0,d0
 	move.b	d7,d0
 	
@@ -1611,17 +1639,33 @@ compute_tile_xy:
 	lsl.w	#3,d1		| times 8
 	rts
 
+compute_tile_xy:
+	moveq	#0,d0
+	moveq	#0,d1
+	move.w	d7,d1
+	lsr.w	#5,d7		| this is X
+	neg.w	d7
+	add.w	#32,d7
+	and.w	#0x1F,d1	| this is Y
+	*addq.w	#2,d1
+
+	move.b	d7,d0		| this is X
+	lsl.b	#3,d1		| Y times 8
+	rts
 
 
 
-* < D7: 0-0xC00 address
+
+* < D7: 0-0x400 address
 * < D0: tile code
-* ex:
-* C402: PLAYER (top left)
-* C7BE: number of credits (bottom right)
+* < D1: color code
+
 update_bg_tile:
+
 	moveq	#0,d2	| mask up to 255
 	move.b	d0,d2
+	moveq	#0,d3
+	*move.b	d1,d3			| CLUT ignored for now
 	bsr		compute_tile_xy
 	
 	lea		character_table,a0
@@ -1629,7 +1673,7 @@ update_bg_tile:
 	
 	* updating bitplanes
 	move.l	#SCREEN_PLANE_SIZE,d5
-	move.w	#NB_PLAYFIELD_PLANES-1,d4
+	move.w	#0,d4 | NB_PLAYFIELD_PLANES-1,d4
 	move.l	playfield_drawed_screen_ptr,a1
 	add.w	d0,a1
 	lea		mulNB_BYTES_PER_ROW_table,A2
@@ -1640,7 +1684,7 @@ update_bg_tile:
 	add.w	d2,d2
 	jeq		11f		| 0: clear
 	add.w	d2,d2	
-	move.l	(a0,d2.w),d0
+	move.l	(a0,d2.w),d0		| tile pointer
 	.ifndef	RELEASE
 	jne		12f
 	add.w	#0x8400,d7
@@ -1651,11 +1695,16 @@ update_bg_tile:
 	jra		11f
 12:
 	.endif
-	
-	* just copy
 	move.l	d0,a2
+	add.w	d3,d3
+	add.w	d3,d3
+	move.l	(a2,d3.w),d0			| pointer on tile bitplanes for that CLUT
+	jeq		11f						| not necessarily a problem
+	move.l	d0,a2					| pointer on bitplanes
+	* just copy
+
 4:
-	move.l	(a2)+,d0
+	move.l	(a2)+,d0		| next plane
 	jeq		5f
 	move.l	d0,a0
 	.set	offset,0
@@ -2149,8 +2198,8 @@ program_args_end:
 	.align	4
 read_args_string:
 	.byte	read_args_string_end-read_args_string
-	.ascii	"INVINCIBLE/S,INFLIVES/S,NODOCUMENTS/S,"
-	.ascii	"CHEATKEYS/S,STARTFLOOR/K/N,SKILL/K/N"
+	.ascii	"INVINCIBLE/S,INFLIVES/S,"
+	.ascii	"CHEATKEYS/S,SKILL/K/N"
 read_args_string_end:
 	.align	2
 
@@ -2159,10 +2208,10 @@ read_args_string_end:
 
 write_videoram_out_of_range_error:
 	.asciz	"write videoram out of range"
+write_colorram_out_of_range_error:
+	.asciz	"write colorram out of range"
 game_tile_not_registered_error:
 	.asciz	"game tile (in D2) not registered"
-title_tile_not_registered_error:
-	.asciz	"title tile (in D2) not registered"
 	
 	.align	2
 	.endif
