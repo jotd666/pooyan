@@ -3395,7 +3395,7 @@ in_game_159B:
 	and.b	#0x1F,d0                         	| [$15a5: and  $1F]
 	jbsr	jump_from_table_below_0028                            	| [$15a7: rst  $28]
 	.long	clear_character_intro_screen_1601
-	.long	update_status_bar_16b7
+	.long	init_level_background_16b7
 	.long	draw_game_scenery_175d
 	.long	l_17c1
 	.long	main_game_sequence_18af
@@ -3536,7 +3536,7 @@ l_169a:
 	cmp.b	#0xFF,d0                         	| [$169b: cp   $FF]
 	jeq	l_16a6                             	| [$169d: jr   z,$16A6]
 	cmp.b	(a0),d0                          	| [$169f: cp   (hl)]
-	jne	update_status_bar_16b7                             	| [$16a0: jr   nz,$16B7]
+	jne	init_level_background_16b7                             	| [$16a0: jr   nz,$16B7]
 	addq.w	#1,a1                           	| [$16a2: inc  de]
 	addq.w	#1,a0                           	| [$16a3: inc  hl]
 	jra	l_169a                             	| [$16a4: jr   $169A]
@@ -3549,7 +3549,7 @@ l_16a6:
 	rts                                    	| [$16ad: ret]
 
 
-update_status_bar_16b7:
+init_level_background_16b7:
 	lea	l_8808(a6),a0                      	| [$16b7: ld   hl,$8808]
 	subq.b	#1,(a0)                         	| [$16ba: dec  (hl)]
 	beq.b	0f                               	| [...]
@@ -3563,8 +3563,8 @@ update_status_bar_16b7:
 	move.b	#0x10,d0                        	| [$16c9: ld   a,$10]
 	move.b	d0,in_game_sub_state_880A(a6)   	| [$16cb: ld   (in_game_sub_state_880A),a]
 	rts                                    	| [$16ce: ret]
+
 l_16cf:
-	CLEAR_XC_FLAGS                         	| [$16cf: xor  a]
 	clr.b	d0                               	| [$16cf: xor  a]
 	move.b	d0,written_column_index_88B7(a6)                   	| [$16d0: ld   ($88B7),a]
 	jbsr	display_nb_lives_03c2                            	| [$16d3: call $03C2]
@@ -3574,13 +3574,15 @@ l_16cf:
 	move.b	round_number_8907(a6),d0                   	| [$16dc: ld   a,($8907)]
 	btst.b	#1,d0                           	| [$16df: bit  1,a]
 	jne	l_16eb                             	| [$16e1: jr   nz,$16EB]
+	* select layout for even rounds
 	LOAD_ROM	0x4E81,a0                          	| [$16e3: ld   hl,$4E81]
 	LOAD_ROM	0x5039,a1                          	| [$16e6: ld   de,$5039]
-	jra	l_1728                             	| [$16e9: jr   $1728]
+	jra	init_level_layout_1728                             	| [$16e9: jr   $1728]
 l_16eb:
+	* select layout for odd rounds
 	LOAD_ROM	0x4C92,a0                          	| [$16eb: ld   hl,$4C92]
 	LOAD_ROM	0x4DCE,a1                          	| [$16ee: ld   de,$4DCE]
-	jra	l_1728                             	| [$16f1: jr   $1728]
+	jra	init_level_layout_1728                             	| [$16f1: jr   $1728]
 
 l_16f3:
 	move.b	l_8904(a6),d0                   	| [$16f3: ld   a,($8904)]
@@ -3590,23 +3592,24 @@ l_16f3:
 	                               	| [$16fc: and  a]
 	jeq	l_1715                             	| [$16fd: jr   z,$1715]
 	move.b	round_number_8907(a6),d0                   	| [$16ff: ld   a,($8907)]
-	btst.b	#0,d0                           	| [$1702: bit  0,a]
+	* select layout for even bonus rounds
 	LOAD_ROM	0x462C,a0                          	| [$1704: ld   hl,$462C]
 	LOAD_ROM	0x4B30,a1                          	| [$1707: ld   de,$4B30]
-	jne	l_1728                             	| [$170a: jr   nz,$1728]
-	tst.b	d0                               	| [$170c: and  a]
+	btst.b	#0,d0                           	| [$1702: bit  0,a]
+	jne	init_level_layout_1728                             	| [$170a: jr   nz,$1728]
 	LOAD_ROM	0x44A9,a0                          	| [$170d: ld   hl,$44A9]
 	LOAD_ROM	0x4B55,a1                          	| [$1710: ld   de,$4B55]
-	jeq	l_1728                             	| [$1713: jr   z,$1728]
+	tst.b	d0                               	| [$170c: and  a]
+	jeq	init_level_layout_1728                             	| [$1713: jr   z,$1728]
 l_1715:
 	move.b	round_number_8907(a6),d0                   	| [$1715: ld   a,($8907)]
-	btst.b	#0,d0                           	| [$1718: bit  0,a]
 	LOAD_ROM	0x46D6,a0                          	| [$171a: ld   hl,$46D6]
 	LOAD_ROM	0x4A50,a1                          	| [$171d: ld   de,$4A50]
-	jeq	l_1728                             	| [$1720: jr   z,$1728]
+	btst.b	#0,d0                           	| [$1718: bit  0,a]
+	jeq	init_level_layout_1728                             	| [$1720: jr   z,$1728]
 	LOAD_ROM	0x4872,a0                          	| [$1722: ld   hl,$4872]
 	LOAD_ROM	0x4BF6,a1                          	| [$1725: ld   de,$4BF6]
-l_1728:
+init_level_layout_1728:
 	STORE_ROM_POINTER	a1,rom_pointer_8f45(a6)            	| [$1728: ld   ($8F45),de]
 	
 	STORE_ROM_POINTER	a0,rom_pointer_88BA(a6)            	| [$172c: ld   ($88BA),hl]
