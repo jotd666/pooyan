@@ -43,5 +43,5 @@ with open("string_list.txt","w") as f:
     for i,sd in enumerate(slist):
         f.write("str_{:02x}_{:04x}:\n".format(i,sd["offset"]))
         for x,y,s in zip(sd["x"],sd["y"],sd["str"]):
-            f.write(f"\t.byte\t{x},{y}\n")
+            f.write("\t.byte\t{},{}\t|\t0x{:04x}\n".format(x,y,(y<<8)+x))
             f.write(f'\t.ascii\t"{s}"\n')

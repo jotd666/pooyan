@@ -72,7 +72,7 @@ TOTAL_NB_COLORS = 1<<NB_PLAYFIELD_PLANES
 NB_BYTES_PER_ROW = 40
 
 
-NB_LINES = 288
+NB_LINES = 256
 NB_PLAYFIELD_LINES = NB_LINES
 
 
@@ -1680,9 +1680,8 @@ update_bg_tile:
 	add.w	d1,d1
 	add.w	(a2,d1.w),a1
 	
-
+	
 	add.w	d2,d2
-	jeq		11f		| 0: clear
 	add.w	d2,d2	
 	move.l	(a0,d2.w),d0		| tile pointer
 	.ifndef	RELEASE

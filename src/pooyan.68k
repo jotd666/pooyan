@@ -329,6 +329,13 @@ l_0010:
 	subq.b	#1,d1                           	| [...]
 	jne	l_0010                             	| [$0012: djnz $0010]
 	rts                                    	| [$0014: ret]
+fill_area_0010_video:
+0:
+	jbsr	osd_w_videoram                         	| [$0010: ld   (hl),a]
+	addq	#1,a0                           	| [$0011: inc  hl]
+	subq.b	#1,d1                           	| [...]
+	jne	0b                             	| [$0012: djnz $0010]
+	rts                                    	| [$0014: ret]
 
 *fill_area_0018:
 *l_0018:
@@ -547,8 +554,7 @@ l_0186:
 	jbsr	read_byte_a0_plus_d0_0020                            	| [$01a0: rst  $20]
 	move.b	d0,l_882C(a6)                   	| [$01a1: ld   ($882C),a]
 	                	| [$01a4: ld   (watchdog_a000),a]
-	jbsr	l_01ea                            	| [$01a7: call $01EA]
-	CLEAR_XC_FLAGS                         	| [$01aa: xor  a]
+	jbsr	fill_video_ram_and_sprites_01ea                            	| [$01a7: call $01EA]
 	clr.b	d0                               	| [$01aa: xor  a]
 	jbsr	audio_shit_0E8F                   	| [$01ab: call audio_shit_0E8F]
 	move.b	#0x01,d0                        	| [$01ae: ld   a,$01]
@@ -574,7 +580,7 @@ l_01b8:
 	jra	l_020f                             	| [$01d2: jp   $020F]
 						
 								| [$01d5: ld   (watchdog_a000),a]
-													| [$01d8: jr   $01D5]
+* unreached???													| [$01d8: jr   $01D5]
 l_01da:
 	subq.w	#1,a4                           	| [$01da: dec  bc]
 	                	| [$01db: ld   (watchdog_a000),a]
@@ -588,7 +594,9 @@ l_01da:
 	jne	l_01da                             	| [$01e6: jr   nz,$01DA]
 	SET_XC_FLAGS                           	| [$01e8: scf]
 	rts                                    	| [$01e9: ret]
-l_01ea:
+	
+	
+fill_video_ram_and_sprites_01ea:
 	lea	sprite_ram_9000+0x410,a0                          	| [$01ea: ld   hl,$9410]
 	move.b	#0x30,d1                        	| [$01ed: ld   b,$30]
 	jbsr	fill_area_0010                            	| [$01ef: rst  $10]
@@ -596,10 +604,13 @@ l_01ea:
 	move.b	#0x30,d1                        	| [$01f3: ld   b,$30]
 	jbsr	fill_area_0010                            	| [$01f5: rst  $10]
 	lea	l_8440(a6),a0                      	| [$01f6: ld   hl,$8440]
-	lea	l_8441(a6),a1                      	| [$01f9: ld   de,$8441]
-	move.w	#0x03BF,d1                          	| [$01fc: ld   bc,$03BF]
-	move.b	#0x1E,(a0)                      	| [$01ff: ld   (hl),$1E]
-	jbsr	ldir_video                              	| [$0201: ldir]
+	                      	| [$01f9: ld   de,$8441]
+	move.w	#0x03C0,d1                          	| [$01fc: ld   bc,$03BF]
+	move.b	#0x1E,d0                      	| [$01ff: ld   (hl),$1E]
+0:
+	jbsr	osd_w_videoram							| [$0201: ldir]
+	addq.w	#1,a0
+	dbf		d1,0b
 				
 							| [$0203: nop]
 							| [$0204: nop]
@@ -612,7 +623,6 @@ l_01ea:
 	rts                                    	| [$020e: ret]
 
 l_020f:
-	jbsr	osd_break
 	move.b	#0x88,d5                        	| [$020f: ld   h,$88]
 	move.b	lsb_index_88A1(a6),d0                   	| [$0211: ld   a,($88A1)]
 	move.b	d0,d6                           	| [$0214: ld   l,a]
@@ -756,7 +766,7 @@ erase_a_column_02ce:
 	LOAD_RAM_POINTER	video_ram_pointer_880b(a6),a0             	| [$02d4: ld   hl,($880B)]
 
 	move.b	#0x10,d0                        	| [$02d7: ld   a,$10]
-	jbsr	fill_area_0010                            	| [$02d9: rst  $10]
+	jbsr	fill_area_0010_video                            	| [$02d9: rst  $10]
 	add.w	d3,a0                            	| [$02da: add  hl,de]
 	STORE_RAM_POINTER	a0,video_ram_pointer_880b(a6)            	| [$02db: ld   ($880B),hl]
 	
@@ -1215,24 +1225,29 @@ display_string_05b2:
 	clr.w	d3                               	| [$05ba: ld   d,$00]
 	move.b	d0,d3                           	| [$05b9: ld   e,a]
 	add.w	d3,a0                            	| [$05bc: add  hl,de]
+	add.w	d3,a0                            	| [$05bc: add  hl,de]
 	move.w	(sp)+,d0                        	| [$05bd: pop  af]
-	move.b	(a0)+,d4                         	| [$05be: ld   e,(hl)]
+	* get pointer on screen address + text
+	move.l	(a0)+,a1                         	| [$05be: ld   e,(hl)]
 	                           	| [$05bf: inc  hl]
-	move.b	(a0),d3                         	| [$05c0: ld   d,(hl)]
-	LOAD_A1_FROM_D3D4
-
+								| [$05c0: ld   d,(hl)]
+		
+		
 	exg	a1,a0                              	| [$05c1: ex   de,hl]
 l_05c2:
+	* get screen address
 	move.b	(a0)+,D4                         	| [$05c2: ld   e,(hl)]
 	                           	| [$05c3: inc  hl]
 	move.b	(a0)+,D3                         	| [$05c4: ld   d,(hl)]
 	                           	| [$05c5: inc  hl]
 	LOAD_A1_FROM_D3D4
+	* now a1 is the screen address
 	exg	a1,a0                              	| [$05c6: ex   de,hl]
-	move.w	#0xFFE0,d1                          	| [$05c7: ld   bc,$FFE0]
+	move.w	#-0x20,d1                          	| [$05c7: ld   bc,$FFE0]
 	tst.b	d7
 	jne	l_05e0                             	| [$05ca: jr   c,$05E0]
 l_05cc:
+	* read character to display
 	move.b	(a1),d0                         	| [$05cc: ld   a,(de)]
 	cmp.b	#0x2E,d0                         	| [$05cd: cp   $2E]
 	jeq	continues_to_next_line_05dc                             	| [$05cf: jr   z,$05DC]
@@ -1244,6 +1259,7 @@ l_05cc:
 	sub.b	#0x30,d0                         	| [$05d4: sub  $30]
 	jbsr	osd_w_videoram                         	| [$05d6: ld   (hl),a]
 	addq.w	#1,a1                           	| [$05d7: inc  de]
+	* advance to next column to the right
 	add.w	d1,a0                            	| [$05d8: add  hl,bc]
 	jra	l_05cc                             	| [$05d9: jr   $05CC]
 l_05db:
@@ -1260,10 +1276,12 @@ l_05e0:
 	bne.b	0f                               	| [...]
 	rts                                    	| [$05e7: ret  z] [...]
 0:
-	move.b	#0x10,(a0)                      	| [$05e8: ld   (hl),$10]
+	move.b	#0x10,d0                      	| [$05e8: ld   (hl),$10]
+	jbsr	osd_w_videoram
 	addq.w	#1,a1                           	| [$05ea: inc  de]
 	add.w	d1,a0                            	| [$05eb: add  hl,bc]
 	jra	l_05e0                             	| [$05ec: jr   $05E0]
+
 display_credits_05EE:
 	move.b	#0x05,d0                        	| [$05ee: ld   a,$05]
 	jbsr	display_string_05b2                            	| [$05f0: call $05B2]
@@ -2116,11 +2134,11 @@ clear_screen_as_first_credit_inserted_0c77:
 	LOAD_RAM_POINTER	video_ram_pointer_880b(a6),a0             	| [$0c77: ld   hl,($880B)]
 	move.b	#0x1D,d1                        	| [$0c7a: ld   b,$1D]
 	move.b	#0x10,d0                        	| [$0c7c: ld   a,$10]
-	jbsr	fill_area_0010                            	| [$0c7e: rst  $10]
+	jbsr	fill_area_0010_video                            	| [$0c7e: rst  $10]
 	move.w	#0x0003,d3                      	| [$0c7f: ld   de,$0003] 3
 	add.w	d3,a0                            	| [$0c82: add  hl,de]
 	move.b	#0x1D,d1                        	| [$0c83: ld   b,$1D]
-	jbsr	fill_area_0010                            	| [$0c85: rst  $10]
+	jbsr	fill_area_0010_video                            	| [$0c85: rst  $10]
 	add.w	d3,a0                            	| [$0c86: add  hl,de]
 	STORE_RAM_POINTER	a0,video_ram_pointer_880b(a6)            	| [$0c87: ld   ($880B),hl]
 	
@@ -15027,221 +15045,222 @@ string_table_7A0D:
 	.long	str_3e_7e56
 	.long	str_3f_7e5a
 
+* screen address (little endian), then string
 str_00_7a8d:
-	.byte	150,134
+	.byte	150,134	|	0x8696
 	.ascii	"GAME@@OVER?"
 str_01_7a9a:
-	.byte	238,134
+	.byte	238,134	|	0x86ee
 	.ascii	"PUSH@START@BUTTON?"
 str_02_7aae:
-	.byte	148,134
+	.byte	148,134	|	0x8694
 	.ascii	"PLAYER@ONE?"
 str_03_7abb:
-	.byte	148,134
+	.byte	148,134	|	0x8694
 	.ascii	"PLAYER@TWO?"
 str_04_7ac8:
-	.byte	128,134
+	.byte	128,134	|	0x8680
 	.ascii	"HIGH@SCORE?"
 str_05_7ad5:
-	.byte	191,135
+	.byte	191,135	|	0x87bf
 	.ascii	"@CREDIT@@@?"
 str_06_7ae2:
-	.byte	191,135
+	.byte	191,135	|	0x87bf
 	.ascii	"@FREE@PLAY@@@?"
 str_07_7af2:
-	.byte	56,135
+	.byte	56,135	|	0x8738
 	.ascii	"ONE@DAY\\\."
-	.byte	218,134
+	.byte	218,134	|	0x86da
 	.ascii	"IN@THE@FOREST\\\?"
 str_08_7b12:
-	.byte	209,134
+	.byte	209,134	|	0x86d1
 	.ascii	"BONUS@POINT."
-	.byte	180,134
+	.byte	180,134	|	0x86b4
 	.ascii	"200X@@w@@00?"
 str_09_7b2e:
-	.byte	202,134
+	.byte	202,134	|	0x86ca
 	.ascii	"YOUR@PLAY@TIME?"
 str_0a_7b3f:
-	.byte	25,135
+	.byte	25,135	|	0x8719
 	.ascii	"NBR@OF@PIGS@TAKEN?"
 str_0b_7b53:
-	.byte	36,134
+	.byte	36,134	|	0x8624
 	.ascii	"PLAY?"
 str_0c_7b5a:
-	.byte	169,134
+	.byte	169,134	|	0x86a9
 	.ascii	"[@@POOYAN@@[?"
 str_0d_7b69:
-	.byte	196,134
+	.byte	196,134	|	0x86c4
 	.ascii	"[@@CHARACTER@@[?"
 str_0e_7b7b:
-	.byte	163,134
+	.byte	163,134	|	0x86a3
 	.ascii	"[@@POO@YAN@@[?"
 str_0f_7b8b:
-	.byte	43,135
+	.byte	43,135	|	0x872b
 	.ascii	"WHEN@7@WOLVES@JOIN."
-	.byte	45,135
+	.byte	45,135	|	0x872d
 	.ascii	"ON@THE@CLIFFsTHEY."
-	.byte	47,135
+	.byte	47,135	|	0x872f
 	.ascii	"DROP@GIAHT@ROCK;;?"
 str_10_7bc8:
-	.byte	175,134
+	.byte	175,134	|	0x86af
 	.ascii	"@NICE@@SHOOT."
-	.byte	210,134
+	.byte	210,134	|	0x86d2
 	.ascii	"@BONUS@@POINT?"
 str_11_7be7:
-	.byte	188,134
+	.byte	188,134	|	0x86bc
 	.ascii	":@KONAMI@@1982?"
 str_12_7bf8:
-	.byte	174,134
+	.byte	174,134	|	0x86ae
 	.ascii	"@MAMAs@HELP@;?"
 str_13_7c08:
-	.byte	230,133
+	.byte	230,133	|	0x85e6
 	.ascii	"OHs@BOY@;?"
 str_14_7c14:
-	.byte	86,135
+	.byte	86,135	|	0x8756
 	.ascii	"@MAMA@@;?"
 str_15_7c1f:
-	.byte	25,135
+	.byte	25,135	|	0x8719
 	.ascii	"@MAMA@@;;?"
 str_16_7c2b:
-	.byte	117,135
+	.byte	117,135	|	0x8775
 	.ascii	"1ST@BONUS@AFTER@?"
 str_17_7c3e:
-	.byte	117,133
+	.byte	117,133	|	0x8575
 	.ascii	"50000@PTS?"
 str_18_7c4a:
-	.byte	209,134
+	.byte	209,134	|	0x86d1
 	.ascii	"ONE@PLAYER@ONLY?"
 str_19_7c5c:
-	.byte	241,134
+	.byte	241,134	|	0x86f1
 	.ascii	"ONE@OR@TWO@PLAYERS?"
 str_1a_7c71:
-	.byte	4,135
+	.byte	4,135	|	0x8704
 	.ascii	"[@SCORE@RANKING@[?"
 str_1b_7c85:
-	.byte	39,135
+	.byte	39,135	|	0x8727
 	.ascii	"1ST?"
 str_1c_7c8b:
-	.byte	41,135
+	.byte	41,135	|	0x8729
 	.ascii	"2ND?"
 str_1d_7c91:
-	.byte	43,135
+	.byte	43,135	|	0x872b
 	.ascii	"3RD?"
 str_1e_7c97:
-	.byte	45,135
+	.byte	45,135	|	0x872d
 	.ascii	"4TH@@@@@@@@@@@?"
 str_1f_7ca8:
-	.byte	47,135
+	.byte	47,135	|	0x872f
 	.ascii	"5TH?"
 str_20_7cae:
-	.byte	49,135
+	.byte	49,135	|	0x8731
 	.ascii	"6TH?"
 str_21_7cb4:
-	.byte	51,135
+	.byte	51,135	|	0x8733
 	.ascii	"7TH?"
 str_22_7cba:
-	.byte	53,135
+	.byte	53,135	|	0x8735
 	.ascii	"8TH?"
 str_23_7cc0:
-	.byte	55,135
+	.byte	55,135	|	0x8737
 	.ascii	"9TH?"
 str_24_7cc6:
-	.byte	89,135
+	.byte	89,135	|	0x8759
 	.ascii	"10TH?"
 str_25_7ccd:
-	.byte	189,134
+	.byte	189,134	|	0x86bd
 	.ascii	":@KONAMI@@1982?"
 str_26_7cde:
-	.byte	209,134
+	.byte	209,134	|	0x86d1
 	.ascii	"@BONUS@@STAGE@?"
 str_27_7cef:
-	.byte	172,134
+	.byte	172,134	|	0x86ac
 	.ascii	"@@PERFECT@@@?"
 str_28_7cfe:
-	.byte	117,133
+	.byte	117,133	|	0x8575
 	.ascii	"30000@PTS?"
 str_29_7d0a:
-	.byte	120,135
+	.byte	120,135	|	0x8778
 	.ascii	"AND@BONUS@EVERY@70000@PTS?"
 str_2a_7d26:
-	.byte	120,135
+	.byte	120,135	|	0x8778
 	.ascii	"AND@BONUS@EVERY@80000@PTS?"
 str_2b_7d42:
-	.byte	208,134
+	.byte	208,134	|	0x86d0
 	.ascii	"2ND@PHASE@GETS?"
 str_2c_7d53:
-	.byte	18,135
+	.byte	18,135	|	0x8712
 	.ascii	"HARDER@AS@YOU@LOSE?"
 str_2d_7d68:
-	.byte	148,134
+	.byte	148,134	|	0x8694
 	.ascii	"MORE@PIGS@;?"
 str_2e_7d76:
-	.byte	22,134
+	.byte	22,134	|	0x8616
 	.ascii	"?"
 str_2f_7d82:
-	.byte	56,135
+	.byte	56,135	|	0x8738
 	.ascii	"?"
 str_30_7d98:
-	.byte	117,135
+	.byte	117,135	|	0x8775
 	.ascii	"ABOUT@10@SECONDS;?"
 str_31_7dac:
-	.byte	146,134
+	.byte	146,134	|	0x8692
 	.ascii	"@ONE@WOLF."
-	.byte	116,134
+	.byte	116,134	|	0x8674
 	.ascii	"@@400@PTS?"
 str_32_7dc4:
-	.byte	146,134
+	.byte	146,134	|	0x8692
 	.ascii	"@TWO@WOLVES."
-	.byte	116,134
+	.byte	116,134	|	0x8674
 	.ascii	"@@400800@PTS?"
 str_33_7de2:
-	.byte	146,134
+	.byte	146,134	|	0x8692
 	.ascii	"@SOME@WOLVES."
-	.byte	116,134
+	.byte	116,134	|	0x8674
 	.ascii	"@@400800@."
-	.byte	86,134
+	.byte	86,134	|	0x8656
 	.ascii	"@@@1600@PTS?"
 str_34_7e0d:
-	.byte	205,134
+	.byte	205,134	|	0x86cd
 	.ascii	"BONUS@@POINT."
-	.byte	16,135
+	.byte	16,135	|	0x8710
 	.ascii	"MEAT@@@@@@@@00@PTS."
-	.byte	18,135
+	.byte	18,135	|	0x8712
 	.ascii	"WOLF@@@@@@@@00@PTS?"
 str_35_7e46:
-	.byte	163,134
+	.byte	163,134	|	0x86a3
 	.ascii	"BONUS@@STAGE@?"
 str_36_7e56:
-	.byte	0,132
+	.byte	0,132	|	0x8400
 	.ascii	"@?"
 str_37_7e56:
-	.byte	0,132
+	.byte	0,132	|	0x8400
 	.ascii	"@?"
 str_38_7e56:
-	.byte	0,132
+	.byte	0,132	|	0x8400
 	.ascii	"@?"
 str_39_7e56:
-	.byte	0,132
+	.byte	0,132	|	0x8400
 	.ascii	"@?"
 str_3a_7e56:
-	.byte	0,132
+	.byte	0,132	|	0x8400
 	.ascii	"@?"
 str_3b_7e56:
-	.byte	0,132
+	.byte	0,132	|	0x8400
 	.ascii	"@?"
 str_3c_7e56:
-	.byte	0,132
+	.byte	0,132	|	0x8400
 	.ascii	"@?"
 str_3d_7e56:
-	.byte	0,132
+	.byte	0,132	|	0x8400
 	.ascii	"@?"
 str_3e_7e56:
-	.byte	0,132
+	.byte	0,132	|	0x8400
 	.ascii	"@?"
 str_3f_7e5a:
-	.byte	137,134
+	.byte	137,134	|	0x8689
 	.ascii	"DOUBLE."
-	.byte	77,134
+	.byte	77,134	|	0x864d
 	.ascii	"PERFECT?"
 	.align	2
 	
