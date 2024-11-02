@@ -155,7 +155,9 @@ for i,tile in enumerate(tile_set):
         plane_size = len(bitplane_data) // nb_planes
         bitplane_plane_ids = []
         for j in range(nb_planes):
-            bitplane = bitplane_data[j:j+plane_size]
+            offset = j*plane_size
+            bitplane = bitplane_data[offset:offset+plane_size]
+
             cache_id = tile_plane_cache.get(bitplane)
             if cache_id is not None:
                 bitplane_plane_ids.append(cache_id)

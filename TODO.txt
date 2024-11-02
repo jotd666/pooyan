@@ -7,13 +7,17 @@ reach 5ca7?
 reach 5d03?
 break on all jump table entrypoints, figure them all out
 
-i register, revert what I did with D7, store as a global
 
-lea l_xxxx, where xxxx in rom: check if label defined / count then replace by access to ROM binary
-LOAD_ROM_ADDRESS
 
 8810: when is it set?
 
+
+- bit 7 on attribute means mirror tile
+- implement mirror tile
+- higher display for credits
+- implement sprites
+- corrupt house (right)
+- title seems to be written mirrored... (intro_baloons_exploding_into_title_7790)
 
 converter: lf address >= 0xFC00 consider as negative data
 converter: postproc: 	move.b	d0,(ax) and addq.w #1,ax => (ax)+

@@ -1655,6 +1655,10 @@ compute_tile_xy:
 
 
 
+* addresses 0x8400->0x843F don't map to visible tiles
+* addresses 0x87C0->0x87FF don't map to visible tiles
+* each column has 0x20*8 = 256 pixels
+* each visible row has 28*8 = 244 pixels
 
 * < D7: 0-0x400 address
 * < D0: tile code
@@ -1673,7 +1677,7 @@ update_bg_tile:
 	
 	* updating bitplanes
 	move.l	#SCREEN_PLANE_SIZE,d5
-	move.w	#0,d4 | NB_PLAYFIELD_PLANES-1,d4
+	move.w	#NB_PLAYFIELD_PLANES-1,d4
 	move.l	playfield_drawed_screen_ptr,a1
 	add.w	d0,a1
 	lea		mulNB_BYTES_PER_ROW_table,A2
