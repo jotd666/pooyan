@@ -3636,7 +3636,7 @@ init_level_layout_1728:
 	STORE_RAM_POINTER	a0,video_ram_pointer_88b8(a6)            	| [$1732: ld   ($88B8),hl]
 	
 	lea	l_8042(a6),a0                      	| [$1735: ld   hl,$8042]
-	STORE_RAM_POINTER	a0,ram_pointerl_8F43(a6)            	| [$1738: ld   ($8F43),hl]
+	STORE_RAM_POINTER	a0,color_ram_pointerl_8F43(a6)            	| [$1738: ld   ($8F43),hl]
 	
 	move.b	#0x20,d0                        	| [$173b: ld   a,$20]
 	move.b	d0,l_8D07(a6)                   	| [$173d: ld   ($8D07),a]
@@ -3661,7 +3661,7 @@ draw_game_scenery_175d:
 	rts                                    	| [$1767: ret  nz] [...]
 0:
 	clr.b	(a0)                             	| [$1768: ld   (hl),$00]
-	lea	l_8920(a6),a0                      	| [$176a: ld   hl,$8920]
+	lea	tile_or_color_mode_8920(a6),a0                      	| [$176a: ld   hl,$8920]
 	move.b	(a0),d0                         	| [$176d: ld   a,(hl)]
 	addq.b	#1,(a0)                         	| [$176e: inc  (hl)]
 	tst.b	d0                               	| [$176f: and  a]
@@ -5655,7 +5655,7 @@ l_2527:
 	lea	l_8934(a6),a0                        	| [$2539: ld   l,$34]
 	move.b	#0x04,(a0)                      	| [$253b: ld   (hl),$04]
 	move.b	#0x20,d1                        	| [$253d: ld   b,$20]
-	lea	l_8920(a6),a0                           	| [$253f: ld   l,b]
+	lea	tile_or_color_mode_8920(a6),a0                           	| [$253f: ld   l,b]
 	jbsr	fill_area_0010                            	| [$2540: rst  $10]
 l_2541:
 	lea	rom_pointer_8f00(a6),a0                      	| [$2541: ld   hl,$8F00]
@@ -5733,7 +5733,7 @@ l_25a6:
 	rts                                    	| [$25b9: ret  z] [...]
 0:
 	move.b	d0,d2                           	| [$25ba: ld   c,a]
-	move.b	l_8920(a6),d0                   	| [$25bb: ld   a,($8920)]
+	move.b	tile_or_color_mode_8920(a6),d0                   	| [$25bb: ld   a,($8920)]
 	                               	| [$25be: and  a]
 	jne	l_2635                             	| [$25bf: jr   nz,$2635]
 	move.b	d2,d0                           	| [$25c1: ld   a,c]
@@ -5850,7 +5850,7 @@ l_267f:
 	move.l	(sp)+,a0                        	| [$2695: pop  hl]
 	subq.b	#1,d1                           	| [...]
 	jne	l_267f                             	| [$2696: djnz $267F]
-	move.b	l_8920(a6),d0                   	| [$2698: ld   a,($8920)]
+	move.b	tile_or_color_mode_8920(a6),d0                   	| [$2698: ld   a,($8920)]
 	                               	| [$269b: and  a]
 	jne	l_26b8                             	| [$269c: jr   nz,$26B8]
 	move.w  #0xFFDF,d3                          	| [$269e: ld   de,$FFDF]
@@ -7045,7 +7045,7 @@ l_308b:
 	                               	| [$3093: and  a]
 	jne	l_30e0                             	| [$3094: jr   nz,$30E0]
 	lea	l_8AE0(a6),a2                      	| [$3096: ld   ix,$8AE0]
-	lea	l_8920(a6),a3                      	| [$309a: ld   iy,$8920]
+	lea	tile_or_color_mode_8920(a6),a3                      	| [$309a: ld   iy,$8920]
 	move.w	#0x0018,d3                      	| [$309e: ld   de,$0018] 24
 	move.b	#0x11,d1                        	| [$30a1: ld   b,$11]
 l_30a3:
@@ -7059,7 +7059,7 @@ l_30ad:
 	subq.b	#1,d1                           	| [...]
 	jne	l_30a3                             	| [$30af: djnz $30A3]
 	clr.b	d0                               	| [$30b1: xor  a]
-	move.b	d0,l_8920(a6)                   	| [$30b2: ld   ($8920),a]
+	move.b	d0,tile_or_color_mode_8920(a6)                   	| [$30b2: ld   ($8920),a]
 	rts                                    	| [$30b5: ret]
 l_30b6:
 	move.b	(0x01,a2),d0                    	| [$30b6: ld   a,(ix+$01)]
@@ -7094,7 +7094,7 @@ l_30e0:
 	.long	rom_checksum_3266
 
 l_30f1:
-	lea	l_8920(a6),a2                      	| [$30f1: ld   ix,$8920]
+	lea	tile_or_color_mode_8920(a6),a2                      	| [$30f1: ld   ix,$8920]
 	LOAD_ROM	0x3337,a0                          	| [$30f5: ld   hl,$3337]
 	move.b	#0x04,d1                        	| [$30f8: ld   b,$04]
 l_30fa:
@@ -7179,7 +7179,7 @@ l_316e:
 	subq.b	#1,(a0)                         	| [$3175: dec  (hl)]
 	rts                                    	| [$3176: ret]
 l_3177:
-	lea	l_8920(a6),a0                        	| [$3177: ld   l,$20]
+	lea	tile_or_color_mode_8920(a6),a0                        	| [$3177: ld   l,$20]
 	move.b	(a0)+,d4                         	| [$3179: ld   e,(hl)]
 	                           	| [$317a: inc  hl]
 	move.b	(a0),d3                         	| [$317b: ld   d,(hl)]
@@ -7241,7 +7241,7 @@ l_31d7:
 l_31e5:
 	move.b	(0x04,a3),d2                    	| [$31e5: ld   c,(iy+$04)]
 	move.b	(0x06,a3),d1                    	| [$31e8: ld   b,(iy+$06)]
-	lea	l_8920(a6),a2                      	| [$31eb: ld   ix,$8920]
+	lea	tile_or_color_mode_8920(a6),a2                      	| [$31eb: ld   ix,$8920]
 	move.w	#0x0003,d3                      	| [$31ef: ld   de,$0003] 3
 	move.b	(0x02,a2),D6                    	| [$31f2: ld   l,(ix+$02)]
 	move.b	(0x03,a2),D5                    	| [$31f5: ld   h,(ix+$03)]
@@ -9350,11 +9350,13 @@ do_nothing_4378:
 
 write_column_to_screen_4381:
 	move.b	#0x1D,d1                        	| [$4381: ld   b,$1D]
-	move.b	l_8920(a6),d0                   	| [$4383: ld   a,($8920)]
-	LOAD_RAM_POINTER	ram_pointerl_8F43(a6),a0             	| [$4386: ld   hl,($8F43)]
+											| [$4383: ld   a,($8920)]
+	lea		osd_w_colorram,a4
+	LOAD_RAM_POINTER	color_ram_pointerl_8F43(a6),a0             	| [$4386: ld   hl,($8F43)]
 	LOAD_ROM_POINTER	rom_pointer_8f45(a6),a1             	| [$4389: ld   de,($8F45)]
-	tst.b	d0                               	| [$438d: and  a]
+	tst.b	tile_or_color_mode_8920(a6)                               	| [$438d: and  a]
 	jeq	l_4397                             	| [$438e: jr   z,$4397]
+	lea		osd_w_videoram,a4
 	LOAD_RAM_POINTER	video_ram_pointer_88b8(a6),a0             	| [$4390: ld   hl,($88B8)]
 	LOAD_ROM_POINTER	rom_pointer_88BA(a6),a1             	| [$4393: ld   de,($88BA)]
 l_4397:
@@ -9363,7 +9365,7 @@ l_4397:
 	jeq	l_43be                             	| [$439a: jr   z,$43BE]
 	cmp.b	#0xFF,d0                         	| [$439c: cp   $FF]
 	jeq	l_43ce                             	| [$439e: jr   z,$43CE]
-	jbsr	osd_w_videoram                         	| [$43a0: ld   (hl),a]
+	jsr		(a4)                         	| [$43a0: ld   (hl),a]
 	addq.w	#1,a1                           	| [$43a1: inc  de]
 	addq.w	#1,a0                           	| [$43a2: inc  hl]
 	subq.b	#1,d1                           	| [...]
@@ -9372,10 +9374,10 @@ l_43a5:
 	addq.w	#3,a0                           	| [$43a5: inc  hl]
 	                           	| [$43a6: inc  hl] * 2
 l_43a8:
-	move.b	l_8920(a6),d0                   	| [$43a8: ld   a,($8920)]
+	tst.b	tile_or_color_mode_8920(a6)                   	| [$43a8: ld   a,($8920)]
 	                               	| [$43ab: and  a]
 	jne	l_43b6                             	| [$43ac: jr   nz,$43B6]
-	STORE_RAM_POINTER	a0,ram_pointerl_8F43(a6)            	| [$43ae: ld   ($8F43),hl]
+	STORE_RAM_POINTER	a0,color_ram_pointerl_8F43(a6)            	| [$43ae: ld   ($8F43),hl]
 	STORE_ROM_POINTER	a1,rom_pointer_8f45(a6)            	| [$43b1: ld   ($8F45),de]
 	
 	rts                                    	| [$43b5: ret]
@@ -13186,12 +13188,12 @@ l_6d31:
 	                        	| [$6d41: pop  de]
 	addq.w	#1,a1                           	| [$6d42: inc  de]
 	                          	| [$6d43: ld   a,e]
-	STORE_RAM_POINTER	a1,ram_pointerl_8F43(a6)                   	| [$6d44: ld   ($8F43),a]
+	STORE_RAM_POINTER	a1,color_ram_pointerl_8F43(a6)                   	| [$6d44: ld   ($8F43),a]
 	                  	| [$6d47: ld   a,d]
 	                  	| [$6d48: ld   ($8F44),a]
 	jra	l_6ced                             	| [$6d4b: jr   $6CED]
 l_6d4d:
-	LOAD_RAM_POINTER	ram_pointerl_8F43(a6),a0             	| [$6d4d: ld   hl,($8F43)]
+	LOAD_RAM_POINTER	color_ram_pointerl_8F43(a6),a0             	| [$6d4d: ld   hl,($8F43)]
 
 	move.b	(a0),d0                         	| [$6d50: ld   a,(hl)]
 	                               	| [$6d51: and  a]
@@ -14209,7 +14211,7 @@ init_intro_744e:
 	STORE_RAM_POINTER	a0,video_ram_pointer_88b8(a6)            	| [$7462: ld   ($88B8),hl]
 	
 	lea	l_8042(a6),a0                      	| [$7465: ld   hl,$8042]
-	STORE_RAM_POINTER	a0,ram_pointerl_8F43(a6)            	| [$7468: ld   ($8F43),hl]
+	STORE_RAM_POINTER	a0,color_ram_pointerl_8F43(a6)            	| [$7468: ld   ($8F43),hl]
 	
 	lea	intro_anim_sub_state_8921(a6),a0                      	| [$746b: ld   hl,$8921]
 	addq.b	#1,(a0)                         	| [$746e: inc  (hl)]
@@ -14250,7 +14252,7 @@ display_intro_tiles_7517:
 	beq.b	0f                               	| [...]
 	rts                                    	| [$7521: ret  nz] [...]
 0:
-	lea	l_8920(a6),a0                      	| [$7522: ld   hl,$8920]
+	lea	tile_or_color_mode_8920(a6),a0                      	| [$7522: ld   hl,$8920]
 	move.b	(a0),d0                         	| [$7525: ld   a,(hl)]
 	addq.b	#1,(a0)                         	| [$7526: inc  (hl)]
 	move.b	d0,written_column_index_88B7(a6)                   	| [$7528: ld   ($88B7),a]
@@ -14384,7 +14386,7 @@ l_760b:
 	add.b	d0,d0                            	| [$7611: add  a,a]
 	add.b	d0,d0                            	| [$7612: add  a,a]
 	move.b	d0,(0x11,a3)                    	| [$7613: ld   (iy+$11),a]
-	move.w	(sp)+,d0                        	| [$7616: pop  af]
+	addq.w	#4,a7                        	| [$7616: pop  af]	pop/skip caller!
 	rts                                    	| [$7617: ret]
 
 l_7621:
@@ -14399,11 +14401,11 @@ l_762e:
 	jbsr	exx                               	| [$762e: exx]
 	jbsr	l_7638                            	| [$762f: call $7638]
 	jbsr	exx                               	| [$7632: exx]
-l_7633:
 	add.w	d3,a2                            	| [$7633: add  ix,de]
 	subq.b	#1,d1                           	| [...]
 	jne	l_762e                             	| [$7635: djnz $762E]
 	rts                                    	| [$7637: ret]
+	
 l_7638:
 	move.b	(0x02,a2),d0                    	| [$7638: ld   a,(ix+$02)]
 	and.b	#0x03,d0                         	| [$763b: and  $03]
@@ -14441,7 +14443,7 @@ l_766c:
 	add.w	d3,a2                            	| [$766f: add  ix,de]
 	subq.b	#1,d1                           	| [...]
 	jne	l_766c                             	| [$7671: djnz $766C]
-	move.w	(sp)+,d0                        	| [$7673: pop  af]
+	addq	#4,a7                        	| [$7673: pop  af] pop/skip caller
 	rts                                    	| [$7674: ret]
 intro_balloons_related_7675:
 	jbsr	l_4006                            	| [$7675: call $4006]
@@ -14461,7 +14463,6 @@ l_768b:
 	add.w	d3,a0                            	| [$768c: add  hl,de]
 	subq.b	#1,d1                           	| [...]
 	jne	l_768b                             	| [$768d: djnz $768B]
-	CLEAR_XC_FLAGS                         	| [$768f: xor  a]
 	clr.b	d0                               	| [$768f: xor  a]
 	lea	l_8BA2(a6),a0                      	| [$7690: ld   hl,$8BA2]
 	move.w	#0x0018,d3                      	| [$7693: ld   de,$0018] 24
@@ -14474,7 +14475,7 @@ l_7698:
 	move.b	d0,l_8D57(a6)                   	| [$769c: ld   ($8D57),a]
 	move.b	#0x08,d0                        	| [$769f: ld   a,$08]
 	move.b	d0,title_sub_state_8E51(a6)     	| [$76a1: ld   (title_sub_state_8E51),a]
-	move.w	(sp)+,d0                        	| [$76a4: pop  af]
+	addq	#4,a7                        	| [$76a4: pop  af] pop/skip caller
 	rts                                    	| [$76a5: ret]
 intro_balloons_related_76a6:
 	move.b	l_8D58(a6),d0                   	| [$76a6: ld   a,($8D58)]
@@ -14503,12 +14504,12 @@ l_76b8:
 l_76c7:
 	lea	l_8471(a6),a0                      	| [$76c7: ld   hl,$8471]
 	move.w	#0x0040,d1                      	| [$76ca: ld   bc,$0040] 64
-	move.b	(a1),d0                         	| [$76cd: ld   a,(de)]
-	move.b	d0,(a0)                         	| [$76ce: ld   (hl),a]
-	addq.w	#1,a1                           	| [$76cf: inc  de]
+	move.b	(a1)+,d0                         	| [$76cd: ld   a,(de)]
+	jbsr	osd_w_videoram                         	| [$76ce: ld   (hl),a]
+												| [$76cf: inc  de]
 	add.w	d1,a0                            	| [$76d0: add  hl,bc]
 	move.b	(a1),d0                         	| [$76d1: ld   a,(de)]
-	move.b	d0,(a0)                         	| [$76d2: ld   (hl),a]
+	jbsr	osd_w_videoram                         	| [$76d2: ld   (hl),a]
 	rts                                    	| [$76d3: ret]
 
 intro_balloons_rise_76ea:

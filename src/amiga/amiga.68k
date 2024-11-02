@@ -1606,7 +1606,7 @@ osd_w_videoram:
 	bcc.b	1f
 0:
 	* should not happen
-	add.w	#SCREEN_TILE_ADDRESS-0x8000,d7
+	add.w	#SCREEN_TILE_ADDRESS,d7
 	lea		write_videoram_out_of_range_error(pc),a0
 	jbsr	osd_break
 	nop	
@@ -2206,9 +2206,9 @@ read_args_string_end:
 	.ifndef	RELEASE
 
 write_videoram_out_of_range_error:
-	.asciz	"write videoram out of range"
+	.asciz	"write videoram out of range (D7)"
 write_colorram_out_of_range_error:
-	.asciz	"write colorram out of range"
+	.asciz	"write colorram out of range (D7)"
 game_tile_not_registered_error:
 	.asciz	"game tile (in D2) not registered"
 	
