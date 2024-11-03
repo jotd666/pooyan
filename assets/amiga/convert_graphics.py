@@ -164,9 +164,15 @@ for i,tsd in tile_sheet_dict.items():
     tile_set_list.append(tile_set)
     tile_palette.update(tp)
 
-sprite_palette,sprite_set = load_tileset(sprite_sheet_dict[0],0,16,None,"sprites",dump_dir,dump=dump_it,name_dict=sprite_names)
+sprite_palette = set()
+sprite_set_list = []
 
-full_palette = sorted(set(sprite_palette) | tile_palette)
+for i,tsd in sprite_sheet_dict.items():
+    sp,sprite_set = load_tileset(tsd,i,16,None,"sprites",dump_dir,dump=dump_it,name_dict=sprite_names)
+    sprite_set_list.append(sprite_set)
+    sprite_palette.update(sp)
+
+full_palette = sorted(sprite_palette | tile_palette)
 
 nb_planes = 5
 nb_colors = 1<<5
@@ -182,49 +188,53 @@ plane_orientations = [("standard",lambda x:x),
 ("mirror",ImageOps.mirror),
 ("flip_mirror",lambda x:ImageOps.flip(ImageOps.mirror(x)))]
 
+def read_tileset(img_set_list,img_set,palette):
+    global next_cache_id
+    tile_table = []
+    for n,img_set in enumerate(img_set_list):
+        tile_entry = []
+        for i,tile in enumerate(img_set):
+            entry = dict()
+            if tile:
 
-tile_table = []
-for n,tile_set in enumerate(tile_set_list):
-    tile_entry = []
-    for i,tile in enumerate(tile_set):
-        entry = dict()
-        if tile:
+                for plane_name,plane_func in plane_orientations:
+                    wtile = plane_func(tile)
 
-            for plane_name,plane_func in plane_orientations:
-                wtile = plane_func(tile)
+                    bitplane_data = bitplanelib.palette_image2raw(wtile,None,palette)
 
-                bitplane_data = bitplanelib.palette_image2raw(wtile,None,full_palette)
+                    plane_size = len(bitplane_data) // nb_planes
+                    bitplane_plane_ids = []
+                    for j in range(nb_planes):
+                        offset = j*plane_size
+                        bitplane = bitplane_data[offset:offset+plane_size]
 
-                plane_size = len(bitplane_data) // nb_planes
-                bitplane_plane_ids = []
-                for j in range(nb_planes):
-                    offset = j*plane_size
-                    bitplane = bitplane_data[offset:offset+plane_size]
-
-                    cache_id = tile_plane_cache.get(bitplane)
-                    if cache_id is not None:
-                        bitplane_plane_ids.append(cache_id)
-                    else:
-                        if any(bitplane):
-                            tile_plane_cache[bitplane] = next_cache_id
-                            bitplane_plane_ids.append(next_cache_id)
-                            next_cache_id += 1
+                        cache_id = tile_plane_cache.get(bitplane)
+                        if cache_id is not None:
+                            bitplane_plane_ids.append(cache_id)
                         else:
-                            bitplane_plane_ids.append(0)  # blank
-                entry[plane_name] = bitplane_plane_ids
+                            if any(bitplane):
+                                tile_plane_cache[bitplane] = next_cache_id
+                                bitplane_plane_ids.append(next_cache_id)
+                                next_cache_id += 1
+                            else:
+                                bitplane_plane_ids.append(0)  # blank
+                    entry[plane_name] = bitplane_plane_ids
 
-        tile_entry.append(entry)
+            tile_entry.append(entry)
 
-    tile_table.append(tile_entry)
+        tile_table.append(tile_entry)
 
-new_tile_table = [[[] for _ in range(16)] for _ in range(256)]
+    new_tile_table = [[[] for _ in range(16)] for _ in range(256)]
 
-# reorder/transpose. We have 16 * 256 we need 256 * 16
-for i,u in enumerate(tile_table):
-    for j,v in enumerate(u):
-        new_tile_table[j][i] = v
+    # reorder/transpose. We have 16 * 256 we need 256 * 16
+    for i,u in enumerate(tile_table):
+        for j,v in enumerate(u):
+            new_tile_table[j][i] = v
 
-tile_table = new_tile_table
+    return new_tile_table
+
+tile_table = read_tileset(tile_set_list,tile_set,full_palette)
+sprite_table = read_tileset(sprite_set_list,sprite_set,full_palette)
 
 with open(os.path.join(src_dir,"palette.68k"),"w") as f:
     bitplanelib.palette_dump(full_palette,f,bitplanelib.PALETTE_FORMAT_ASMGNU)
