@@ -16,6 +16,8 @@ dump_dir = os.path.join(this_dir,"dumps")
 if dump_it:
     if not os.path.exists(dump_dir):
         os.mkdir(dump_dir)
+        with open(os.path.join(dump_dir,".gitignore"),"w") as f:
+            f.write("*")
 
 
 def dump_asm_bytes(*args,**kwargs):
@@ -179,27 +181,33 @@ tile_table = []
 for n,tile_set in enumerate(tile_set_list):
     tile_entry = []
     for i,tile in enumerate(tile_set):
+        entry = dict()
         if tile:
-            bitplane_data = bitplanelib.palette_image2raw(tile,None,full_palette)
+            for x in range(2):
+                if x:
+                    tile = ImageOps.mirror(tile)
 
-            plane_size = len(bitplane_data) // nb_planes
-            bitplane_plane_ids = []
-            for j in range(nb_planes):
-                offset = j*plane_size
-                bitplane = bitplane_data[offset:offset+plane_size]
+                bitplane_data = bitplanelib.palette_image2raw(tile,None,full_palette)
 
-                cache_id = tile_plane_cache.get(bitplane)
-                if cache_id is not None:
-                    bitplane_plane_ids.append(cache_id)
-                else:
-                    if any(bitplane):
-                        tile_plane_cache[bitplane] = next_cache_id
-                        bitplane_plane_ids.append(next_cache_id)
-                        next_cache_id += 1
+                plane_size = len(bitplane_data) // nb_planes
+                bitplane_plane_ids = []
+                for j in range(nb_planes):
+                    offset = j*plane_size
+                    bitplane = bitplane_data[offset:offset+plane_size]
+
+                    cache_id = tile_plane_cache.get(bitplane)
+                    if cache_id is not None:
+                        bitplane_plane_ids.append(cache_id)
                     else:
-                        bitplane_plane_ids.append(0)  # blank
+                        if any(bitplane):
+                            tile_plane_cache[bitplane] = next_cache_id
+                            bitplane_plane_ids.append(next_cache_id)
+                            next_cache_id += 1
+                        else:
+                            bitplane_plane_ids.append(0)  # blank
+                entry["mirror_planes" if x else "planes"] = bitplane_plane_ids
 
-        tile_entry.append({"bitmap_planes":bitplane_plane_ids})
+        tile_entry.append(entry)
 
     tile_table.append(tile_entry)
 
@@ -245,14 +253,24 @@ with open(os.path.join(src_dir,"graphics.68k"),"w") as f:
         if tile_entry:
             for j,t in enumerate(tile_entry):
                 if t:
-                    f.write(f"tile_{i:02x}_{j:02x}:\n")
-                    for bitplane_id in t["bitmap_planes"]:
+                    name = f"tile_{i:02x}_{j:02x}"
+                    f.write(f"{name}:\n")
+                    for bitplane_id in t["planes"]:
                         f.write("\t.long\t")
                         if bitplane_id:
                             f.write(f"tile_plane_{bitplane_id:02d}")
                         else:
                             f.write("0")
                         f.write("\n")
+                    if "mirror_planes" in t:
+                        f.write("* mirror\n")
+                        for bitplane_id in t["mirror_planes"]:
+                            f.write("\t.long\t")
+                            if bitplane_id:
+                                f.write(f"tile_plane_{bitplane_id:02d}")
+                            else:
+                                f.write("0")
+                            f.write("\n")
 
                     #dump_asm_bytes(t["bitmap"],f)
 

@@ -19,6 +19,10 @@ break on all jump table entrypoints, figure them all out
 - corrupt house (right)
 - title seems to be written mirrored... (intro_baloons_exploding_into_title_7790)
 
+
+- capture screenshot memory dumps to filter out unused tiles/cluts
+  to save memory
+
 converter: lf address >= 0xFC00 consider as negative data
 converter: postproc: 	move.b	d0,(ax) and addq.w #1,ax => (ax)+
 converter: postproc: 	subq.w #1,ax and move.b d0,(ax) => -(ax)

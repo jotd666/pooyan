@@ -653,7 +653,7 @@ _vblank:
 	jbsr		pooyan_irq
 
 
-	*bsr		really_update_sprites
+	bsr		really_update_sprites
 	
 	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
 	bsr		switch_screen_buffers
@@ -841,6 +841,8 @@ blit_background:
 
 really_update_sprites:
 update_bobs_and_hw_sprites:
+	rts
+	
 	*****************************
 	* position hardware sprites *
 	*****************************
@@ -1680,10 +1682,13 @@ update_bg_tile:
 	move.l	#SCREEN_PLANE_SIZE,d5
 	move.w	#NB_PLAYFIELD_PLANES-1,d4
 	move.l	playfield_drawed_screen_ptr,a1
+	lea		background_restore_buffer,a3
 	add.w	d0,a1
 	lea		mulNB_BYTES_PER_ROW_table,A2
 	add.w	d1,d1
-	add.w	(a2,d1.w),a1
+	move.w	(a2,d1.w),d1
+	add.w	d1,a1
+	add.w	d1,a3
 	
 	
 	add.w	d2,d2
@@ -1700,11 +1705,18 @@ update_bg_tile:
 12:
 	.endif
 	move.l	d0,a2
+	move.b	d3,d1
 	and.w	#0xF,d3
 	add.w	d3,d3
 	add.w	d3,d3
 	move.l	(a2,d3.w),d0			| pointer on tile bitplanes for that CLUT
 	jeq		11f						| not necessarily a problem
+
+	btst	#7,d1
+	jeq	13f
+	add.w	#NB_PLAYFIELD_PLANES*4,d0	| mirror
+13:
+
 	move.l	d0,a2					| pointer on bitplanes
 	* just copy
 
@@ -1714,12 +1726,15 @@ update_bg_tile:
 	move.l	d0,a0
 	.set	offset,0
 	.rept	8
-	move.b	(a0)+,(offset,a1)
+	move.b	(a0)+,d0
+	move.b	d0,(offset,a1)  | buffer
+	move.b	d0,(offset,a3)  | backbuffer
 
 	.set	offset,offset+NB_BYTES_PER_ROW
 	.endr
 41:
 	add.l	d5,a1
+	add.l	d5,a3
 	dbf		d4,4b
 0:
 	rts
@@ -1727,6 +1742,7 @@ update_bg_tile:
 	.set	offset,0
 	.rept	8
 	clr.b	(offset,a1)
+	clr.b	(offset,a3)
 	.set	offset,offset+NB_BYTES_PER_ROW
 	.endr
 	jra		41b
@@ -1738,9 +1754,11 @@ update_bg_tile:
 	.set	offset,0
 	.rept	8
 	clr.b	(offset,a1)
+	clr.b	(offset,a3)
 	.set	offset,offset+NB_BYTES_PER_ROW
 	.endr
 	add.w	d5,a1
+	add.w	d5,a3
 	dbf		d4,111b
 2:
 	rts
@@ -2510,7 +2528,6 @@ intreq_block_game:
 	
 background_restore_buffer:
 	.skip	RESTORE_SCREEN_SIZE
-	*.skip	NB_BYTES_PER_ROW*12*3
 		
 bg_screen_buffer_1:
 	.skip	SCREEN_SIZE
