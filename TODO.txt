@@ -12,16 +12,10 @@ break on all jump table entrypoints, figure them all out
 8810: when is it set?
 
 
-- bit 7 on attribute means mirror tile
-- implement mirror tile
-- higher display for credits
 - implement sprites
-- corrupt house (right)
-- title seems to be written mirrored... (intro_baloons_exploding_into_title_7790)
 
-
-- capture screenshot memory dumps to filter out unused tiles/cluts
-  to save memory
+- capture screenshot memory dumps to filter out unused tiles/cluts/orientations
+  to save A LOT OF memory
 
 converter: lf address >= 0xFC00 consider as negative data
 converter: postproc: 	move.b	d0,(ax) and addq.w #1,ax => (ax)+

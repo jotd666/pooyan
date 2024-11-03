@@ -177,17 +177,23 @@ sprite_table = [None]*NB_SPRITES
 
 next_cache_id = 1
 
+plane_orientations = [("standard",lambda x:x),
+("flip",ImageOps.flip),
+("mirror",ImageOps.mirror),
+("flip_mirror",lambda x:ImageOps.flip(ImageOps.mirror(x)))]
+
+
 tile_table = []
 for n,tile_set in enumerate(tile_set_list):
     tile_entry = []
     for i,tile in enumerate(tile_set):
         entry = dict()
         if tile:
-            for x in range(2):
-                if x:
-                    tile = ImageOps.mirror(tile)
 
-                bitplane_data = bitplanelib.palette_image2raw(tile,None,full_palette)
+            for plane_name,plane_func in plane_orientations:
+                wtile = plane_func(tile)
+
+                bitplane_data = bitplanelib.palette_image2raw(wtile,None,full_palette)
 
                 plane_size = len(bitplane_data) // nb_planes
                 bitplane_plane_ids = []
@@ -205,7 +211,7 @@ for n,tile_set in enumerate(tile_set_list):
                             next_cache_id += 1
                         else:
                             bitplane_plane_ids.append(0)  # blank
-                entry["mirror_planes" if x else "planes"] = bitplane_plane_ids
+                entry[plane_name] = bitplane_plane_ids
 
         tile_entry.append(entry)
 
@@ -254,23 +260,20 @@ with open(os.path.join(src_dir,"graphics.68k"),"w") as f:
             for j,t in enumerate(tile_entry):
                 if t:
                     name = f"tile_{i:02x}_{j:02x}"
+
+
                     f.write(f"{name}:\n")
-                    for bitplane_id in t["planes"]:
-                        f.write("\t.long\t")
-                        if bitplane_id:
-                            f.write(f"tile_plane_{bitplane_id:02d}")
-                        else:
-                            f.write("0")
-                        f.write("\n")
-                    if "mirror_planes" in t:
-                        f.write("* mirror\n")
-                        for bitplane_id in t["mirror_planes"]:
-                            f.write("\t.long\t")
-                            if bitplane_id:
-                                f.write(f"tile_plane_{bitplane_id:02d}")
-                            else:
-                                f.write("0")
-                            f.write("\n")
+                    for orientation,_ in plane_orientations:
+                        if orientation in t:
+                            f.write("* {}\n".format(orientation))
+                            for bitplane_id in t[orientation]:
+                                f.write("\t.long\t")
+                                if bitplane_id:
+                                    f.write(f"tile_plane_{bitplane_id:02d}")
+                                else:
+                                    f.write("0")
+                                f.write("\n")
+
 
                     #dump_asm_bytes(t["bitmap"],f)
 
