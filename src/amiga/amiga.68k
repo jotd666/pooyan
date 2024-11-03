@@ -1442,12 +1442,12 @@ platform_init:
     move.w #0x200+(NB_PLAYFIELD_PLANES<<12),bplcon0(a5)
 
  	*         VVHH
-    move.w #0x1C81,diwstrt(a5)
-    move.w #0x0C81,diwstop(a5)
-	cmp.l	#NTSC_MONITOR_ID,monitor
-	jne		0f
-    move.w #0xFC81,diwstop(a5)
-0:	
+    move.w #0x1C99,diwstrt(a5)
+    move.w #0x1C79,diwstop(a5)
+*	cmp.l	#NTSC_MONITOR_ID,monitor
+*	jne		0f
+*    move.w #0xFC81,diwstop(a5)
+*0:	
     move.w #0x0038,ddfstrt(a5)
     move.w #0x00D0,ddfstop(a5)
 
@@ -1669,7 +1669,8 @@ update_bg_tile:
 	moveq	#0,d2	| mask up to 255
 	move.b	d0,d2
 	moveq	#0,d3
-	*move.b	d1,d3			| CLUT ignored for now
+	move.b	d1,d3			| CLUT
+	
 	bsr		compute_tile_xy
 	
 	lea		character_table,a0
@@ -1699,6 +1700,7 @@ update_bg_tile:
 12:
 	.endif
 	move.l	d0,a2
+	and.w	#0xF,d3
 	add.w	d3,d3
 	add.w	d3,d3
 	move.l	(a2,d3.w),d0			| pointer on tile bitplanes for that CLUT

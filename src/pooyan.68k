@@ -1857,7 +1857,8 @@ l_0ad1:
 	beq.b	0f                               	| [...]
 	rts                                    	| [$0ad8: ret  nz] [...]
 0:
-	move.b	#0x02,(a0)                      	| [$0ad9: ld   (hl),$02]
+	move.b	#0x02,d0                      	| [$0ad9: ld   (hl),$02]
+	jbsr	osd_w_videoram
 	LOAD_ROM_POINTER	rom_pointer_8e54(a6),a0             	| [$0adb: ld   hl,($8E54)]
 	move.b	(a0)+,d0                         	| [$0ade: ld   a,(hl)]
 	                           	| [$0adf: inc  hl]
@@ -1865,7 +1866,7 @@ l_0ad1:
 	
 	LOAD_RXM_POINTER	ram_or_rom_pointer_8e56(a6),a0             	| [$0ae3: ld   hl,($8E56)]
 
-	move.b	d0,(a0)                         	| [$0ae6: ld   (hl),a] write name of character to screen
+	jbsr	osd_w_videoram                         	| [$0ae6: ld   (hl),a] write name of character to screen
 	move.w	#-0x20,d3                          	| [$0ae7: ld   de,$FFE0] next char
 	add.w	d3,a0                            	| [$0aea: add  hl,de]
 	STORE_RXM_POINTER	a0,ram_or_rom_pointer_8e56(a6)            	| [$0aeb: ld   ($8E56),hl]

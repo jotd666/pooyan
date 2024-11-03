@@ -10,7 +10,7 @@ sprite_names = dict()
 NB_TILES = 256
 NB_SPRITES = 64
 
-dump_it = False
+dump_it = True
 dump_dir = os.path.join(this_dir,"dumps")
 
 if dump_it:
@@ -97,7 +97,12 @@ def change_color(img,color1,color2):
     return rval
 
 def add_sprite(index,name):
-    sprite_names[index] = name
+    if isinstance(index,range):
+        pass
+    elif not isinstance(index,list):
+        index = [index]
+    for idx in index:
+        sprite_names[idx] = name
 
 def add_sprite_range(start,end,name):
     for i in range(start,end):
@@ -106,72 +111,106 @@ def add_sprite_range(start,end,name):
 
 sprite_names = {}
 
-add_sprite(0,"rock")
+add_sprite(0,"small_rock")
 add_sprite(1,"upside_down_wolf")
-add_sprite_range(3,6,"pig_1")
-add_sprite(6,"falling_wolf")
+add_sprite([3,4,9],"piglet")
+add_sprite([6,0x1D,0xB],"falling_wolf")
 add_sprite(7,"basket_bottom")
-add_sprite_range(8,10,"pig_2")
-add_sprite(10,"basket_top")
+#add_sprite_range(8,10,"pig")
+add_sprite(0xA,"basket_top")
+add_sprite(0xF,"basket_bottom")
 add_sprite(0x10,"meat")
 add_sprite(0x3A,"points_1600")
+add_sprite([0x37,0x39],"points")
+
 
 add_sprite(0x11,"player_in_basket_top")
 add_sprite(0x1c,"strawberry")  # wrong CLUT
 add_sprite(0x12,"player_in_basket_bottom")
 add_sprite(0x14,"arrow")
-add_sprite(0x25,"player_in_basket_top_2")
-add_sprite(0x16,"player_in_basket_bottom_2")
+add_sprite(0x1b,"arrow")
+add_sprite(0x25,"player_in_basket_top")
+add_sprite(0x16,"player_in_basket_bottom")
 add_sprite_range(0x26,0x2A,"wolf")
 add_sprite_range(0x20,0x25,"baloon")  # 0: yellow
+add_sprite_range(0x3B,0x3F,"baloon")  # 0: yellow
+add_sprite(0x2,"baloon")
+add_sprite(0x2d,"baloon")
+add_sprite([0x17,0x18,0x13],"bow")
+add_sprite([0x30,0x3F,0x35,0x38],"rock")
+
+add_sprite_range(0x31,0x35,"burst")
+add_sprite([0xD,0x36,0x15,0x1E],"pig")
+
+
+add_sprite([0x19,0x1F,0x2a,0x2B],"wolf")
+add_sprite(range(0x2e,0x30),"ladder_wolf")
+add_sprite([0xe,0x1A,0xC,5,8],"falling_player")
+
 
 sprites_path = os.path.join(this_dir,os.path.pardir,"pooyan")
 
 
 sprite_sheet_dict = {i:Image.open(os.path.join(sprites_path,f"sprites_pal_{i:02x}.png")) for i in [0]}
-tile_sheet_dict = {i:Image.open(os.path.join(sprites_path,f"tiles_pal_{i:02x}.png")) for i in [0]}
+tile_sheet_dict = {i:Image.open(os.path.join(sprites_path,f"tiles_pal_{i:02x}.png")) for i in range(16)}
 
+tile_palette = set()
+tile_set_list = []
 
-tile_palette,tile_set = load_tileset(tile_sheet_dict[0],0,8,None,"tiles",dump_dir,dump=dump_it,name_dict=None)
+for i,tsd in tile_sheet_dict.items():
+    tp,tile_set = load_tileset(tsd,i,8,None,"tiles",dump_dir,dump=dump_it,name_dict=None)
+    tile_set_list.append(tile_set)
+    tile_palette.update(tp)
+
 sprite_palette,sprite_set = load_tileset(sprite_sheet_dict[0],0,16,None,"sprites",dump_dir,dump=dump_it,name_dict=sprite_names)
 
-full_palette = sorted(set(sprite_palette + tile_palette))
+full_palette = sorted(set(sprite_palette) | tile_palette)
 
 nb_planes = 5
 nb_colors = 1<<5
 
 full_palette += (nb_colors-len(full_palette)) * [(0x10,0x20,0x30)]
 
-tile_table = [None]*NB_TILES
 sprite_table = [None]*NB_SPRITES
 
 next_cache_id = 1
 
-for i,tile in enumerate(tile_set):
-    tile_entry = [None]*16
-    if tile:
-        bitplane_data = bitplanelib.palette_image2raw(tile,None,full_palette)
+tile_table = []
+for n,tile_set in enumerate(tile_set_list):
+    tile_entry = []
+    for i,tile in enumerate(tile_set):
+        if tile:
+            bitplane_data = bitplanelib.palette_image2raw(tile,None,full_palette)
 
-        plane_size = len(bitplane_data) // nb_planes
-        bitplane_plane_ids = []
-        for j in range(nb_planes):
-            offset = j*plane_size
-            bitplane = bitplane_data[offset:offset+plane_size]
+            plane_size = len(bitplane_data) // nb_planes
+            bitplane_plane_ids = []
+            for j in range(nb_planes):
+                offset = j*plane_size
+                bitplane = bitplane_data[offset:offset+plane_size]
 
-            cache_id = tile_plane_cache.get(bitplane)
-            if cache_id is not None:
-                bitplane_plane_ids.append(cache_id)
-            else:
-                if any(bitplane):
-                    tile_plane_cache[bitplane] = next_cache_id
-                    bitplane_plane_ids.append(next_cache_id)
-                    next_cache_id += 1
+                cache_id = tile_plane_cache.get(bitplane)
+                if cache_id is not None:
+                    bitplane_plane_ids.append(cache_id)
                 else:
-                    bitplane_plane_ids.append(0)  # blank
+                    if any(bitplane):
+                        tile_plane_cache[bitplane] = next_cache_id
+                        bitplane_plane_ids.append(next_cache_id)
+                        next_cache_id += 1
+                    else:
+                        bitplane_plane_ids.append(0)  # blank
 
-        tile_entry[0] = {"bitmap_planes":bitplane_plane_ids}
+        tile_entry.append({"bitmap_planes":bitplane_plane_ids})
 
-    tile_table[i] = tile_entry
+    tile_table.append(tile_entry)
+
+new_tile_table = [[[] for _ in range(16)] for _ in range(256)]
+
+# reorder/transpose. We have 16 * 256 we need 256 * 16
+for i,u in enumerate(tile_table):
+    for j,v in enumerate(u):
+        new_tile_table[j][i] = v
+
+tile_table = new_tile_table
 
 with open(os.path.join(src_dir,"palette.68k"),"w") as f:
     bitplanelib.palette_dump(full_palette,f,bitplanelib.PALETTE_FORMAT_ASMGNU)
@@ -181,6 +220,7 @@ with open(os.path.join(src_dir,"graphics.68k"),"w") as f:
     f.write("\t.global\tbob_table\n")
 
     f.write("character_table:\n")
+
     for i,tile_entry in enumerate(tile_table):
         f.write("\t.long\t")
         if tile_entry:
