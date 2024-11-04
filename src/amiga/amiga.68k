@@ -82,7 +82,7 @@ RESTORE_SCREEN_SIZE = RESTORE_SCREEN_PLANE_SIZE*NB_PLAYFIELD_PLANES
 SCREEN_SIZE = SCREEN_PLANE_SIZE*NB_PLAYFIELD_PLANES
 NB_HOST_SPRITES = 8
 
-NB_TARGET_SPRITES = 32
+NB_TARGET_SPRITES = 24
 
 SPRITE_X = 0
 SPRITE_Y = 1
@@ -846,7 +846,7 @@ update_bobs_and_hw_sprites:
 	* position hardware sprites *
 	*****************************
 	
-	lea		sprite_ram_9000,a0	
+	lea		sprite_ram_9000+0x10,a0	
 
 *    lea sprite_translation_table,A6
 *	lea		hw_sprite_table,a4
@@ -883,7 +883,7 @@ update_bobs_and_hw_sprites:
 	* erase previous BOBs *
 	***********************
 	
-	lea		sprite_ram_9000,a0	
+
 	move.l	bob_previous_drawed_sprites(pc),a4
 	lea		_custom,a5
 	
@@ -915,22 +915,17 @@ update_bobs_and_hw_sprites:
 	* draw current BOBs *
 	*********************
 
-  	lea		sprite_ram_9000,a0	
+  	lea		sprite_ram_9000+0x10,a0	
     lea _custom,A5
 	move.l	bob_previous_drawed_sprites(pc),a6
 	lea		bob_table,a4
-	| start by the end (drawing priority), except for last sprite
-	| which has top priority (strange hardware!)
-	add.w	#(NB_TARGET_SPRITES-1)*4,a0		| last sprite
-	move.l	a0,-(a7)
-	moveq	#NB_TARGET_SPRITES-2,d7
+	
+	moveq	#NB_TARGET_SPRITES-1,d7
 1:
-	subq.w	#4,a0
 	jbsr	update_one_bob
+	addq.w	#2,a0
 	dbf		d7,1b
-	move.l	(a7)+,a0
-	* last sprite
-	jbsr	update_one_bob
+
 	rts
 	
 	
