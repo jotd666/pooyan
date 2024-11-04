@@ -188,7 +188,7 @@ plane_orientations = [("standard",lambda x:x),
 ("mirror",ImageOps.mirror),
 ("flip_mirror",lambda x:ImageOps.flip(ImageOps.mirror(x)))]
 
-def read_tileset(img_set_list,img_set,palette):
+def read_tileset(img_set_list,img_set,palette,plane_orientation_flags):
     global next_cache_id
     tile_table = []
     for n,img_set in enumerate(img_set_list):
@@ -197,28 +197,29 @@ def read_tileset(img_set_list,img_set,palette):
             entry = dict()
             if tile:
 
-                for plane_name,plane_func in plane_orientations:
-                    wtile = plane_func(tile)
+                for b,(plane_name,plane_func) in zip(plane_orientation_flags,plane_orientations):
+                    if b:
+                        wtile = plane_func(tile)
 
-                    bitplane_data = bitplanelib.palette_image2raw(wtile,None,palette)
+                        bitplane_data = bitplanelib.palette_image2raw(wtile,None,palette)
 
-                    plane_size = len(bitplane_data) // nb_planes
-                    bitplane_plane_ids = []
-                    for j in range(nb_planes):
-                        offset = j*plane_size
-                        bitplane = bitplane_data[offset:offset+plane_size]
+                        plane_size = len(bitplane_data) // nb_planes
+                        bitplane_plane_ids = []
+                        for j in range(nb_planes):
+                            offset = j*plane_size
+                            bitplane = bitplane_data[offset:offset+plane_size]
 
-                        cache_id = tile_plane_cache.get(bitplane)
-                        if cache_id is not None:
-                            bitplane_plane_ids.append(cache_id)
-                        else:
-                            if any(bitplane):
-                                tile_plane_cache[bitplane] = next_cache_id
-                                bitplane_plane_ids.append(next_cache_id)
-                                next_cache_id += 1
+                            cache_id = tile_plane_cache.get(bitplane)
+                            if cache_id is not None:
+                                bitplane_plane_ids.append(cache_id)
                             else:
-                                bitplane_plane_ids.append(0)  # blank
-                    entry[plane_name] = bitplane_plane_ids
+                                if any(bitplane):
+                                    tile_plane_cache[bitplane] = next_cache_id
+                                    bitplane_plane_ids.append(next_cache_id)
+                                    next_cache_id += 1
+                                else:
+                                    bitplane_plane_ids.append(0)  # blank
+                        entry[plane_name] = bitplane_plane_ids
 
             tile_entry.append(entry)
 
@@ -233,8 +234,8 @@ def read_tileset(img_set_list,img_set,palette):
 
     return new_tile_table
 
-tile_table = read_tileset(tile_set_list,tile_set,full_palette)
-sprite_table = read_tileset(sprite_set_list,sprite_set,full_palette)
+tile_table = read_tileset(tile_set_list,tile_set,full_palette,[True,False,False,False])
+sprite_table = read_tileset(sprite_set_list,sprite_set,full_palette,[True,True,False,False])
 
 with open(os.path.join(src_dir,"palette.68k"),"w") as f:
     bitplanelib.palette_dump(full_palette,f,bitplanelib.PALETTE_FORMAT_ASMGNU)
@@ -271,11 +272,10 @@ with open(os.path.join(src_dir,"graphics.68k"),"w") as f:
                 if t:
                     name = f"tile_{i:02x}_{j:02x}"
 
-
                     f.write(f"{name}:\n")
                     for orientation,_ in plane_orientations:
+                        f.write("* {}\n".format(orientation))
                         if orientation in t:
-                            f.write("* {}\n".format(orientation))
                             for bitplane_id in t[orientation]:
                                 f.write("\t.long\t")
                                 if bitplane_id:
@@ -283,6 +283,12 @@ with open(os.path.join(src_dir,"graphics.68k"),"w") as f:
                                 else:
                                     f.write("0")
                                 f.write("\n")
+                            if len(t)==1:
+                                # optim: only standard
+                                break
+                        else:
+                            for _ in range(nb_planes):
+                                f.write("\t.long\t0\n")
 
 
                     #dump_asm_bytes(t["bitmap"],f)

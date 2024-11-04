@@ -936,6 +936,7 @@ update_bobs_and_hw_sprites:
 	
 	
 update_one_bob:
+	
 	* code = 0 and clut = 0 => disabled ?? to check
 	moveq	#0,d2
 	move.b	(TARGET_SPRITE_CODE,a0),d2
@@ -1553,7 +1554,7 @@ osd_interrupt_control:
 
 osd_w_colorram:
     .ifeq OPT_DISABLE_BG_LAYER
-	movem.l	d0-d7/a0-a3,-(a7)
+	movem.l	d0-d7/a0-a4,-(a7)
 	move.l	a0,d7		| save address
 	sub.l	a6,d7
 	jcs		0f
@@ -1584,7 +1585,7 @@ osd_w_colorram:
 	jbsr	update_bg_tile
 
 0:
-	movem.l	(a7)+,d0-d7/a0-a3
+	movem.l	(a7)+,d0-d7/a0-a4
     .endif | OPT_DISABLE_BG_LAYER
 	rts	
 	
@@ -1594,7 +1595,7 @@ osd_w_colorram:
 
 osd_w_videoram:
     .ifeq OPT_DISABLE_BG_LAYER
-	movem.l	d0-d7/a0-a3,-(a7)
+	movem.l	d0-d7/a0-a4,-(a7)
 	move.l	a0,d7		| save address
 	sub.l	a6,d7
 	jcs		0f
@@ -1624,7 +1625,7 @@ osd_w_videoram:
 	jbsr	update_bg_tile
 
 0:
-	movem.l	(a7)+,d0-d7/a0-a3
+	movem.l	(a7)+,d0-d7/a0-a4
     .endif | OPT_DISABLE_BG_LAYER
 	rts
 
@@ -1712,16 +1713,20 @@ update_bg_tile:
 	move.l	(a2,d3.w),d0			| pointer on tile bitplanes for that CLUT
 	jeq		11f						| not necessarily a problem
 
+	move.l	d0,a2					| pointer on bitplanes
 	rol.b	#2,d1			| modifiers on first bits
 	and.w	#3,d1
-	jeq		13f
-	add.w	d1,d1
-	add.w	d1,d1
-	lea		mirror_flip_table(pc),a2
-	add.l	(a2,d1.w),d0	
-13:
+	jeq		standard_tile
+	
 
-	move.l	d0,a2					| pointer on bitplanes
+	add.w	d1,d1
+	add.w	d1,d1
+	lea		mirror_jump_table(pc),a4
+	move.l	(a4,d1.w),a4
+	jmp		(a4)
+	
+standard_tile:
+
 	* just copy
 
 4:
@@ -1750,7 +1755,97 @@ update_bg_tile:
 	.set	offset,offset+NB_BYTES_PER_ROW
 	.endr
 	jra		41b
+
+flipped_tile:	
+4:
+	move.l	(a2)+,d0		| next plane
+	jeq		5f
+	move.l	d0,a0
+	.set	offset,8*NB_BYTES_PER_ROW
+	.rept	8
+	.set	offset,offset-NB_BYTES_PER_ROW
+	move.b	(a0)+,d0
+	move.b	d0,(offset,a1)  | buffer
+	move.b	d0,(offset,a3)  | backbuffer
+
+	.endr
+41:
+	add.l	d5,a1
+	add.l	d5,a3
+	dbf		d4,4b
+0:
+	rts
+5:
+	.set	offset,0
+	.rept	8
+	clr.b	(offset,a1)
+	clr.b	(offset,a3)
+	.set	offset,offset+NB_BYTES_PER_ROW
+	.endr
+	jra		41b
 	
+mirror_tile:
+	lea		mirror_bits(pc),a4
+	moveq	#0,d1
+4:
+	move.l	(a2)+,d0		| next plane
+	jeq		5f
+	move.l	d0,a0
+	.set	offset,0
+	.rept	8
+	move.b	(a0)+,d1
+	move.b	(a4,d1.w),d0	| mirror
+	move.b	d0,(offset,a1)  | buffer
+	move.b	d0,(offset,a3)  | backbuffer
+
+	.set	offset,offset+NB_BYTES_PER_ROW
+	.endr
+41:
+	add.l	d5,a1
+	add.l	d5,a3
+	dbf		d4,4b
+0:
+	rts
+5:
+	.set	offset,0
+	.rept	8
+	clr.b	(offset,a1)
+	clr.b	(offset,a3)
+	.set	offset,offset+NB_BYTES_PER_ROW
+	.endr
+	jra		41b
+	
+mirror_flipped_tile:
+	lea		mirror_bits(pc),a4
+	moveq	#0,d1
+4:
+	move.l	(a2)+,d0		| next plane
+	jeq		5f
+	move.l	d0,a0
+	.set	offset,8*NB_BYTES_PER_ROW
+	.rept	8
+	.set	offset,offset-NB_BYTES_PER_ROW
+	move.b	(a0)+,d1
+	move.b	(a4,d1.w),d0	| mirror
+	move.b	d0,(offset,a1)  | buffer
+	move.b	d0,(offset,a3)  | backbuffer
+
+	.endr
+41:
+	add.l	d5,a1
+	add.l	d5,a3
+	dbf		d4,4b
+0:
+	rts
+5:
+	.set	offset,0
+	.rept	8
+	clr.b	(offset,a1)
+	clr.b	(offset,a3)
+	.set	offset,offset+NB_BYTES_PER_ROW
+	.endr
+	jra		41b
+
 	* clear tile
 
 11:
@@ -1767,12 +1862,15 @@ update_bg_tile:
 2:
 	rts
 	
-mirror_flip_table:
-	.long	0	
-	.long	NB_PLAYFIELD_PLANES*4
-	.long	NB_PLAYFIELD_PLANES*8	
-	.long	NB_PLAYFIELD_PLANES*12
+mirror_jump_table:
+	.long	standard_tile
+
+	.long	flipped_tile
+	.long	mirror_tile
+	.long	mirror_flipped_tile
 	
+mirror_bits:
+	.include "mirror_bits.68k"
 	
 * < d0.w: x
 * < d1.w: y
