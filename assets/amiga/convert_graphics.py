@@ -81,8 +81,7 @@ def load_tileset(image_name,palette_index,side,used_tiles,tileset_name,dumpdir,d
     return sorted(set(palette)),tileset_1
 
 
-tile_plane_cache = dict()
-sprite_plane_cache = dict()
+
 
 def paint_black(img,coords):
     for x,y in coords:
@@ -181,15 +180,15 @@ full_palette += (nb_colors-len(full_palette)) * [(0x10,0x20,0x30)]
 
 sprite_table = [None]*NB_SPRITES
 
-next_cache_id = 1
+
 
 plane_orientations = [("standard",lambda x:x),
 ("flip",ImageOps.flip),
 ("mirror",ImageOps.mirror),
 ("flip_mirror",lambda x:ImageOps.flip(ImageOps.mirror(x)))]
 
-def read_tileset(img_set_list,img_set,palette,plane_orientation_flags):
-    global next_cache_id
+def read_tileset(img_set_list,img_set,palette,plane_orientation_flags,cache,is_bob):
+    next_cache_id = 1
     tile_table = []
     for n,img_set in enumerate(img_set_list):
         tile_entry = []
@@ -199,22 +198,26 @@ def read_tileset(img_set_list,img_set,palette,plane_orientation_flags):
 
                 for b,(plane_name,plane_func) in zip(plane_orientation_flags,plane_orientations):
                     if b:
+                        actual_nb_planes = nb_planes
                         wtile = plane_func(tile)
+                        if is_bob:
+                            actual_nb_planes += 1
+                            bitplane_data = bitplanelib.palette_image2raw(wtile,None,palette,generate_mask=True,blit_pad=True)
+                        else:
+                            bitplane_data = bitplanelib.palette_image2raw(wtile,None,palette)
 
-                        bitplane_data = bitplanelib.palette_image2raw(wtile,None,palette)
-
-                        plane_size = len(bitplane_data) // nb_planes
+                        plane_size = len(bitplane_data) // actual_nb_planes
                         bitplane_plane_ids = []
-                        for j in range(nb_planes):
+                        for j in range(actual_nb_planes):
                             offset = j*plane_size
                             bitplane = bitplane_data[offset:offset+plane_size]
 
-                            cache_id = tile_plane_cache.get(bitplane)
+                            cache_id = cache.get(bitplane)
                             if cache_id is not None:
                                 bitplane_plane_ids.append(cache_id)
                             else:
                                 if any(bitplane):
-                                    tile_plane_cache[bitplane] = next_cache_id
+                                    cache[bitplane] = next_cache_id
                                     bitplane_plane_ids.append(next_cache_id)
                                     next_cache_id += 1
                                 else:
@@ -225,7 +228,7 @@ def read_tileset(img_set_list,img_set,palette,plane_orientation_flags):
 
         tile_table.append(tile_entry)
 
-    new_tile_table = [[[] for _ in range(16)] for _ in range(256)]
+    new_tile_table = [[[] for _ in range(16)] for _ in range(len(tile_table[0]))]
 
     # reorder/transpose. We have 16 * 256 we need 256 * 16
     for i,u in enumerate(tile_table):
@@ -234,8 +237,11 @@ def read_tileset(img_set_list,img_set,palette,plane_orientation_flags):
 
     return new_tile_table
 
-tile_table = read_tileset(tile_set_list,tile_set,full_palette,[True,False,False,False])
-sprite_table = read_tileset(sprite_set_list,sprite_set,full_palette,[True,True,False,False])
+tile_plane_cache = {}
+tile_table = read_tileset(tile_set_list,tile_set,full_palette,[True,False,False,False],cache=tile_plane_cache, is_bob=False)
+
+bob_plane_cache = {}
+sprite_table = read_tileset(sprite_set_list,sprite_set,full_palette,[True,True,False,False],cache=bob_plane_cache, is_bob=True)
 
 with open(os.path.join(src_dir,"palette.68k"),"w") as f:
     bitplanelib.palette_dump(full_palette,f,bitplanelib.PALETTE_FORMAT_ASMGNU)
@@ -298,4 +304,58 @@ with open(os.path.join(src_dir,"graphics.68k"),"w") as f:
         dump_asm_bytes(k,f)
 
     f.write("bob_table:\n")
+    for i,tile_entry in enumerate(sprite_table):
+        f.write("\t.long\t")
+        if tile_entry:
+            f.write(f"bob_{i:02x}")
+        else:
+            f.write("0")
+        f.write("\n")
+
+    for i,tile_entry in enumerate(sprite_table):
+        if tile_entry:
+            f.write(f"bob_{i:02x}:\n")
+            for j,t in enumerate(tile_entry):
+                f.write("\t.long\t")
+                if t:
+                    f.write(f"bob_{i:02x}_{j:02x}")
+                else:
+                    f.write("0")
+                f.write("\n")
+
+
+    for i,tile_entry in enumerate(sprite_table):
+        if tile_entry:
+            for j,t in enumerate(tile_entry):
+                if t:
+                    name = f"bob_{i:02x}_{j:02x}"
+
+                    f.write(f"{name}:\n")
+                    # TODO: adjust
+                    height = 16
+                    width = 4
+                    offset = 0
+                    f.write(f"\t.word\t{height},{width},{offset}\n")
+                    for orientation,_ in plane_orientations:
+                        f.write("* {}\n".format(orientation))
+                        if orientation in t:
+                            for bitplane_id in t[orientation]:
+                                f.write("\t.long\t")
+                                if bitplane_id:
+                                    f.write(f"bob_plane_{bitplane_id:02d}")
+                                else:
+                                    f.write("0")
+                                f.write("\n")
+                            if len(t)==1:
+                                # optim: only standard
+                                break
+                        else:
+                            for _ in range(nb_planes):
+                                f.write("\t.long\t0\n")
+
+    f.write("\t.section\t.datachip\n")
+
+    for k,v in bob_plane_cache.items():
+        f.write(f"bob_plane_{v:02d}:")
+        dump_asm_bytes(k,f)
 

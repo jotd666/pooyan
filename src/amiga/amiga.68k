@@ -40,11 +40,10 @@ SCREEN_COLOR_ADDRESS = 0x8000
 * RAMs have 4 bytes per sprite, only the order
 * and some bits differ
 
-TARGET_SPRITE_Y = 1
-TARGET_SPRITE_X = 0
-TARGET_SPRITE_ATTRIBUTES = 2
-TARGET_SPRITE_CODE = 3
-ACTIVE_BITPLANE_MASK = 4   | for optimized bitplane erase
+TARGET_SPRITE_Y = 0
+TARGET_SPRITE_X = 0x401
+TARGET_SPRITE_ATTRIBUTES = 0x400
+TARGET_SPRITE_CODE = 1
 
 
 	.ifdef	RELEASE
@@ -841,7 +840,7 @@ blit_background:
 
 really_update_sprites:
 update_bobs_and_hw_sprites:
-	rts
+
 	
 	*****************************
 	* position hardware sprites *
@@ -937,85 +936,24 @@ update_bobs_and_hw_sprites:
 	
 update_one_bob:
 	
+*		int const sx = m_spriteram[0][offs];
+*		int const sy = 240 - m_spriteram[1][offs + 1];
+*
+*		int const code = m_spriteram[0][offs + 1];
+*		int const color = m_spriteram[1][offs] & 0x0f;
+*		int const flipx = ~m_spriteram[1][offs] & 0x40;
+*		int const flipy = m_spriteram[1][offs] & 0x80;
+
 	* code = 0 and clut = 0 => disabled ?? to check
-	moveq	#0,d2
-	move.b	(TARGET_SPRITE_CODE,a0),d2
-	jeq	2f
-	*lea		sprite_translation_table,a3
-	add.w	d2,d2
-	add.w	d2,d2
-	btst    #2,(TARGET_SPRITE_ATTRIBUTES,a0)
-	jeq		0f
-	addq	#2,d2
-0:
-	move.b	(a3,d2.w),d4
-	cmp.b	#1,d4
-	jeq	2f				| HW sprite: skip
-	cmp.b	#3,d4
-	jeq	2f				| ignore
-	.ifndef	RELEASE
-	cmp.b	#2,d4
-	jeq	0f				| BOB sprite: OK
-	lsr.w	#2,d2
-	move.w	#0xFF0,0xDFF180
-	jra		2f
-0:
-	.endif
-	* get the actual sprite index for our engine
-	move.b	(1,a3,d2.w),d2
-	and.w	#0xFF,d2
-	
-*	btst	#2,(TARGET_SPRITE_ATTRIBUTES,a0)
-*	jeq	22f
-	* select alternate color, I simplified the whole
-	* clut/palette thing because there are really only
-	* 1 or 2 possible colors, maybe 3 but only for enemies
-	* when lights are shot!
-*	add.w	#0x40,d2
-22:
-*int color = 2 * ((m_colorbank[1] >> 4) & 0x03) + ((m_spriteram[offs + 2] >> 2) & 0x01);
-*int flip_x = m_spriteram[offs + 2] & 0x01;
-*int flip_y = m_spriteram[ offs + 2] & 0x02;
-
-* alt color:  #2,(TARGET_SPRITE_ATTRIBUTES,a0)
-* flipy:  #1,(TARGET_SPRITE_ATTRIBUTES,a0)
-*	btst.b	#1,(TARGET_SPRITE_ATTRIBUTES,a0)
-*	beq.b	0f
-*0:
-	add.w	d2,d2
-	add.w	d2,d2
-	move.l	(a4,d2.w),d4	| test pointer
-	jmi		2f			| legal but skipped
-	bne.b	11f
-	.ifndef	RELEASE
-	* not known/registered: we should log that!
-	move.w	#0xF00,0xDFF180
-	moveq	#0,d2
-	move.b	(TARGET_SPRITE_CODE,a0),d2
-	cmp.b	#3,d2		| some fake wall sprite in an obscure sprite sheet
-	jeq		2f
-	move.l	a0,-(a7)
-  	lea		sprite_ram_9000,a0	
-	move.b	(TARGET_SPRITE_ATTRIBUTES,a0),d3
-	move.w	#0xF00,0xDFF180
-	move.l	(a7)+,a0
-	.endif
-	jra	2f
-11:
-	move.b  (TARGET_SPRITE_ATTRIBUTES,a0),d3
-	btst	#0,d3
-	jeq		0f
-	add.w	#(NB_PLAYFIELD_PLANES+1)*4+6,d4
-0:
-
-	
 	moveq	#0,d0
+	move.b	(TARGET_SPRITE_X,a0),d0
+	jeq	2f
+	
 	moveq	#0,d1
 	move.b	(TARGET_SPRITE_Y,a0),d1  | sprite Y
 	beq.b	2f			| Y set to 0: not shown
 	
 
-	move.b	(TARGET_SPRITE_X,a0),d0  | sprite X
 	.ifne	SPRITE_Y_CORRECTION
 	* D1 can be > 0xFF with scolling offset! add must be WORD
 	add.w	#SPRITE_Y_CORRECTION,d1
@@ -1024,6 +962,15 @@ update_one_bob:
 	add.w	#SPRITE_X_CORRECTION,d0
 	.endif
 
+	lea		bob_table,a0
+	moveq	#0,d2
+	move.b	(TARGET_SPRITE_CODE,a0),d2
+	add.w	d2,d2
+	add.w	d2,d2
+	move.l	(a0,d2.w),a1
+	
+	* TEMP CLUT = 0
+	move.l	(a1),d4
 	
 	move.l	a0,-(a7)
 	move.l	d4,a0
@@ -1047,7 +994,7 @@ update_one_bob:
 	move.w	d5,(a6)+			| store width in bytes
 	move.w	d5,d2			| width in bytes, 4 for 16 pixels+shift
 	moveq	#0,d5			| Y-offset
-	moveq	#NB_PLAYFIELD_PLANES,d3		| 4 planes
+	moveq	#NB_PLAYFIELD_PLANES,d3		| 5 planes
 	bsr		blit_planes_any_internal_cookie_cut
 	move.l	(a7)+,a0
 	rts

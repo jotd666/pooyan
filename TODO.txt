@@ -14,7 +14,7 @@ break on all jump table entrypoints, figure them all out
 
 - implement sprites
 
-- capture screenshot memory dumps to filter out unused tiles/cluts/orientations
+- capture screenshot memory dumps to filter out unused tiles/cluts
   to save A LOT OF memory
 
 converter: lf address >= 0xFC00 consider as negative data

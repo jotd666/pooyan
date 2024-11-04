@@ -83,17 +83,9 @@ no_sync_flag:
 	.byte 	0
 break_at_startup_flag:
 	.byte	0
-sound_latch_D50B:
-	.byte	0
-colorbank_D506:
-	.byte	0
-colorbank_D507:
-	.byte	0
-video_mode_d600:
-	.byte	0
+
 * maybe sound-related?? maybe useless
-bank_switch_d50e:
-	.byte	0
+
 start_level:
 	.byte	0
 	.ascii	"RAM_END!"
