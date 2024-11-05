@@ -834,6 +834,7 @@ blit_background:
 * < A0: target sprite pointer
 
 
+	.include	"sprites.s"
 	
 * drawing order is a bit strange. The last sprite has to be moved at the start of the list.
 * if ((which >= 0x10) && (which <= 0x17)) no sprites!
@@ -847,7 +848,6 @@ update_bobs_and_hw_sprites:
 	*****************************
 	
 	lea		sprite_ram_9000+0x10,a0	
-
 *    lea sprite_translation_table,A6
 *	lea		hw_sprite_table,a4
 *	lea	HW_SpriteYTable_16(pc),a1
@@ -916,6 +916,7 @@ update_bobs_and_hw_sprites:
 	*********************
 
   	lea		sprite_ram_9000+0x10,a0	
+	*lea		mockup_sprites+0x10,a0
     lea _custom,A5
 	move.l	bob_previous_drawed_sprites(pc),a6
 	lea		bob_table,a4
@@ -956,17 +957,20 @@ update_one_bob:
 	.ifne	SPRITE_X_CORRECTION
 	add.w	#SPRITE_X_CORRECTION,d0
 	.endif
-
-	lea		bob_table,a0
+	
 	moveq	#0,d2
 	move.b	(TARGET_SPRITE_CODE,a0),d2
+	and.w	#0x3F,d2
 	add.w	d2,d2
 	add.w	d2,d2
-	move.l	(a0,d2.w),a1
+	move.l	(a4,d2.w),a1		| get pointer from bob table
 	
 	* TEMP CLUT = 0
 	move.l	(a1),d4
-	
+	jne		100f
+	* CLUT not available
+	jbsr	osd_break
+100:
 	move.l	a0,-(a7)
 	move.l	d4,a0
 	move.w	(a0)+,d4		| height
@@ -990,6 +994,7 @@ update_one_bob:
 	move.w	d5,d2			| width in bytes, 4 for 16 pixels+shift
 	moveq	#0,d5			| Y-offset
 	moveq	#NB_PLAYFIELD_PLANES,d3		| 5 planes
+
 	bsr		blit_planes_any_internal_cookie_cut
 	move.l	(a7)+,a0
 	rts
