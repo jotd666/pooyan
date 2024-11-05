@@ -768,6 +768,7 @@ lose_all_lives:
 * what: blits data on bg plane, no horizontal shifting (erase)
 * args:
 * < A0: pristine background
+* < A1: dest buffer
 * < D0: X (rounded to smaller 8-multiple)
 * < D1: Y
 * < D2: width in bytes
@@ -778,7 +779,6 @@ lose_all_lives:
 blit_background:
 	movem.l	d2-d6/a0-a5,-(a7)
 	lea		_custom,a5
-	move.l	playfield_drawed_screen_ptr(pc),a1
 	* adjust offset X: X//8
 	lsr.w	#3,d0
 	lea		mulNB_BYTES_PER_ROW_table(pc),a4
@@ -887,10 +887,10 @@ update_bobs_and_hw_sprites:
 	move.l	bob_previous_drawed_sprites(pc),a4
 	lea		_custom,a5
 	
-	* MAME driver notes that some sprite positions (0x10->0x17)
-	* aren't used, but this is not very clear. I'm updating everything
-	* no matter what...
+
 	* clear previous positions
+	lea	background_restore_buffer,a0
+	move.l	playfield_drawed_screen_ptr(pc),a1
 	move.w	#NB_TARGET_SPRITES-1,d7
 1:
 	move.w	(2,a4),d1
@@ -898,8 +898,6 @@ update_bobs_and_hw_sprites:
 	move.w	(a4),d0
 	and.w	#0x1F0,d0		| align on 16 lower bound
 	* clear area where the sprite was
-	lea	background_restore_buffer,a0
-	moveq	#NB_PLAYFIELD_PLANES,d3
 	clr.l	(a4)+			| ack deletion
 	move.w	(a4),d4			| height
 	move.w	(2,a4),d2		| width
@@ -965,12 +963,26 @@ update_one_bob:
 	add.w	d2,d2
 	move.l	(a4,d2.w),a1		| get pointer from bob table
 	
-	* TEMP CLUT = 0
-	move.l	(a1),d4
+	move.b	(TARGET_SPRITE_ATTRIBUTES,a0),d2
+	and.b	#0xF,d2		| CLUT
+	add.w	d2,d2
+	add.w	d2,d2
+	move.l	(a1,d2.w),d4
+	.ifdef	RELEASE
+	jeq		2f
+	.else
 	jne		100f
-	* CLUT not available
+	* CLUT not available, break & temp fix use color 0 mostly present
+	move.l	(a1),(a1,d2.w)
+	move.b	(TARGET_SPRITE_CODE,a0),d1
+	lsr.b	#2,d2
+	lea		unregistered_sprite_clut_error(pc),a0
 	jbsr	osd_break
+	move.l	(a1),d4
+	jeq		2f			| just in case fallback not working
 100:
+	.endif
+	
 	move.l	a0,-(a7)
 	move.l	d4,a0
 	move.w	(a0)+,d4		| height
@@ -1631,13 +1643,13 @@ update_bg_tile:
 	move.w	#NB_PLAYFIELD_PLANES-1,d4
 	move.l	playfield_drawed_screen_ptr,a1
 	lea		background_restore_buffer,a3
-	add.w	d0,a1
+
 	lea		mulNB_BYTES_PER_ROW_table,A2
 	add.w	d1,d1
 	move.w	(a2,d1.w),d1
-	add.w	d1,a1
-	add.w	d1,a3
-	
+	add.w	d1,d0
+	add.w	d0,a1
+	add.w	d0,a3
 	
 	add.w	d2,d2
 	add.w	d2,d2	
@@ -2196,6 +2208,8 @@ write_videoram_out_of_range_error:
 	.asciz	"write videoram out of range (D7)"
 write_colorram_out_of_range_error:
 	.asciz	"write colorram out of range (D7)"
+unregistered_sprite_clut_error:
+	.asciz	"unregistered sprite clut (D1=code, D2=clut)"
 game_tile_not_registered_error:
 	.asciz	"game tile (in D2) not registered"
 	

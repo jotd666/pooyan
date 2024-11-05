@@ -31,7 +31,7 @@ def ensure_empty(d):
     else:
         os.makedirs(d)
 
-def load_tileset(image_name,palette_index,side,used_tiles,tileset_name,dumpdir,dump=False,name_dict=None):
+def load_tileset(image_name,palette_index,side,tileset_name,dumpdir,dump=False,name_dict=None,cluts=None):
 
     if isinstance(image_name,str):
         full_image_path = os.path.join(this_dir,os.path.pardir,"pooyan",
@@ -55,7 +55,8 @@ def load_tileset(image_name,palette_index,side,used_tiles,tileset_name,dumpdir,d
 
     for j in range(nb_rows):
         for i in range(nb_cols):
-            if used_tiles and tile_number not in used_tiles:
+
+            if cluts and palette_index not in cluts[tile_number]:
                 tileset_1.append(None)
             else:
 
@@ -97,69 +98,75 @@ def change_color(img,color1,color2):
             rval.putpixel((x,y),p)
     return rval
 
-def add_sprite(index,name):
+def add_sprite(index,name,cluts=[0]):
     if isinstance(index,range):
         pass
-    elif not isinstance(index,list):
+    elif not isinstance(index,(list,tuple)):
         index = [index]
     for idx in index:
         sprite_names[idx] = name
+        sprite_cluts[idx] = cluts
 
-def add_sprite_range(start,end,name):
-    for i in range(start,end):
-        sprite_names[i] = name
 
 
 sprite_names = {}
+sprite_cluts = [[] for _ in range(64)]
+
+
+baloon_cluts = [0,1,9,4,0xC,0xF]
+wolf_cluts = [0,4]
 
 add_sprite(0,"small_rock")
-add_sprite(1,"upside_down_wolf")
-add_sprite([3,4,9],"piglet")
-add_sprite([6,0x1D,0xB],"falling_wolf")
+add_sprite(1,"upside_down_wolf",wolf_cluts)
+add_sprite([3,4,9],"pooyan")
+add_sprite([6,0x1D,0xB],"falling_wolf",wolf_cluts)
 add_sprite(7,"basket_bottom")
 #add_sprite_range(8,10,"pig")
 add_sprite(0xA,"basket_top")
 add_sprite(0xF,"basket_bottom")
 add_sprite(0x10,"meat")
-add_sprite(0x3A,"points_1600")
-add_sprite([0x37,0x39],"points")
+add_sprite(0x3A,"points")           # 1600
+add_sprite(0x37,"points",[8,2,3])  # 100, 200, 50
+add_sprite(0x39,"points",[3,2])  # 400, 800
+
 
 
 add_sprite(0x11,"player_in_basket_top")
-add_sprite(0x1c,"strawberry")  # wrong CLUT
+add_sprite(0x1c,"fruit",[6,7]) # strawberry or apple!
 add_sprite(0x12,"player_in_basket_bottom")
-add_sprite(0x14,"arrow")
-add_sprite(0x1b,"arrow")
+add_sprite([0x14,0x1B],"arrow")
+
 add_sprite(0x25,"player_in_basket_top")
 add_sprite(0x16,"player_in_basket_bottom")
-add_sprite_range(0x26,0x2A,"wolf")
-add_sprite_range(0x20,0x25,"baloon")  # 0: yellow
-add_sprite_range(0x3B,0x3F,"baloon")  # 0: yellow
-add_sprite(0x2,"baloon")
-add_sprite(0x2d,"baloon")
+add_sprite(range(0x26,0x2A),"wolf",wolf_cluts)
+add_sprite(range(0x20,0x25),"baloon",baloon_cluts)  # 0: yellow
+add_sprite(range(0x3B,0x3F),"baloon",baloon_cluts)  # 0: yellow
+add_sprite([0x2,0x2d],"baloon",baloon_cluts)
+
 add_sprite([0x17,0x18,0x13],"bow")
 add_sprite([0x30,0x3F,0x35,0x38],"rock")
 
-add_sprite_range(0x31,0x35,"burst")
-add_sprite([0xD,0x36,0x15,0x1E],"pig")
+add_sprite(range(0x31,0x35),"burst",[0,1,4,7,9])
+add_sprite([0x15,0x1E],"mama")
+add_sprite([0xD,0x36],"buuyan",[5])
 
 
-add_sprite([0x19,0x1F,0x2a,0x2B],"wolf")
-add_sprite(range(0x2e,0x30),"ladder_wolf")
+add_sprite([0x19,0x1F,0x2a,0x2B],"wolf",wolf_cluts)
+add_sprite(range(0x2e,0x30),"ladder_wolf",[0])
 add_sprite([0xe,0x1A,0xC,5,8],"falling_player")
 
 
 sprites_path = os.path.join(this_dir,os.path.pardir,"pooyan")
 
 
-sprite_sheet_dict = {i:Image.open(os.path.join(sprites_path,f"sprites_pal_{i:02x}.png")) for i in [0]}
+sprite_sheet_dict = {i:Image.open(os.path.join(sprites_path,f"sprites_pal_{i:02x}.png")) for i in range(16)}
 tile_sheet_dict = {i:Image.open(os.path.join(sprites_path,f"tiles_pal_{i:02x}.png")) for i in range(16)}
 
 tile_palette = set()
 tile_set_list = []
 
 for i,tsd in tile_sheet_dict.items():
-    tp,tile_set = load_tileset(tsd,i,8,None,"tiles",dump_dir,dump=dump_it,name_dict=None)
+    tp,tile_set = load_tileset(tsd,i,8,"tiles",dump_dir,dump=dump_it,name_dict=None)
     tile_set_list.append(tile_set)
     tile_palette.update(tp)
 
@@ -167,7 +174,8 @@ sprite_palette = set()
 sprite_set_list = []
 
 for i,tsd in sprite_sheet_dict.items():
-    sp,sprite_set = load_tileset(tsd,i,16,None,"sprites",dump_dir,dump=dump_it,name_dict=sprite_names)
+    cluts = sprite_cluts
+    sp,sprite_set = load_tileset(tsd,i,16,"sprites",dump_dir,dump=dump_it,name_dict=sprite_names,cluts=cluts)
     sprite_set_list.append(sprite_set)
     sprite_palette.update(sp)
 
@@ -307,18 +315,20 @@ with open(os.path.join(src_dir,"graphics.68k"),"w") as f:
     for i,tile_entry in enumerate(sprite_table):
         f.write("\t.long\t")
         if tile_entry:
-            f.write(f"bob_{i:02x}")
+            prefix = sprite_names.get(i,"bob")
+            f.write(f"{prefix}_{i:02x}")
         else:
             f.write("0")
         f.write("\n")
 
     for i,tile_entry in enumerate(sprite_table):
         if tile_entry:
-            f.write(f"bob_{i:02x}:\n")
+            prefix = sprite_names.get(i,"bob")
+            f.write(f"{prefix}_{i:02x}:\n")
             for j,t in enumerate(tile_entry):
                 f.write("\t.long\t")
                 if t:
-                    f.write(f"bob_{i:02x}_{j:02x}")
+                    f.write(f"{prefix}_{i:02x}_{j:02x}")
                 else:
                     f.write("0")
                 f.write("\n")
@@ -326,9 +336,10 @@ with open(os.path.join(src_dir,"graphics.68k"),"w") as f:
 
     for i,tile_entry in enumerate(sprite_table):
         if tile_entry:
+            prefix = sprite_names.get(i,"bob")
             for j,t in enumerate(tile_entry):
                 if t:
-                    name = f"bob_{i:02x}_{j:02x}"
+                    name = f"{prefix}_{i:02x}_{j:02x}"
 
                     f.write(f"{name}:\n")
                     # TODO: adjust
