@@ -11,8 +11,10 @@ break on all jump table entrypoints, figure them all out
 
 8810: when is it set?
 
-
-- hearts not displaying in highscores
+- init_intro_pigs_755d called spuriously at character screen
+- after character screen, game locks up
+- w_videoram with 8E00: no trap, writes bullshit
+- double buffering
 - capture screenshot memory dumps to filter out unused tiles/cluts
   to save A LOT OF memory
 

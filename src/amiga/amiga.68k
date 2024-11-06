@@ -949,7 +949,6 @@ update_one_bob:
 	
 
 	.ifne	SPRITE_Y_CORRECTION
-	* D1 can be > 0xFF with scolling offset! add must be WORD
 	add.w	#SPRITE_Y_CORRECTION,d1
 	.endif
 	.ifne	SPRITE_X_CORRECTION
@@ -964,6 +963,7 @@ update_one_bob:
 	move.l	(a4,d2.w),a1		| get pointer from bob table
 	
 	move.b	(TARGET_SPRITE_ATTRIBUTES,a0),d2
+	move.b	d2,d3
 	and.b	#0xF,d2		| CLUT
 	add.w	d2,d2
 	add.w	d2,d2
@@ -982,9 +982,13 @@ update_one_bob:
 	jeq		2f			| just in case fallback not working
 100:
 	.endif
-	
 	move.l	a0,-(a7)
 	move.l	d4,a0
+	btst	#7,d3
+	jeq		101f
+	* mirror
+	add.w	#((NB_PLAYFIELD_PLANES+1)*4+6)*2,a0
+101:
 	move.w	(a0)+,d4		| height
 	move.w	(a0)+,d5		| width
 	add.w	(a0)+,d1		| add offset to Y
@@ -1627,7 +1631,6 @@ compute_tile_xy:
 * < D1: color code
 
 update_bg_tile:
-
 	moveq	#0,d2	| mask up to 255
 	move.b	d0,d2
 	moveq	#0,d3

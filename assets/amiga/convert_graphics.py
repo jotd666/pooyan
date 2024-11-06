@@ -249,7 +249,7 @@ tile_plane_cache = {}
 tile_table = read_tileset(tile_set_list,tile_set,full_palette,[True,False,False,False],cache=tile_plane_cache, is_bob=False)
 
 bob_plane_cache = {}
-sprite_table = read_tileset(sprite_set_list,sprite_set,full_palette,[True,True,False,False],cache=bob_plane_cache, is_bob=True)
+sprite_table = read_tileset(sprite_set_list,sprite_set,full_palette,[True,False,True,False],cache=bob_plane_cache, is_bob=True)
 
 with open(os.path.join(src_dir,"palette.68k"),"w") as f:
     bitplanelib.palette_dump(full_palette,f,bitplanelib.PALETTE_FORMAT_ASMGNU)
@@ -346,9 +346,9 @@ with open(os.path.join(src_dir,"graphics.68k"),"w") as f:
                     height = 16
                     width = 4
                     offset = 0
-                    f.write(f"\t.word\t{height},{width},{offset}\n")
                     for orientation,_ in plane_orientations:
                         f.write("* {}\n".format(orientation))
+                        f.write(f"\t.word\t{height},{width},{offset}\n")
                         if orientation in t:
                             for bitplane_id in t[orientation]:
                                 f.write("\t.long\t")
@@ -361,7 +361,7 @@ with open(os.path.join(src_dir,"graphics.68k"),"w") as f:
                                 # optim: only standard
                                 break
                         else:
-                            for _ in range(nb_planes):
+                            for _ in range(nb_planes+1):
                                 f.write("\t.long\t0\n")
 
     f.write("\t.section\t.datachip\n")
