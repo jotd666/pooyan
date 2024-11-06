@@ -1034,7 +1034,7 @@ l_0442:
 	addq.w	#1,a2                           	| [$044f: inc  ix]
 	jbsr	write_to_screen_0429                            	| [$0451: call $0429]
 	jeq	l_0457                             	| [$0454: jr   z,$0457]
-	move.b	d0,(a0)                         	| [$0456: ld   (hl),a]
+	jbsr	osd_w_videoram                         	| [$0456: ld   (hl),a]
 l_0457:
 	addq.w	#1,a2                           	| [$0457: inc  ix]
 	move.w    #0xFF82,d3                          	| [$0459: ld   de,$FF82]
@@ -1053,7 +1053,7 @@ l_0469:
 	jne	l_0474                             	| [$0470: jr   nz,$0474]
 	move.b	#0x40,d0                        	| [$0472: ld   a,$40]
 l_0474:
-	move.b	d0,(a0)                         	| [$0474: ld   (hl),a]
+	jbsr	osd_w_videoram                         	| [$0474: ld   (hl),a]
 	add.w	d3,a0                            	| [$0475: add  hl,de]
 	addq.w	#1,a2                           	| [$0476: inc  ix]
 	move.b	(0x00,a2),d0                    	| [$0478: ld   a,(ix+$00)]
@@ -1061,7 +1061,7 @@ l_0474:
 	jne	l_0480                             	| [$047c: jr   nz,$0480]
 	move.b	#0x40,d0                        	| [$047e: ld   a,$40]
 l_0480:
-	move.b	d0,(a0)                         	| [$0480: ld   (hl),a]
+	jbsr	osd_w_videoram                         	| [$0480: ld   (hl),a]
 	add.w	d3,a0                            	| [$0481: add  hl,de]
 	addq.w	#1,a2                           	| [$0482: inc  ix]
 	move.b	(0x00,a2),d0                    	| [$0484: ld   a,(ix+$00)]
@@ -1069,7 +1069,7 @@ l_0480:
 	jne	l_048c                             	| [$0488: jr   nz,$048C]
 	move.b	#0x40,d0                        	| [$048a: ld   a,$40]
 l_048c:
-	move.b	d0,(a0)                         	| [$048c: ld   (hl),a]
+	jbsr	osd_w_videoram                         	| [$048c: ld   (hl),a]
 	addq.w	#1,a2                           	| [$048d: inc  ix]
 	move.w	#0x0042,d3                      	| [$048f: ld   de,$0042] 66
 	add.w	d3,a0                            	| [$0492: add  hl,de]
@@ -1400,7 +1400,6 @@ irq_066D:
 	move.l	a2,-(sp)                        	| [$0677: push ix]
 
 	move.l	a3,-(sp)                        	| [$0679: push iy]
-	CLEAR_XC_FLAGS                         	| [$067b: xor  a]
 	            	| [$067b: xor  a]
 	               	| [$067c: ld   (mainlatch_a180),a]
 	lea	sprite_shadow_ram_8840(a6),a0      	| [$067f: ld   hl,sprite_shadow_ram_8840]
@@ -1528,7 +1527,7 @@ title_erase_a_column_072d:
 	clr.b	d0                               	| [$0743: xor  a]
 	move.b	d0,in_game_sub_state_880A(a6)   	| [$0744: ld   (in_game_sub_state_880A),a]
 	LOAD_ROM	0x0779,a4                          	| [$0747: ld   bc,$0779]
-	jbsr	l_075d                            	| [$074a: call $075D]
+	jbsr	apply_color_075d                            	| [$074a: call $075D]
 	move.w	#0x0604,d3                          	| [$074d: ld   de,$0604]
 	jbsr	update_88A0_0038                            	| [$0750: rst  $38]
 	move.w	#0x0500,d3                          	| [$0751: ld   de,$0500]
@@ -1540,12 +1539,12 @@ title_erase_a_column_072d:
 	rts                                    	| [$075c: ret]
 
 * < A4
-l_075d:
+apply_color_075d:
 	lea	l_8040(a6),a0                      	| [$075d: ld   hl,$8040]
 	move.w	#0x0020,d3                      	| [$0760: ld   de,$0020] 32
 l_0763:
 	move.b	(a4),d0                         	| [$0763: ld   a,(bc)]
-	move.b	d0,(a0)                         	| [$0764: ld   (hl),a]
+	jbsr	osd_w_colorram                        	| [$0764: ld   (hl),a]
 	add.w	d3,a0                            	| [$0765: add  hl,de]
 	LOAD_D5D6_FROM_A0_RAM
 	move.b	d5,d0                           	| [$0766: ld   a,h]
@@ -1636,7 +1635,7 @@ l_08f8:
 	cmp.b	#0x63,d0                         	| [$08fc: cp   $63]
 	jne	l_08f2                             	| [$08fe: jr   nz,$08F2]
 	LOAD_ROM	0x0859,a4                          	| [$0900: ld   bc,$0859]
-	jbsr	l_075d                            	| [$0903: call $075D]
+	jbsr	apply_color_075d                            	| [$0903: call $075D]
 	LOAD_ROM	0x0831,a0                          	| [$0906: ld   hl,$0831]
 	move.b	#0x08,d1                        	| [$0909: ld   b,$08]
 	move.b	(a0),d0                         	| [$090b: ld   a,(hl)]
@@ -1703,7 +1702,7 @@ l_094a:
 												| [...]
 												| [$0962: djnz $094A]
 	LOAD_ROM	0x07D9,a4                          	| [$0964: ld   bc,$07D9]
-	jbsr	l_075d                            	| [$0967: call $075D]
+	jbsr	apply_color_075d                            	| [$0967: call $075D]
 	move.w	#0x068B,d3                          	| [$096a: ld   de,$068B]
 	jbsr	update_88A0_0038                            	| [$096d: rst  $38]
 	move.b	#0x8E,d3                        	| [$096e: ld   e,$8E]
@@ -1745,11 +1744,10 @@ clear_screen_introduce_characters_099c:
 											| [$09b0: dec  d]
 										| [$09b1: jr   nz,$09AA]
 	LOAD_ROM	0x07B9,a4                          	| [$09b3: ld   bc,$07B9]
-	jbsr	l_075d                            	| [$09b6: call $075D]
+	jbsr	apply_color_075d                            	| [$09b6: call $075D]
 	move.w	#0x060D,d3                          	| [$09b9: ld   de,$060D]
 	jbsr	update_88A0_0038                            	| [$09bc: rst  $38]
 	lea	l_8B70(a6),a0                      	| [$09bd: ld   hl,$8B70]
-	CLEAR_XC_FLAGS                         	| [$09c0: xor  a]
 	clr.b	d0                               	| [$09c0: xor  a]
 	move.b	d0,d1                           	| [$09c1: ld   b,a]
 	jbsr	fill_area_0010                            	| [$09c2: rst  $10]
@@ -1763,7 +1761,7 @@ l_09cd:
 	move.b	(a1),d0                         	| [$09d5: ld   a,(de)]
 	addq.b	#1,d0                           	| [$09d6: inc  a]
 	jne	l_09cd                             	| [$09d7: jr   nz,$09CD]
-	jbsr	l_0a52                            	| [$09d9: call $0A52]
+	jbsr	apply_color_to_buuyan_0a52                            	| [$09d9: call $0A52]
 	jbsr	l_0a25                            	| [$09dc: call $0A25]
 	LOAD_ROM	0x0A87,a0                          	| [$09df: ld   hl,$0A87]
 	STORE_ROM_POINTER	a0,rom_pointer_8e54(a6)            	| [$09e2: ld   ($8E54),hl]
@@ -1817,34 +1815,53 @@ l_0a28:
 	jbsr	load_16bit_rom_pointer_0c45                            	| [$0a32: call $0C45]
 	move.l	a1,-(sp)                        	| [$0a35: push de]
 	lea	l_866A(a6),a0                      	| [$0a36: ld   hl,$866A]
-	jbsr	l_0a40                            	| [$0a39: call $0A40]
+	jbsr	write_buuyan_tiles_0a40                            	| [$0a39: call $0A40]
 	move.l	(sp)+,a1                        	| [$0a3c: pop  de]
 	lea	l_86AA(a6),a0                      	| [$0a3d: ld   hl,$86AA]
-l_0a40:
+	* write BUUYAN tiles (which aren't sprites, unlike the other characters)
+write_buuyan_tiles_0a40:
 	move.w	#0x0020,d1                      	| [$0a40: ld   bc,$0020] 32
 	move.b	(a1)+,d0                         	| [$0a43: ld   a,(de)]
-	move.b	d0,(a0)+                         	| [$0a44: ld   (hl),a]
-	                           	| [$0a45: inc  l]
+	jbsr	osd_w_videoram                         	| [$0a44: ld   (hl),a]
+	addq	#1,a0                           	| [$0a45: inc  l]
 	                           	| [$0a46: inc  de]
 	move.b	(a1)+,d0                         	| [$0a47: ld   a,(de)]
-	move.b	d0,(a0)                         	| [$0a48: ld   (hl),a]
+	jbsr	osd_w_videoram                         	| [$0a48: ld   (hl),a]
 	add.w	d1,a0                            	| [$0a49: add  hl,bc]
 	                           	| [$0a4a: inc  de]
 	move.b	(a1)+,d0                         	| [$0a4b: ld   a,(de)]
-	move.b	d0,(a0)                         	| [$0a4c: ld   (hl),a]
+	jbsr	osd_w_videoram                         	| [$0a4c: ld   (hl),a]
 	subq.w	#1,a0                           	| [$0a4d: dec  l]
 	                           	| [$0a4e: inc  de]
 	move.b	(a1),d0                         	| [$0a4f: ld   a,(de)]
-	move.b	d0,(a0)                         	| [$0a50: ld   (hl),a]
+	jbsr	osd_w_videoram                         	| [$0a50: ld   (hl),a]
 	rts                                    	| [$0a51: ret]
-l_0a52:
+apply_color_to_buuyan_0a52:
 	lea	l_82AA(a6),a0                      	| [$0a52: ld   hl,$82AA]
 	LOAD_ROM	0x0A72,a1                          	| [$0a55: ld   de,$0A72]
-	jbsr	l_0a40                            	| [$0a58: call $0A40]
+	jbsr	write_buuyan_color_0a40                            	| [$0a58: call $0A40]
 	lea	l_826A(a6),a0                      	| [$0a5b: ld   hl,$826A]
 	LOAD_ROM	0x0A72,a1                          	| [$0a5e: ld   de,$0A72]
-	jbsr	l_0a40                            	| [$0a61: call $0A40]
-	rts                                    	| [$0a64: ret]
+											| [$0a61: call $0A40]
+											| [$0a64: ret]
+
+write_buuyan_color_0a40:
+	move.w	#0x0020,d1                      	| [$0a40: ld   bc,$0020] 32
+	move.b	(a1)+,d0                         	| [$0a43: ld   a,(de)]
+	jbsr	osd_w_colorram                         	| [$0a44: ld   (hl),a]
+	addq	#1,a0                           	| [$0a45: inc  l]
+	                           	| [$0a46: inc  de]
+	move.b	(a1)+,d0                         	| [$0a47: ld   a,(de)]
+	jbsr	osd_w_colorram                         	| [$0a48: ld   (hl),a]
+	add.w	d1,a0                            	| [$0a49: add  hl,bc]
+	                           	| [$0a4a: inc  de]
+	move.b	(a1)+,d0                         	| [$0a4b: ld   a,(de)]
+	jbsr	osd_w_colorram                         	| [$0a4c: ld   (hl),a]
+	subq.w	#1,a0                           	| [$0a4d: dec  l]
+	                           	| [$0a4e: inc  de]
+	move.b	(a1),d0                         	| [$0a4f: ld   a,(de)]
+	jbsr	osd_w_colorram                         	| [$0a50: ld   (hl),a]
+	rts                                    	| [$0a51: ret]
 
 animate_characters_0ac8:
 	lea		character_animation_timer_8D41(a6),a0	| [$0ac8: ld   hl,$8D41]
@@ -1858,8 +1875,7 @@ l_0ad1:
 	beq.b	0f                               	| [...]
 	rts                                    	| [$0ad8: ret  nz] [...]
 0:
-	move.b	#0x02,d0                      	| [$0ad9: ld   (hl),$02]
-	jbsr	osd_w_videoram
+	move.b	#0x02,(a0)                      	| [$0ad9: ld   (hl),$02]
 	LOAD_ROM_POINTER	rom_pointer_8e54(a6),a0             	| [$0adb: ld   hl,($8E54)]
 	move.b	(a0)+,d0                         	| [$0ade: ld   a,(hl)]
 	                           	| [$0adf: inc  hl]
@@ -2169,7 +2185,7 @@ clear_screen_as_first_credit_inserted_0c77:
 										| [$0ca4: cp   $0C]
 										| [$0ca6: jr   nz,$0C98]
 	LOAD_ROM	0x0779,a4                          	| [$0ca8: ld   bc,$0779]
-	jbsr	l_075d                            	| [$0cab: call $075D]
+	jbsr	apply_color_075d                            	| [$0cab: call $075D]
 	move.b	d0,current_player_is_p2_880D(a6)                   	| [$0cae: ld   ($880D),a]
 	jbsr	l_0e54                            	| [$0cb1: call $0E54]
 	jbsr	l_0cf8                            	| [$0cb4: call $0CF8]
@@ -3507,7 +3523,7 @@ l_1643:
 l_164a:
 	jbsr	update_88A0_0038                            	| [$164a: rst  $38]
 	LOAD_ROM	0x0779,a4                          	| [$164b: ld   bc,$0779]
-	jbsr	l_075d                            	| [$164e: call $075D]
+	jbsr	apply_color_075d                            	| [$164e: call $075D]
 	move.b	#0x80,d0                        	| [$1651: ld   a,$80]
 l_1653:
 	move.b	d0,l_8808(a6)                   	| [$1653: ld   ($8808),a]
@@ -4232,7 +4248,7 @@ l_1b43:
 0:
 	jbsr	l_02e3                            	| [$1b47: call $02E3]
 	LOAD_ROM	0x0819,a4                          	| [$1b4a: ld   bc,$0819]
-	jbsr	l_075d                            	| [$1b4d: call $075D]
+	jbsr	apply_color_075d                            	| [$1b4d: call $075D]
 	move.w	#0x0600,d3                          	| [$1b50: ld   de,$0600]
 	jbsr	update_88A0_0038                            	| [$1b53: rst  $38]
 	move.b	#0x02,d3                        	| [$1b54: ld   e,$02]
@@ -4279,7 +4295,7 @@ l_1b8c:
 	rts                                    	| [$1b8f: ret  nz] [...]
 0:
 	LOAD_ROM	0x0819,a4                          	| [$1b90: ld   bc,$0819]
-	jbsr	l_075d                            	| [$1b93: call $075D]
+	jbsr	apply_color_075d                            	| [$1b93: call $075D]
 	move.w	#0x0600,d3                          	| [$1b96: ld   de,$0600]
 	jbsr	update_88A0_0038                            	| [$1b99: rst  $38]
 	move.b	#0x03,d3                        	| [$1b9a: ld   e,$03]
@@ -4360,7 +4376,7 @@ l_1c03:
 	move.b	#0x89,d0                        	| [$1c12: ld   a,$89]
 	jbsr	display_string_05b2                            	| [$1c14: call $05B2]
 	LOAD_ROM	0x07D9,a4                          	| [$1c17: ld   bc,$07D9]
-	jbsr	l_075d                            	| [$1c1a: call $075D]
+	jbsr	apply_color_075d                            	| [$1c1a: call $075D]
 	jbsr	display_high_scores_table_03E9                            	| [$1c1d: call $03E9]
 	move.w	#0x0611,d3                          	| [$1c20: ld   de,$0611]
 	jbsr	update_88A0_0038                            	| [$1c23: rst  $38]
@@ -4662,7 +4678,7 @@ l_1deb:
 	jne	l_1df6                             	| [$1df1: jr   nz,$1DF6]
 	LOAD_ROM	0x0879,a4                          	| [$1df3: ld   bc,$0879]
 l_1df6:
-	jbsr	l_075d                            	| [$1df6: call $075D]
+	jbsr	apply_color_075d                            	| [$1df6: call $075D]
 	move.b	#0x0F,d0                        	| [$1df9: ld   a,$0F]
 	lea	l_8045(a6),a0                      	| [$1dfb: ld   hl,$8045]
 	move.w	#0x0020,d3                      	| [$1dfe: ld   de,$0020] 32
@@ -4685,7 +4701,7 @@ l_1e11:
 	                               	| [$1e14: and  a]
 	jne	l_1deb                             	| [$1e15: jr   nz,$1DEB]
 	LOAD_ROM	0x0859,a4                          	| [$1e17: ld   bc,$0859]
-	jbsr	l_075d                            	| [$1e1a: call $075D]
+	jbsr	apply_color_075d                            	| [$1e1a: call $075D]
 	lea	l_811C(a6),a0                      	| [$1e1d: ld   hl,$811C]
 	move.w	#0x0020,d3                      	| [$1e20: ld   de,$0020] 32
 	move.b	#0x10,d1                        	| [$1e23: ld   b,$10]

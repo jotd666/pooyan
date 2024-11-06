@@ -22,7 +22,7 @@ PREVIOUS_SPRITE_SIZE = 8
 BORDERBLANK = 1
 
 
-SPRITE_X_CORRECTION = 0
+SPRITE_X_CORRECTION = 24
 SPRITE_Y_CORRECTION = 0
 
 Y_MAX = 256
@@ -1633,6 +1633,7 @@ update_bg_tile:
 	moveq	#0,d3
 	move.b	d1,d3			| CLUT
 	
+
 	bsr		compute_tile_xy
 	
 	lea		character_table,a0
@@ -1673,7 +1674,7 @@ update_bg_tile:
 	jeq		11f						| not necessarily a problem
 
 	move.l	d0,a2					| pointer on bitplanes
-	rol.b	#2,d1			| modifiers on first bits
+	rol.b	#2,d1			        | modifiers on first bits
 	and.w	#3,d1
 	jeq		standard_tile
 	
