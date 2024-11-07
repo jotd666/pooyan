@@ -1524,12 +1524,10 @@ osd_w_colorram:
 	sub.w	#SCREEN_COLOR_ADDRESS-0x8000,d7
 	bcs.b	0f
 	.ifndef	RELEASE
-	cmp.w	#0x800,d7
+	cmp.w	#0x400,d7
 	bcs.b	1f
 
-	cmp.w	#0x400,d7
-	bcc.b	1f
-0:
+
 	* should not happen
 	add.w	#SCREEN_COLOR_ADDRESS-0x8000,d7
 	lea		write_colorram_out_of_range_error(pc),a0
@@ -1565,12 +1563,10 @@ osd_w_videoram:
 	sub.w	#SCREEN_TILE_ADDRESS-0x8000,d7
 	bcs.b	0f
 	.ifndef	RELEASE
-	cmp.w	#0x800,d7
+	cmp.w	#0x400,d7
 	bcs.b	1f
 
-	cmp.w	#0x400,d7
-	bcc.b	1f
-0:
+
 	* should not happen
 	add.w	#SCREEN_TILE_ADDRESS,d7
 	lea		write_videoram_out_of_range_error(pc),a0

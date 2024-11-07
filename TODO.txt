@@ -9,8 +9,11 @@ break on all jump table entrypoints, figure them all out
 
 8810: when is it set?
 
+- code insert coin & start
+- wolves don't fall, but go up instead!
+- unregistered tiles 29/8, 1A/8
 - remove "N" screen
-- w_videoram with 8E00: no trap, writes bullshit
+- reduce to 16 colors
 - double buffering
 - capture screenshot memory dumps to filter out unused tiles/cluts
   to save A LOT OF memory
