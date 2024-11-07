@@ -1337,6 +1337,7 @@ title_display_play_08E9:
 0AF8: 36 14       ld   (hl),$14
 0AFA: 2C          inc  l
 0AFB: 34          inc  (hl)
+; ram checksum ... again ... this is tiresome
 0AFC: 2A 56 8E    ld   hl,($8E56)
 0AFF: 11 00 00    ld   de,$0000
 0B02: 06 0E       ld   b,$0E
@@ -1354,11 +1355,11 @@ title_display_play_08E9:
 0B13: 2A 48 8F    ld   hl,($8F48)
 0B16: 7E          ld   a,(hl)
 0B17: BB          cp   e
-0B18: C2 42 74    jp   nz,pigs_arrive_during_title_7442
+0B18: C2 42 74    jp   nz,pigs_arrive_during_title_7442  ; legit but bogus!!!
 0B1B: 23          inc  hl
 0B1C: 7E          ld   a,(hl)
 0B1D: BA          cp   d
-0B1E: C2 EA 76    jp   nz,$76EA
+0B1E: C2 EA 76    jp   nz,$76EA   ; legit but bogus
 0B21: 23          inc  hl
 0B22: 22 48 8F    ld   ($8F48),hl
 0B25: C9          ret
@@ -1399,6 +1400,7 @@ title_display_play_08E9:
 0B6F: 2C          inc  l
 0B70: AF          xor  a
 0B71: 77          ld   (hl),a
+; ram checksum
 0B72: 21 62 84    ld   hl,$8462
 0B75: 57          ld   d,a
 0B76: 5F          ld   e,a
@@ -1421,11 +1423,12 @@ title_display_play_08E9:
 0B8E: 2A 48 8F    ld   hl,($8F48)
 0B91: 7B          ld   a,e
 0B92: BE          cp   (hl)
-0B93: C2 B3 08    jp   nz,$08B3
+0B93: C2 B3 08    jp   nz,$08B3	; bogus
 0B96: 23          inc  hl
 0B97: 7E          ld   a,(hl)
 0B98: BA          cp   d
-0B99: C2 E9 08    jp   nz,$08E9
+0B99: C2 E9 08    jp   nz,$08E9		; bogus
+; end ram checksum
 0B9C: AF          xor  a
 0B9D: 32 48 8F    ld   ($8F48),a
 0BA0: 32 49 8F    ld   ($8F49),a
@@ -10264,6 +10267,7 @@ jump_table_6AA4:
 6ACF: C0          ret  nz
 6AD0: 3C          inc  a
 6AD1: 32 56 8F    ld   ($8F56),a
+; ram checksum
 6AD4: 21 50 84    ld   hl,$8450
 6AD7: 11 00 00    ld   de,$0000
 6ADA: 7B          ld   a,e
@@ -10295,6 +10299,7 @@ jump_table_6AA4:
 6B03: 7A          ld   a,d
 6B04: FE 29       cp   $29
 6B06: C2 29 38    jp   nz,$3829
+; end ram checksum
 6B09: C9          ret
 
 6B13: 21 06 8F    ld   hl,$8F06
@@ -10704,6 +10709,7 @@ jump_table_6DAA:
 6E29: 36 14       ld   (hl),$14
 6E2B: 2C          inc  l
 6E2C: 34          inc  (hl)
+; another ram checksum
 6E2D: 2A 56 8E    ld   hl,($8E56)
 6E30: 11 00 00    ld   de,$0000
 6E33: 06 0E       ld   b,$0E
@@ -10721,11 +10727,11 @@ jump_table_6DAA:
 6E44: 2A 48 8F    ld   hl,($8F48)
 6E47: 7E          ld   a,(hl)
 6E48: BB          cp   e
-6E49: C2 42 74    jp   nz,pigs_arrive_during_title_7442
+6E49: C2 42 74    jp   nz,pigs_arrive_during_title_7442   ; legit but bogus
 6E4C: 23          inc  hl
 6E4D: 7E          ld   a,(hl)
 6E4E: BA          cp   d
-6E4F: C2 EA 76    jp   nz,$76EA
+6E4F: C2 EA 76    jp   nz,$76EA         ; legit but bogus
 6E52: 23          inc  hl
 6E53: 22 48 8F    ld   ($8F48),hl
 6E56: C9          ret
@@ -10948,6 +10954,7 @@ jump_table_6DAA:
 6FF7: C0          ret  nz
 6FF8: 3C          inc  a
 6FF9: 32 56 8F    ld   ($8F56),a
+; ram checksum
 6FFC: 21 50 84    ld   hl,$8450
 6FFF: 11 00 00    ld   de,$0000
 7002: 7B          ld   a,e
@@ -10979,6 +10986,7 @@ jump_table_6DAA:
 702B: 7A          ld   a,d
 702C: FE 29       cp   $29
 702E: C2 29 38    jp   nz,$3829
+; end ram checksum
 7031: C9          ret
 7032: 21 47 8F    ld   hl,$8F47
 7035: 7E          ld   a,(hl)
@@ -11069,6 +11077,7 @@ jump_table_6DAA:
 70C9: 24          inc  h
 70CA: 0D          dec  c
 70CB: 20 EB       jr   nz,$70B8
+; ram checksum
 70CD: 2A 48 8F    ld   hl,($8F48)
 70D0: 7B          ld   a,e
 70D1: BE          cp   (hl)
@@ -11532,6 +11541,7 @@ jump_table_7448:
 7527: A7          and  a
 7528: 32 B7 88    ld   ($88B7),a
 752B: C8          ret  z
+; ram checksum
 752C: 21 BC 82    ld   hl,$82BC
 752F: 11 00 00    ld   de,$0000
 7532: 0E 02       ld   c,$02

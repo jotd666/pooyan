@@ -1655,12 +1655,12 @@ l_090c:
 * change state to 7
 	move.b	#0x07,(a0)                      	| [$0921: ld   (hl),$07]
 	rts                                    	| [$0923: ret]
-l_0937:
-	ILLEGAL
-l_0929:
-	move.b	d1,d1                           	| [$0929: ld   b,b]
-	SET_C_FROM_X
-	jcs	l_0937                             	| [$092a: jr   c,$0937]
+
+
+
+                       	| [$0929: ld   b,b]
+
+                      	| [$092a: jr   c,$0937]
 
 clear_screen_092c:
 	move.b	#0x19,d1                        	| [$092c: ld   b,$19]
@@ -1897,36 +1897,41 @@ l_0ad1:
 	lea	high_score_table_timer_8E50(a6),a0                      	| [$0af5: ld   hl,$8E50]
 	move.b	#0x14,(a0)+                      	| [$0af8: ld   (hl),$14]
 	                           	| [$0afa: inc  l]
-	addq.b	#1,(a0)                         	| [$0afb: inc  (hl)]
+	* character name text is written, next character
+	* (next sub state)
+	addq.b	#1,(a0)                         	| [$0afb: inc  (hl)] title_sub_state_8E51(a6)
 	LOAD_RXM_POINTER	ram_or_rom_pointer_8e56(a6),a0             	| [$0afc: ld   hl,($8E56)]
-	moveq	#0x0000,d3                      	| [$0aff: ld   de,$0000] 0
-	moveq	#0x0000,d4                      	| [$0aff: ld   de,$0000] 0
-	move.b	#0x0E,d1                        	| [$0b02: ld   b,$0E]
-l_0b04:
-	move.b	(a0),d0                         	| [$0b04: ld   a,(hl)]
-	add.b	d4,d0                            	| [$0b05: add  a,e]
-	move.b	d0,d4                           	| [$0b06: ld   e,a]
-	SET_C_FROM_X
-	jcc	l_0b0a                             	| [$0b07: jr   nc,$0B0A]
-	addq.b	#1,d3                           	| [$0b09: inc  d]
-l_0b0a:
-	add.w	#0x20,a0                        	| [$0b0a: ld   a,$20]
-												| [$0b0c: add  a,l]
-												| [$0b0d: ld   l,a]
-												| [$0b0e: jr   nc,$0B11]
-											
-												| [$0b10: inc  h]
-
-	subq.b	#1,d1                           	| [...]
-	jne	l_0b04                             	| [$0b11: djnz $0B04]
+	* ram checksum ... again ... this is tiresome
+											| [$0aff: ld   de,$0000] 0
+											| [$0aff: ld   de,$0000] 0
+											| [$0b02: ld   b,$0E]
+									
+									
+											| [$0b04: ld   a,(hl)]
+											| [$0b05: add  a,e]
+											| [$0b06: ld   e,a]  RAM_CHECKSUM
+									
+										| [$0b07: jr   nc,$0B0A]
+											| [$0b09: inc  d]
+									
+											| [$0b0a: ld   a,$20]
+											| [$0b0c: add  a,l]
+											| [$0b0d: ld   l,a]
+											| [$0b0e: jr   nc,$0B11]
+										
+											| [$0b10: inc  h]
+									
+											| [...]
+										| [$0b11: djnz $0B04]
 	LOAD_RAM_POINTER	ram_pointer_8f48(a6),a0             	| [$0b13: ld   hl,($8F48)]
-	move.b	(a0),d0                         	| [$0b16: ld   a,(hl)]
-	cmp.b	d4,d0                            	| [$0b17: cp   e]
-	jne	pigs_arrive_during_title_7442      	| [$0b18: jp   nz,pigs_arrive_during_title_7442]
-	addq.w	#1,a0                           	| [$0b1b: inc  hl]
-	move.b	(a0),d0                         	| [$0b1c: ld   a,(hl)]
-	cmp.b	d3,d0                            	| [$0b1d: cp   d]
-	jne	intro_balloons_rise_76ea                             	| [$0b1e: jp   nz,$76EA]
+                         	| [$0b16: ld   a,(hl)]
+										
+											| [$0b17: cp   e]
+												| [$0b18: jp   nz,pigs_arrive_during_title_7442]
+											| [$0b1b: inc  hl]
+											| [$0b1c: ld   a,(hl)]
+											| [$0b1d: cp   d]
+															| [$0b1e: jp   nz,$76EA]
 	addq.w	#1,a0                           	| [$0b21: inc  hl]
 	STORE_RAM_POINTER	a0,ram_pointer_8f48(a6)            	| [$0b22: ld   ($8F48),hl]
 	
@@ -1975,38 +1980,39 @@ l_0b4b:
 	                           	| [$0b6f: inc  l]
 	clr.b	d0                               	| [$0b70: xor  a]
 	move.b	d0,(a0)                         	| [$0b71: ld   (hl),a]
-	lea	l_8462(a6),a0                      	| [$0b72: ld   hl,$8462]
-	move.b	d0,d3                           	| [$0b75: ld   d,a]
-	move.b	d0,d4                           	| [$0b76: ld   e,a]
-	move.b	#0x0E,d2                        	| [$0b77: ld   c,$0E]
-l_0b79:
-	move.b	#0x1D,d1                        	| [$0b79: ld   b,$1D]
-l_0b7b:
-	move.b	d4,d0                           	| [$0b7b: ld   a,e]
-	add.b	(a0),d0                          	| [$0b7c: add  a,(hl)]
-	jcc	l_0b80                             	| [$0b7d: jr   nc,$0B80]
-	addq.b	#1,d3                           	| [$0b7f: inc  d]
-l_0b80:
-	move.b	d0,d4                           	| [$0b80: ld   e,a]
-	addq.w	#1,a0                           	| [$0b81: inc  hl]
-	subq.b	#1,d1                           	| [...]
-	jne	l_0b7b                             	| [$0b82: djnz $0B7B]
-	                           	| [$0b84: ld   a,l]
-	addq.w	#0x03,a0                        	| [$0b85: add  a,$03]
-												| [$0b87: ld   l,a]
-												| [$0b88: jr   nc,$0B8B]
-												| [$0b8a: inc  h]
-l_0b8b:
-	subq.b	#1,d2                           	| [$0b8b: dec  c]
-	jne	l_0b79                             	| [$0b8c: jr   nz,$0B79]
-	LOAD_RAM_POINTER	ram_pointer_8f48(a6),a0             	| [$0b8e: ld   hl,($8F48)]
-	move.b	d4,d0                           	| [$0b91: ld   a,e]
-	cmp.b	(a0),d0                          	| [$0b92: cp   (hl)]
-	jne	l_08b3                             	| [$0b93: jp   nz,$08B3]
-	addq.w	#1,a0                           	| [$0b96: inc  hl]
-	move.b	(a0),d0                         	| [$0b97: ld   a,(hl)]
-	cmp.b	d3,d0                            	| [$0b98: cp   d]
-	jne	l_08e9                             	| [$0b99: jp   nz,$08E9]
+	
+												| [$0b72: ld   hl,$8462]
+												| [$0b75: ld   d,a]
+												| [$0b76: ld   e,a]
+												| [$0b77: ld   c,$0E]
+									
+												| [$0b79: ld   b,$1D]
+									
+												| [$0b7b: ld   a,e]
+												| [$0b7c: add  a,(hl)]  RAM_CHECKSUM
+												| [$0b7d: jr   nc,$0B80]
+												| [$0b7f: inc  d]
+									
+												| [$0b80: ld   e,a]
+												| [$0b81: inc  hl]   RAM_CHECKSUM
+												| [...]
+												| [$0b82: djnz $0B7B]
+												| [$0b84: ld   a,l]
+												| [$0b85: add  a,$03]
+													| [$0b87: ld   l,a]
+													| [$0b88: jr   nc,$0B8B]
+													| [$0b8a: inc  h]
+									
+												| [$0b8b: dec  c]
+												| [$0b8c: jr   nz,$0B79]
+											| [$0b8e: ld   hl,($8F48)] RAM_CHECKSUM
+													| [$0b91: ld   a,e]
+													| [$0b92: cp   (hl)]
+													| [$0b93: jp   nz,$08B3]
+													| [$0b96: inc  hl]
+													| [$0b97: ld   a,(hl)]
+													| [$0b98: cp   d]
+													| [$0b99: jp   nz,$08E9]
 	clr.b	d0                               	| [$0b9c: xor  a]
 	move.b	d0,ram_pointer_8f48(a6)                   	| [$0b9d: ld   ($8F48),a]
 	move.b	d0,l_8F49(a6)                   	| [$0ba0: ld   ($8F49),a]
@@ -4337,31 +4343,32 @@ l_1bd6:
 	CLEAR_XC_FLAGS                         	| [$1be1: xor  a]
 	clr.b	d0                               	| [$1be1: xor  a]
 	move.b	d0,in_game_sub_state_880A(a6)   	| [$1be2: ld   (in_game_sub_state_880A),a]
-	LOAD_ROM	0x5328,a0                          	| [$1be5: ld   hl,$5328]
-	move.b	#0x0E,d1                        	| [$1be8: ld   b,$0E]
-l_1bea:
-	move.b	(a0),d0                         	| [$1bea: ld   a,(hl)]
-	and.b	#0x1F,d0                         	| [$1beb: and  $1F]
-	add.b	d4,d0                            	| [$1bed: add  a,e]
-	move.b	d0,d4                           	| [$1bee: ld   e,a]
-	SET_C_FROM_X
-	jcc	l_1bf2                             	| [$1bef: jr   nc,$1BF2]
-	addq.b	#1,d3                           	| [$1bf1: inc  d]
-l_1bf2:
-	addq.w	#1,a0                           	| [$1bf2: inc  hl]
-	subq.b	#1,d1                           	| [...]
-	jne	l_1bea                             	| [$1bf3: djnz $1BEA]
-	move.b	#0x60,d0                        	| [$1bf5: ld   a,$60]
-	cmp.b	d4,d0                            	| [$1bf7: cp   e]
-	jne	l_1bfe                             	| [$1bf8: jr   nz,$1BFE]
-	move.b	#0x8A,d0                        	| [$1bfa: ld   a,$8A]
-	sub.b	d3,d0                            	| [$1bfc: sub  d]
-	bne.b	0f                               	| [...]
-	rts                                    	| [$1bfd: ret  z] [...]
-0:
-l_1bfe:
-	lea	checksum_failed_8A38(a6),a0                      	| [$1bfe: ld   hl,$8A38]
-	addq.b	#1,(a0)                         	| [$1c01: inc  (hl)]
+	* another checksum
+								| [$1be5: ld   hl,$5328]
+							| [$1be8: ld   b,$0E]
+				
+							| [$1bea: ld   a,(hl)]
+							| [$1beb: and  $1F]
+							| [$1bed: add  a,e]
+							| [$1bee: ld   e,a]
+				
+						| [$1bef: jr   nc,$1BF2]
+							| [$1bf1: inc  d]
+				
+							| [$1bf2: inc  hl]
+							| [...]
+						| [$1bf3: djnz $1BEA]
+							| [$1bf5: ld   a,$60]
+							| [$1bf7: cp   e]
+						| [$1bf8: jr   nz,$1BFE]
+							| [$1bfa: ld   a,$8A]
+							| [$1bfc: sub  d]
+							| [...]
+						| [$1bfd: ret  z] [...]
+				
+				
+										| [$1bfe: ld   hl,$8A38]
+							| [$1c01: inc  (hl)]
 	rts                                    	| [$1c02: ret]
 l_1c03:
 	lea	l_8808(a6),a0                      	| [$1c03: ld   hl,$8808]
@@ -12603,12 +12610,12 @@ l_698f:
 	move.b	d0,d4                           	| [$6994: ld   e,a]
 	and.b	#0xF0,d0                         	| [$6995: and  $F0]
 	ror.b	#4,d0                            	| [$6997: rrca] * 4
-	move.b	d0,(a0)                         	| [$699b: ld   (hl),a]
+	jbsr	osd_w_videoram                         	| [$699b: ld   (hl),a]
 	move.w	#0xFFE0,d1                          	| [$699c: ld   bc,$FFE0]
 	add.w	d1,a0                            	| [$699f: add  hl,bc]
 	move.b	d4,d0                           	| [$69a0: ld   a,e]
 	and.b	#0x0F,d0                         	| [$69a1: and  $0F]
-	move.b	d0,(a0)                         	| [$69a3: ld   (hl),a]
+	jbsr	osd_w_videoram                         	| [$69a3: ld   (hl),a]
 	jbsr	l_0f97                            	| [$69a4: call $0F97]
 l_69a7:
 	lea	l_892D(a6),a0                      	| [$69a7: ld   hl,$892D]
@@ -12812,46 +12819,46 @@ l_6ac5:
 0:
 	addq.b	#1,d0                           	| [$6ad0: inc  a]
 	move.b	d0,l_8F56(a6)                   	| [$6ad1: ld   ($8F56),a]
-	lea	l_8450(a6),a0                      	| [$6ad4: ld   hl,$8450]
-	move.w	#0x0000,d3                      	| [$6ad7: ld   de,$0000] 0
-	move.w	#0x0000,d4                      	| [$6ad7: ld   de,$0000] 0
-l_6ada:
-	move.b	d4,d0                           	| [$6ada: ld   a,e]
-	add.b	(a0),d0                          	| [$6adb: add  a,(hl)]
-	move.b	d0,d4                           	| [$6adc: ld   e,a]
-	SET_C_FROM_X
-	jcc	l_6ae0                             	| [$6add: jr   nc,$6AE0]
-	addq.b	#1,d3                           	| [$6adf: inc  d]
-l_6ae0:
-	addq.w	#1,a0                           	| [$6ae0: inc  l]
-	LOAD_D5D6_FROM_A0_RAM
-	move.b	D6,d0                           	| [$6ae1: ld   a,l]
-	and.b	#0x1F,d0                         	| [$6ae2: and  $1F]
-	cmp.b	#0x1B,d0                         	| [$6ae4: cp   $1B]
-	jne	l_6aeb                             	| [$6ae6: jr   nz,$6AEB]
-	addq.w	#1,a0                           	| [$6ae8: inc  l]
-	jra	l_6ada                             	| [$6ae9: jr   $6ADA]
-l_6aeb:
-	cmp.b	#0x1F,d0                         	| [$6aeb: cp   $1F]
-	jne	l_6ada                             	| [$6aed: jr   nz,$6ADA]
-	add.w	#0x12,a0                        	| [$6aef: ld   a,$12]
-	  	| [$6af1: add  a,l]
-	 	| [$6af2: ld   l,a]
-		| [$6af3: jr   nc,$6ADA]
-	
-	LOAD_D5D6_FROM_A0_RAM                           	| [$6af5: inc  h]
-	move.b	d5,d0                           	| [$6af6: ld   a,h]
-	cmp.b	#0x88,d0                         	| [$6af7: cp   $88]
-	jcs	l_6ada                             	| [$6af9: jr   c,$6ADA]
-	move.b	d4,d0                           	| [$6afb: ld   a,e]
-	cmp.b	#0xB8,d0                         	| [$6afc: cp   $B8]
-	jeq	l_6b03                             	| [$6afe: jr   z,$6B03]
-	SET_X_FROM_C
-	jra	l_0929                             	| [$6b00: jp   $0929]
-l_6b03:
-	move.b	d3,d0                           	| [$6b03: ld   a,d]
-	                        	| [$6b04: cp   $29]
-	                      	| [$6b06: jp   nz,$3829]
+												| [$6ad4: ld   hl,$8450]
+												| [$6ad7: ld   de,$0000] RAM_CHECKSUM
+												| [$6ad7: ld   de,$0000] 0
+							
+												| [$6ada: ld   a,e]
+												| [$6adb: add  a,(hl)]
+												| [$6adc: ld   e,a]
+							
+												| [$6add: jr   nc,$6AE0]
+												| [$6adf: inc  d]
+							
+												| [$6ae0: inc  l]
+							
+												| [$6ae1: ld   a,l]
+												| [$6ae2: and  $1F]
+												| [$6ae4: cp   $1B]
+												| [$6ae6: jr   nz,$6AEB]
+												| [$6ae8: inc  l]
+												| [$6ae9: jr   $6ADA]
+							
+												| [$6aeb: cp   $1F]
+												| [$6aed: jr   nz,$6ADA]
+												| [$6aef: ld   a,$12]
+												| [$6af1: add  a,l]
+												| [$6af2: ld   l,a]
+												| [$6af3: jr   nc,$6ADA]
+							
+														| [$6af5: inc  h]
+												| [$6af6: ld   a,h]
+												| [$6af7: cp   $88]
+												| [$6af9: jr   c,$6ADA]
+												| [$6afb: ld   a,e]
+												| [$6afc: cp   $B8]
+												| [$6afe: jr   z,$6B03]
+							
+												| [$6b00: jp   $0929]
+							
+												| [$6b03: ld   a,d]
+								| [$6b04: cp   $29]
+								| [$6b06: jp   nz,$3829]
 	rts                                    	| [$6b09: ret]
 
 animate_pigs_in_house_intro_6b13:
@@ -13356,35 +13363,39 @@ l_6e02:
 	move.b	#0x14,(a0)+                      	| [$6e29: ld   (hl),$14]
 	                           	| [$6e2b: inc  l]
 	addq.b	#1,(a0)                         	| [$6e2c: inc  (hl)]
-	LOAD_RXM_POINTER	ram_or_rom_pointer_8e56(a6),a0             	| [$6e2d: ld   hl,($8E56)]
-	move.w	#0x0000,d3                      	| [$6e30: ld   de,$0000] 0
-	move.w	#0x0000,d4                      	| [$6e30: ld   de,$0000] 0
-	move.b	#0x0E,d1                        	| [$6e33: ld   b,$0E]
-l_6e35:
-	moveq	#0,d0
-	move.b	(a0),d0                         	| [$6e35: ld   a,(hl)]
-	add.w	d0,d3                            	| [$6e36: add  a,e]
-	                           	| [$6e37: ld   e,a]
-	                             	| [$6e38: jr   nc,$6E3B]
-	                           	| [$6e3a: inc  d]
-l_6e3b:
-	                        	| [$6e3b: ld   a,$20]
-	add.w	#0x20,a0                            	| [$6e3d: add  a,l]
-	                        	| [$6e3e: ld   l,a]
-	                       	| [$6e3f: jr   nc,$6E42]
-	                        	| [$6e41: inc  h]
-l_6e42:
-	subq.b	#1,d1                           	| [...]
-	jne	l_6e35                             	| [$6e42: djnz $6E35]
+							| [$6e2d: ld   hl,($8E56)]
+
+											| [$6e30: ld   de,$0000] 0
+											| [$6e30: ld   de,$0000] 0
+											| [$6e33: ld   b,$0E]  RAM_CHECKSUM
+						
+						
+											| [$6e35: ld   a,(hl)]
+												| [$6e36: add  a,e]
+								| [$6e37: ld   e,a]
+									| [$6e38: jr   nc,$6E3B]
+								| [$6e3a: inc  d]
+						
+							| [$6e3b: ld   a,$20]
+												| [$6e3d: add  a,l]
+							| [$6e3e: ld   l,a]
+							| [$6e3f: jr   nc,$6E42]
+							| [$6e41: inc  h]
+						
+											| [...]
+											| [$6e42: djnz $6E35]
+
+
+	
 	LOAD_RAM_POINTER	ram_pointer_8f48(a6),a0             	| [$6e44: ld   hl,($8F48)]
-	LOAD_D3D4_FROM_D3_16
-	move.b	(a0),d0                         	| [$6e47: ld   a,(hl)]
-	cmp.b	d4,d0                            	| [$6e48: cp   e]
-	jne	pigs_arrive_during_title_7442      	| [$6e49: jp   nz,pigs_arrive_during_title_7442]
-	addq.w	#1,a0                           	| [$6e4c: inc  hl]
-	move.b	(a0),d0                         	| [$6e4d: ld   a,(hl)]
-	cmp.b	d3,d0                            	| [$6e4e: cp   d]
-	jne	intro_balloons_rise_76ea                             	| [$6e4f: jp   nz,$76EA]
+											
+												| [$6e47: ld   a,(hl)]
+												| [$6e48: cp   e]
+												| [$6e49: jp   nz,pigs_arrive_during_title_7442] RAM_CHECKSUM
+												| [$6e4c: inc  hl]
+												| [$6e4d: ld   a,(hl)]
+												| [$6e4e: cp   d]
+																| [$6e4f: jp   nz,$76EA]
 	addq.w	#1,a0                           	| [$6e52: inc  hl]
 	STORE_RAM_POINTER	a0,ram_pointer_8f48(a6)            	| [$6e53: ld   ($8F48),hl]
 	
@@ -13660,44 +13671,44 @@ l_6fe2:
 0:
 	addq.b	#1,d0                           	| [$6ff8: inc  a]
 	move.b	d0,l_8F56(a6)                   	| [$6ff9: ld   ($8F56),a]
-	lea	l_8450(a6),a0                      	| [$6ffc: ld   hl,$8450]
-	move.w	#0x0000,d3                      	| [$6fff: ld   de,$0000] 0
-	move.w	#0x0000,d4                      	| [$6fff: ld   de,$0000] 0
-l_7002:
-	move.b	d4,d0                           	| [$7002: ld   a,e]
-	add.b	(a0),d0                          	| [$7003: add  a,(hl)]
-	move.b	d0,d4                           	| [$7004: ld   e,a]
-	SET_C_FROM_X
-	jcc	l_7008                             	| [$7005: jr   nc,$7008]
-	addq.b	#1,d3                           	| [$7007: inc  d]
-l_7008:
-	addq.w	#1,a0                           	| [$7008: inc  l]
-	LOAD_D5D6_FROM_A0_RAM
-	move.b	D6,d0                           	| [$7009: ld   a,l]
-	and.b	#0x1F,d0                         	| [$700a: and  $1F]
-	cmp.b	#0x1B,d0                         	| [$700c: cp   $1B]
-	jne	l_7013                             	| [$700e: jr   nz,$7013]
-	addq.w	#1,a0                           	| [$7010: inc  l]
-	jra	l_7002                             	| [$7011: jr   $7002]
-l_7013:
-	cmp.b	#0x1F,d0                         	| [$7013: cp   $1F]
-	jne	l_7002                             	| [$7015: jr   nz,$7002]
-	add.w	#0x12,a0                        	| [$7017: ld   a,$12]
+												| [$6ffc: ld   hl,$8450]
+												| [$6fff: ld   de,$0000] RAM_CHECKSUM
+												| [$6fff: ld   de,$0000] 0
+								
+												| [$7002: ld   a,e]
+												| [$7003: add  a,(hl)]
+												| [$7004: ld   e,a]
+								
+												| [$7005: jr   nc,$7008]
+												| [$7007: inc  d]
+								
+												| [$7008: inc  l]
+								
+												| [$7009: ld   a,l]
+												| [$700a: and  $1F]
+												| [$700c: cp   $1B]
+												| [$700e: jr   nz,$7013]
+												| [$7010: inc  l]
+												| [$7011: jr   $7002]
+								
+												| [$7013: cp   $1F]
+												| [$7015: jr   nz,$7002]
+												| [$7017: ld   a,$12]
 									| [$7019: add  a,l]
 									| [$701a: ld   l,a]
 									| [$701b: jr   nc,$7002]
 								
-	LOAD_D5D6_FROM_A0_RAM								| [$701d: inc  h]
-	move.b	D5,d0                           	| [$701e: ld   a,h]
-	cmp.b	#0x88,d0                         	| [$701f: cp   $88]
-	jcs	l_7002                             	| [$7021: jr   c,$7002]
-	move.b	d4,d0                           	| [$7023: ld   a,e]
-	cmp.b	#0xB8,d0                         	| [$7024: cp   $B8]
-	jeq	l_702b                             	| [$7026: jr   z,$702B]
-	SET_X_FROM_C
-	jra	l_0929                             	| [$7028: jp   $0929]
-l_702b:
-	move.b	d3,d0                           	| [$702b: ld   a,d]
+														| [$701d: inc  h]
+												| [$701e: ld   a,h]
+												| [$701f: cp   $88]
+												| [$7021: jr   c,$7002]
+												| [$7023: ld   a,e]
+												| [$7024: cp   $B8]
+												| [$7026: jr   z,$702B]
+								
+												| [$7028: jp   $0929]
+								
+												| [$702b: ld   a,d]
 	                       	| [$702c: cp   $29]
 	                     	| [$702e: jp   nz,$3829]
 	rts                                    	| [$7031: ret]
@@ -13792,38 +13803,38 @@ l_708a:
 	                           	| [$70ae: inc  l]
 	clr.b	d0                               	| [$70af: xor  a]
 	move.b	d0,(a0)                         	| [$70b0: ld   (hl),a]
-	lea	l_8462(a6),a0                      	| [$70b1: ld   hl,$8462]
-	move.b	d0,d3                           	| [$70b4: ld   d,a]
-	move.b	d0,d4                           	| [$70b5: ld   e,a]
-	move.b	#0x0E,d2                        	| [$70b6: ld   c,$0E]
-l_70b8:
-	move.b	#0x1D,d1                        	| [$70b8: ld   b,$1D]
-l_70ba:
-	move.b	d4,d0                           	| [$70ba: ld   a,e]
-	add.b	(a0),d0                          	| [$70bb: add  a,(hl)]
-	jcc	l_70bf                             	| [$70bc: jr   nc,$70BF]
-	addq.b	#1,d3                           	| [$70be: inc  d]
-l_70bf:
-	move.b	d0,d4                           	| [$70bf: ld   e,a]
-	addq.w	#1,a0                           	| [$70c0: inc  hl]
-	subq.b	#1,d1                           	| [...]
-	jne	l_70ba                             	| [$70c1: djnz $70BA]
-	                           	| [$70c3: ld   a,l]
-	addq.w	#0x03,a0                        	| [$70c4: add  a,$03]
-	                           	| [$70c6: ld   l,a]
-	                             	| [$70c7: jr   nc,$70CA]
-	                           	| [$70c9: inc  h]
-l_70ca:
-	subq.b	#1,d2                           	| [$70ca: dec  c]
-	jne	l_70b8                             	| [$70cb: jr   nz,$70B8]
-	LOAD_RAM_POINTER	ram_pointer_8f48(a6),a0             	| [$70cd: ld   hl,($8F48)]
-	move.b	d4,d0                           	| [$70d0: ld   a,e]
-	cmp.b	(a0),d0                          	| [$70d1: cp   (hl)]
-	jne	l_08b3                             	| [$70d2: jp   nz,$08B3]
-	addq.w	#1,a0                           	| [$70d5: inc  hl]
-	move.b	(a0),d0                         	| [$70d6: ld   a,(hl)]
-	cmp.b	d3,d0                            	| [$70d7: cp   d]
-	jne	l_08e9                             	| [$70d8: jp   nz,$08E9]
+												| [$70b1: ld   hl,$8462]
+												| [$70b4: ld   d,a]
+												| [$70b5: ld   e,a]
+												| [$70b6: ld   c,$0E]
+						
+												| [$70b8: ld   b,$1D]
+						
+												| [$70ba: ld   a,e]
+												| [$70bb: add  a,(hl)]
+												| [$70bc: jr   nc,$70BF]
+												| [$70be: inc  d]
+						
+												| [$70bf: ld   e,a]
+												| [$70c0: inc  hl]
+												| [...]
+												| [$70c1: djnz $70BA]
+									| [$70c3: ld   a,l]
+												| [$70c4: add  a,$03]
+									| [$70c6: ld   l,a]
+									| [$70c7: jr   nc,$70CA]
+									| [$70c9: inc  h]
+						
+												| [$70ca: dec  c]
+												| [$70cb: jr   nz,$70B8]
+												| [$70cd: ld   hl,($8F48)] RAM_CHECKSUM
+												| [$70d0: ld   a,e]
+												| [$70d1: cp   (hl)]
+												| [$70d2: jp   nz,$08B3]
+												| [$70d5: inc  hl]
+												| [$70d6: ld   a,(hl)]
+												| [$70d7: cp   d]
+												| [$70d8: jp   nz,$08E9]
 	clr.b	d0                               	| [$70db: xor  a]
 	move.b	d0,ram_pointer_8f48(a6)                   	| [$70dc: ld   ($8F48),a]
 	move.b	d0,l_8F49(a6)                   	| [$70df: ld   ($8F49),a]
@@ -14219,6 +14230,7 @@ l_742a:
 	move.b	d0,title_sub_state_8E51(a6)     	| [$743e: ld   (title_sub_state_8E51),a]
 	rts                                    	| [$7441: ret]
 
+
 pigs_arrive_during_title_7442:
 	move.b	intro_anim_sub_state_8921(a6),d0                   	| [$7442: ld   a,($8921)]
 	and.b	#0x03,d0                         	| [$7445: and  $03]
@@ -14288,33 +14300,33 @@ display_intro_tiles_7517:
 	bne.b	0f                               	| [...]
 	rts                                    	| [$752b: ret  z] [...]
 0:
-	lea	l_82BC(a6),a0                      	| [$752c: ld   hl,$82BC]
-	move.w	#0x0000,d3                      	| [$752f: ld   de,$0000] 0
-	move.w	#0x0000,d4                      	| [$752f: ld   de,$0000] 0
-	move.b	#0x02,d2                        	| [$7532: ld   c,$02]
-l_7534:
-	move.b	#0x0E,d1                        	| [$7534: ld   b,$0E]
-l_7536:
-	move.b	(a0),d0                         	| [$7536: ld   a,(hl)]
-	add.b	d4,d0                            	| [$7537: add  a,e]
-	move.b	d0,d4                           	| [$7538: ld   e,a]
-	SET_C_FROM_X
-	jcc	l_753c                             	| [$7539: jr   nc,$753C]
-	addq.b	#1,d3                           	| [$753b: inc  d]
-l_753c:
-	                           	| [$753c: ld   a,l]
-	sub.w	#0x20,a0                         	| [$753d: sub  $20]
-									| [$753f: ld   l,a]
-			
-									| [$7540: jr   nc,$7543]
-									| [$7542: dec  h]
-l_7543:
-	subq.b	#1,d1                           	| [...]
-	jne	l_7536                             	| [$7543: djnz $7536]
-	lea	l_86BC(a6),a0                      	| [$7546: ld   hl,$86BC]
-	subq.b	#1,d2                           	| [$7545: dec  c]
-	jne	l_7534                             	| [$7549: jr   nz,$7534]
-	move.b	d4,d0                           	| [$754b: ld   a,e]
+										| [$752c: ld   hl,$82BC]
+											| [$752f: ld   de,$0000] RAM_CHECKSUM
+											| [$752f: ld   de,$0000] 0
+											| [$7532: ld   c,$02]
+					
+											| [$7534: ld   b,$0E]
+					
+											| [$7536: ld   a,(hl)]
+											| [$7537: add  a,e]
+											| [$7538: ld   e,a]
+					
+										| [$7539: jr   nc,$753C]
+											| [$753b: inc  d]
+					
+							| [$753c: ld   a,l]
+											| [$753d: sub  $20]
+								| [$753f: ld   l,a]
+					
+								| [$7540: jr   nc,$7543]
+								| [$7542: dec  h]
+					
+											| [...]
+										| [$7543: djnz $7536]
+										| [$7546: ld   hl,$86BC]
+											| [$7545: dec  c]
+										| [$7549: jr   nz,$7534]
+											| [$754b: ld   a,e]
 	* rom/ram check again against copyright?                    	| [$754c: cp   $4F]
 	                       	| [$754e: jp   nz,$43E1]
 											| [$7551: dec  d]

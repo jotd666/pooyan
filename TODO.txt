@@ -1,18 +1,15 @@
-reverse title around 08A0 (title sub state)
-reverse 0C55 (push start)
-reverse 15A7
 
 
-reach 5ca7?
-reach 5d03?
+
+
+
 break on all jump table entrypoints, figure them all out
 
 
 
 8810: when is it set?
 
-- init_intro_pigs_755d called spuriously at character screen
-- after character screen, game locks up
+- remove "N" screen
 - w_videoram with 8E00: no trap, writes bullshit
 - double buffering
 - capture screenshot memory dumps to filter out unused tiles/cluts
