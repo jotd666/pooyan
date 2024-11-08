@@ -9,6 +9,7 @@ break on all jump table entrypoints, figure them all out
 
 8810: when is it set?
 
+- number of wolves not written into flag???
 - code insert coin & start
 - wolves don't fall, but go up instead!
 - unregistered tiles 29/8, 1A/8

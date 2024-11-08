@@ -107,11 +107,21 @@ def add_sprite(index,name,cluts=[0]):
         sprite_names[idx] = name
         sprite_cluts[idx] = cluts
 
+# 24 bit colors that Marconelly reported as the only colors used, we'll see
+#actually_used_colors = ["ff00fb", "0000fb", "0000ab", "2147fb", "0068fb", "00defb",
+#"defffb", "00ff00", "009700", "97de00", "ffff00", "ffb800", "de9700", "b82100", "ff0000",
+#680000"]
+#actually_used_colors = {tuple(int(c[i:i+2],16) for i in range(0,6,2)) for c in actually_used_colors}
+
+nb_planes = 4
+nb_colors = 1<<nb_planes
+# colors collected from tiles/sprites but reported by Marconelly@eab as not used. Seems to be right
+colors_to_remove = {(104, 0, 251), (0, 255, 171)}
+
 
 
 sprite_names = {}
 sprite_cluts = [[] for _ in range(64)]
-
 
 baloon_cluts = [0,1,9,4,0xC,0xF]
 wolf_cluts = [0,4]
@@ -158,9 +168,17 @@ add_sprite([0xe,0x1A,0xC,5,8],"falling_player")
 
 sprites_path = os.path.join(this_dir,os.path.pardir,"pooyan")
 
+def remove_colors(imgname):
+    img = Image.open(imgname)
+    for x in range(img.size[0]):
+        for y in range(img.size[1]):
+            c = img.getpixel((x,y))
+            if c in colors_to_remove:
+                img.putpixel((x,y),(0,0,0))
+    return img
 
-sprite_sheet_dict = {i:Image.open(os.path.join(sprites_path,f"sprites_pal_{i:02x}.png")) for i in range(16)}
-tile_sheet_dict = {i:Image.open(os.path.join(sprites_path,f"tiles_pal_{i:02x}.png")) for i in range(16)}
+sprite_sheet_dict = {i:remove_colors(os.path.join(sprites_path,f"sprites_pal_{i:02x}.png")) for i in range(16)}
+tile_sheet_dict = {i:remove_colors(os.path.join(sprites_path,f"tiles_pal_{i:02x}.png")) for i in range(16)}
 
 tile_palette = set()
 tile_set_list = []
@@ -179,11 +197,15 @@ for i,tsd in sprite_sheet_dict.items():
     sprite_set_list.append(sprite_set)
     sprite_palette.update(sp)
 
-full_palette = sorted(sprite_palette | tile_palette)
+full_palette = sorted(sprite_palette | tile_palette)[1:]
 
-nb_planes = 5
-nb_colors = 1<<5
 
+#full_palette_rgb4 = {(x>>4,y>>4,z>>4) for x,y,z in full_palette}
+#actually_used_colors_rgb4 = {(x>>4,y>>4,z>>4) for x,y,z in actually_used_colors}
+#unused_colors = full_palette_rgb4 - actually_used_colors_rgb4
+#print([(hex(x<<4),hex(y<<4),hex(z<<4)) for x,y,z in unused_colors])
+
+# pad just in case we don't have 16 colors (but we have)
 full_palette += (nb_colors-len(full_palette)) * [(0x10,0x20,0x30)]
 
 sprite_table = [None]*NB_SPRITES
