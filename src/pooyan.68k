@@ -119,7 +119,7 @@
 	.endm
 	
 	.macro	LOAD_D3D4_FROM_A1_ROM
-	move.l	a0,d3
+	move.l	a1,d3
 	sub.l	#rom_base,d3
 	.ifndef	RELEASE
 	jpl	110f
@@ -367,11 +367,14 @@ NB_WOLVES = 14
 wolf_state_02 = 2
 
 
-
-x_pos_06 = 6
-sprite_attributes_10 = 0x10
+* offset from object structure
 y_pos_04 = 4
+x_pos_06 = 6
+animation_rom_pointer_lsb_0c = 0xc
+animation_rom_pointer_msb_0d = 0xd
+animation_timer_0e = 0xe
 sprite_code_0f = 0xf
+sprite_attributes_10 = 0x10
 
 GAME_IN_PLAY_03 = 3
 
@@ -819,7 +822,7 @@ l_02b9:
 	move.b	#0x60,d1                        	| [$02bc: ld   b,$60]
 	clr.b	d0                               	| [$02be: xor  a]
 	jbsr	fill_area_0010                            	| [$02bf: rst  $10]
-	lea	player_structure_8A80(a6),a0      	| [$02c0: ld   hl,player_structure_8A80]
+	lea	player_bow_structure_8A80(a6),a0      	| [$02c0: ld   hl,player_bow_structure_8A80]
 	jbsr	fill_area_0010                            	| [$02c3: rst  $10]
 	jbsr	fill_area_0010                            	| [$02c4: rst  $10]
 	move.b	#0x37,d1                        	| [$02c5: ld   b,$37]
@@ -856,17 +859,18 @@ l_02e6:
 
 update_sprite_shadows_02EF:
 	lea	sprite_shadow_ram_8840(a6),a0      	| [$02ef: ld   hl,sprite_shadow_ram_8840]
-	lea	player_structure_8A80(a6),a2      	| [$02f2: ld   ix,player_structure_8A80]
+	lea	player_bow_structure_8A80(a6),a2      	| [$02f2: ld   ix,player_bow_structure_8A80]
 	move.w	#0x0018,d3                      	| [$02f6: ld   de,$0018] 24
 	move.b	#0x02,d1                        	| [$02f9: ld   b,$02]
 	jbsr	update_sprite_shadow_0321         	| [$02fb: call update_sprite_shadow_0321]
 	lea	l_8C90(a6),a2                      	| [$02fe: ld   ix,$8C90]
 	move.b	#0x02,d1                        	| [$0302: ld   b,$02]
 	jbsr	update_sprite_shadow_0321         	| [$0304: call update_sprite_shadow_0321]
-	lea	wolf_structure_array_8AE0(a6),a2                      	| [$0307: ld   ix,$8AE0]
+	lea	wolf_structure_array_8AE0(a6),a2        | [$0307: ld   ix,$8AE0]
 	move.b	#0x12,d1                        	| [$030b: ld   b,$12]
-	jbsr	l_0343                            	| [$030d: call $0343]
-	lea	l_8AB0(a6),a2                      	| [$0310: ld   ix,$8AB0]
+	* at this point, HL=$8850
+	jbsr	update_wolves_sprite_shadow_ram_0343    | [$030d: call $0343]
+	lea	player_structure_8AB0(a6),a2                      	| [$0310: ld   ix,$8AB0]
 	move.b	#0x02,d1                        	| [$0314: ld   b,$02]
 	jbsr	update_sprite_shadow_0321         	| [$0316: call update_sprite_shadow_0321]
 	lea	l_8898(a6),a0                      	| [$0319: ld   hl,$8898]
@@ -874,16 +878,16 @@ update_sprite_shadows_02EF:
 	lea	l_889C(a6),a0                      	| [$031d: ld   hl,$889C]
 l_0320:
 	subq.b	#1,(a0)                         	| [$0320: dec  (hl)]
-	move.b	cabinet_upright_881F(a6),d0                   	| [$0321: ld   a,($881F)]
-	                               	| [$0324: and  a]
-	beq.b	0f                               	| [...]
+	* no cocktail mode support!				| [$0321: ld   a,($881F)]
+										| [$0324: and  a]
+									| [...]
 	rts                                    	| [$0325: ret  nz] [...]
 0:
-	jbsr	l_0378                            	| [$0326: call $0378]
+		                            	| [$0326: call $mirror_coords_for_cocktail_mode_0378]
 	rts                                    	| [$0329: ret]
 
-* < HL: 88xx (to write to shadow sprite ram)
-* < IX: character structure X,Y, ...
+* < A0: 88xx (to write to shadow sprite ram)
+* < A2: character structure X,Y, ...
 update_sprite_shadow_0321:
 	move.b	(x_pos_06,a2),d0                	| [$032a: ld   a,(ix+x_pos_06)]
 	move.b	d0,(a0)+                         	| [$032d: ld   (hl),a]
@@ -902,7 +906,7 @@ update_sprite_shadow_0321:
 	jne	update_sprite_shadow_0321          	| [$0340: djnz update_sprite_shadow_0321]
 	rts                                    	| [$0342: ret]
 
-l_0343:
+update_wolves_sprite_shadow_ram_0343:
 	move.b	(0x05,a2),d2                    	| [$0343: ld   c,(ix+$05)]
 	move.b	(0x06,a2),d0                    	| [$0346: ld   a,(ix+$06)]
 	rol.b	#1,d2                            	| [$0349: rlc  c]
@@ -937,12 +941,12 @@ l_0343:
 	move.b	(0x0f,a2),d0                    	| [$036e: ld   a,(ix+$0f)]
 	move.b	d0,(a0)+                         	| [$0371: ld   (hl),a]
 	                           	| [$0372: inc  l]
-	add.w	d3,a2                            	| [$0373: add  ix,de]
+	add.w	d3,a2                            	| [$0373: add  ix,de] next wolf
 	subq.b	#1,d1                           	| [...]
-	jne	l_0343                             	| [$0375: djnz $0343]
+	jne	update_wolves_sprite_shadow_ram_0343                             	| [$0375: djnz $0343]
 	rts                                    	| [$0377: ret]
 
-l_0378:
+mirror_coords_for_cocktail_mode_0378:
 	lea	sprite_shadow_ram_8840(a6),a1      	| [$0378: ld   de,sprite_shadow_ram_8840]
 	move.b	#0x18,d1                        	| [$037b: ld   b,$18]
 l_037d:
@@ -976,7 +980,7 @@ l_039B:
 0:
 	lea	l_8482(a6),a0                      	| [$03a0: ld   hl,$8482]
 	move.w	#0x0020,d3                      	| [$03a3: ld   de,$0020] 32
-	move.b	player_structure_8A80(a6),d0   	| [$03a6: ld   a,(player_structure_8A80)]
+	move.b	player_bow_structure_8A80(a6),d0   	| [$03a6: ld   a,(player_bow_structure_8A80)]
 	addq.b	#1,d0                           	| [$03a9: inc  a]
 	cmp.b	#0x08,d0                         	| [$03aa: cp   $08]
 	jcs	l_03b0                             	| [$03ac: jr   c,$03B0]
@@ -1864,7 +1868,7 @@ l_09f8:
 	move.b	#0x04,d1                        	| [$09fc: ld   b,$04]
 	move.w	#0x0018,d3                      	| [$09fe: ld   de,$0018] 24
 l_0a01:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$0a01: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$0a01: call $4006]
 	add.w	d3,a2                            	| [$0a04: add  ix,de]
 	subq.b	#1,d1                           	| [...]
 	jne	l_0a01                             	| [$0a06: djnz $0A01]
@@ -1878,11 +1882,11 @@ l_0a0c:
 	                           	| [$0a12: inc  de]
 	move.b	d0,(0x04,a2)                    	| [$0a13: ld   (ix+$04),a]
 	move.b	(a0)+,d0                         	| [$0a16: ld   a,(hl)]
-	move.b	d0,(0x0c,a2)                    	| [$0a17: ld   (ix+$0c),a]
+	move.b	d0,(animation_rom_pointer_lsb_0c,a2)                    	| [$0a17: ld   (ix+$0c),a]
 	                           	| [$0a1a: inc  hl]
 	move.b	(a0)+,d0                         	| [$0a1b: ld   a,(hl)]
-	move.b	d0,(0x0d,a2)                    	| [$0a1c: ld   (ix+$0d),a]
-	clr.b	(0x0e,a2)                        	| [$0a1f: ld   (ix+$0e),$00]
+	move.b	d0,(animation_rom_pointer_msb_0d,a2)                    	| [$0a1c: ld   (ix+$0d),a]
+	clr.b	(animation_timer_0e,a2)                        	| [$0a1f: ld   (ix+$0e),$00]
 	                           	| [$0a23: inc  hl]
 	rts                                    	| [$0a24: ret]
 l_0a25:
@@ -2198,8 +2202,9 @@ l_0c3d:
 * > d3 (16 bit rom offset/value)
 * > a1: pointer
 * < a0: input table
+* < d0: pointer number
 load_16bit_rom_pointer_0c45:
-	add.b	d0,d0                            	| [$0c45: add  a,a]
+	add.b	d0,d0                            	| [$0c45: add  a,a] double
 	clr.w	d3                               	| [$0c46: ld   d,$00]
 	move.b	d0,d3                           	| [$0c48: ld   e,a]
 	add.w	d3,a0                            	| [$0c49: add  hl,de]
@@ -2833,7 +2838,7 @@ l_1016:
 l_1042:
 	move.b	#0x01,d0                        	| [$1042: ld   a,$01]
 	move.b	d0,l_8F3F(a6)                   	| [$1044: ld   ($8F3F),a]
-	lea	player_structure_8A80(a6),a2      	| [$1047: ld   ix,player_structure_8A80]
+	lea	player_bow_structure_8A80(a6),a2      	| [$1047: ld   ix,player_bow_structure_8A80]
 	lea	l_8C90(a6),a3                      	| [$104b: ld   iy,$8C90]
 	move.b	(0x02,a2),d0                    	| [$104f: ld   a,(ix+$02)]
 	                               	| [$1052: and  a]
@@ -3161,7 +3166,7 @@ l_125f:
 	move.b	#0x01,(0x08,a2)                 	| [$1269: ld   (ix+$08),$01]
 	jra	store_de_in_struct_381e                             	| [$126d: jp   $381E]
 l_1270:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$1270: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$1270: call $4006]
 	move.b	(0x0a,a2),d0                    	| [$1273: ld   a,(ix+$0a)]
 	neg.b	d0                               	| [$1276: neg]
 	move.b	d0,d1                           	| [$1278: ld   b,a]
@@ -3202,7 +3207,7 @@ l_12a6:
 	move.b	d0,l_8743(a6)                   	| [$12ab: ld   ($8743),a]
 	rts                                    	| [$12ae: ret]
 l_12af:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$12af: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$12af: call $4006]
 	move.b	(0x08,a2),d0                    	| [$12b2: ld   a,(ix+$08)]
 	                               	| [$12b5: and  a]
 	jne	l_13fe                             	| [$12b6: jp   nz,$13FE]
@@ -3305,9 +3310,9 @@ l_13e2:
 	move.b	d2,(0x14,a2)                    	| [$13e3: ld   (ix+$14),c]
 	LOAD_ROM	0x3988,a0                          	| [$13e6: ld   hl,$3988]
 	LOAD_D5D6_FROM_A0_ROM
-	move.b	d6,(0x0c,a2)                    	| [$13e9: ld   (ix+$0c),l]
-	move.b	d5,(0x0d,a2)                    	| [$13ec: ld   (ix+$0d),h]
-	clr.b	(0x0e,a2)                        	| [$13ef: ld   (ix+$0e),$00]
+	move.b	d6,(animation_rom_pointer_lsb_0c,a2)                    	| [$13e9: ld   (ix+$0c),l]
+	move.b	d5,(animation_rom_pointer_msb_0d,a2)                    	| [$13ec: ld   (ix+$0d),h]
+	clr.b	(animation_timer_0e,a2)                        	| [$13ef: ld   (ix+$0e),$00]
 	move.b	#0x28,(0x11,a2)                 	| [$13f3: ld   (ix+$11),$28]
 l_13f7:
 	move.b	#0x04,(0x02,a2)                 	| [$13f7: ld   (ix+$02),$04]
@@ -3374,13 +3379,13 @@ l_1475:
 	LOAD_ROM	0x38CB,a1                          	| [$147b: ld   de,$38CB]
 	move.b	d0,(0x0b,a3)                    	| [$147e: ld   (iy+$0b),a]
 	LOAD_D3D4_FROM_A1_ROM
-	move.b	d4,(0x0c,a3)                    	| [$1481: ld   (iy+$0c),e]
-	move.b	d3,(0x0d,a3)                    	| [$1484: ld   (iy+$0d),d]
+	move.b	d4,(animation_rom_pointer_lsb_0c,a3)                    	| [$1481: ld   (iy+$0c),e]
+	move.b	d3,(animation_rom_pointer_msb_0d,a3)                    	| [$1484: ld   (iy+$0d),d]
 	move.b	#0x28,(0x11,a3)                 	| [$1487: ld   (iy+$11),$28]
 	jra	l_0ee3                             	| [$148b: jp   $0EE3]
 	
 l_1496:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$1496: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$1496: call $4006]
 	move.b	(0x0a,a2),d0                    	| [$1499: ld   a,(ix+$0a)]
 	neg.b	d0                               	| [$149c: neg]
 	move.b	d0,d1                           	| [$149e: ld   b,a]
@@ -3452,7 +3457,7 @@ l_1508:
 	jbsr	store_de_in_struct_381e                            	| [$1512: call $381E]
 	addq.b	#1,(0x02,a2)                    	| [$1515: inc  (ix+$02)]
 l_1518:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$1518: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$1518: call $4006]
 	subq.b	#1,(0x11,a2)                    	| [$151b: dec  (ix+$11)]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$151e: ret  nz] [...]
@@ -3481,7 +3486,7 @@ l_153a:
 	move.b	#0x01,(0x11,a2)                 	| [$1546: ld   (ix+$11),$01]
 	addq.b	#1,(0x02,a2)                    	| [$154a: inc  (ix+$02)]
 l_154d:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$154d: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$154d: call $4006]
 	subq.b	#1,(0x11,a2)                    	| [$1550: dec  (ix+$11)]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$1553: ret  nz] [...]
@@ -3817,7 +3822,7 @@ l_17bb:
 	rts                                    	| [$17c0: ret]
 
 l_17c1:
-	lea	player_structure_8A80(a6),a2      	| [$17c1: ld   ix,player_structure_8A80]
+	lea	player_bow_structure_8A80(a6),a2      	| [$17c1: ld   ix,player_bow_structure_8A80]
 	move.b	is_bonus_stage_8F50(a6),d0                   	| [$17c5: ld   a,($8F50)]
 	                               	| [$17c8: and  a]
 	lea	l_84F6(a6),a1                      	| [$17c9: ld   de,$84F6]
@@ -3845,7 +3850,7 @@ l_17e6:
 	add.w	d3,a2                            	| [$17f4: add  ix,de]
 	subq.b	#1,d1                           	| [...]
 	jne	l_17e6                             	| [$17f6: djnz $17E6]
-	lea	player_structure_8A80(a6),a2      	| [$17f8: ld   ix,player_structure_8A80]
+	lea	player_bow_structure_8A80(a6),a2      	| [$17f8: ld   ix,player_bow_structure_8A80]
 	move.b	cabinet_upright_881F(a6),d0                   	| [$17fc: ld   a,($881F)]
 	                               	| [$17ff: and  a]
 	jne	l_1808                             	| [$1800: jr   nz,$1808]
@@ -4113,7 +4118,7 @@ l_19b3:
 	jbsr	l_0f76                            	| [$19b8: call $0F76]
 	rts                                    	| [$19bb: ret]
 l_19bc:
-	lea	player_structure_8A80(a6),a0      	| [$19bc: ld   hl,player_structure_8A80]
+	lea	player_bow_structure_8A80(a6),a0      	| [$19bc: ld   hl,player_bow_structure_8A80]
 	lea	l_8A81(a6),a1                      	| [$19bf: ld   de,$8A81]
 	move.w	#0x01FF,d1                          	| [$19c2: ld   bc,$01FF]
 	clr.b	(a0)                             	| [$19c5: ld   (hl),$00]
@@ -4136,8 +4141,8 @@ l_19ca:
 	rts                                    	| [$19d8: ret  nz] [...]
 0:
 	move.b	#0x18,(a0)                      	| [$19d9: ld   (hl),$18]
-	subq.w	#1,a0                           	| [$19db: dec  l]
-	btst.b	#0,(a0)                         	| [$19dc: bit  0,(hl)]
+	                           	| [$19db: dec  l]
+	btst.b	#0,-(a0)                         	| [$19dc: bit  0,(hl)]
 	jne	l_19e7                             	| [$19de: jr   nz,$19E7]
 	move.b	#0x01,(a0)                      	| [$19e0: ld   (hl),$01]
 	move.w	#0x060F,d3                          	| [$19e2: ld   de,$060F]
@@ -4810,7 +4815,7 @@ l_1e55:
 	                           	| [$1e5d: ld   a,b]
 	                           	| [$1e5e: or   (hl)]
 	                               	| [$1e5f: and  a]
-	lea	player_structure_8A80(a6),a2      	| [$1e60: ld   ix,player_structure_8A80]
+	lea	player_bow_structure_8A80(a6),a2      	| [$1e60: ld   ix,player_bow_structure_8A80]
 	* failed test: cannot move!                             	| [$1e64: jr   nz,$1EA2]
 	move.b	l_8806(a6),d0                   	| [$1e66: ld   a,($8806)]
 	                               	| [$1e69: and  a]
@@ -4870,7 +4875,7 @@ l_1ebc:
 	jne	l_1ebc                             	| [$1ec2: jr   nz,$1EBC]
 	move.b	round_number_8907(a6),d0                   	| [$1ec4: ld   a,($8907)]
 	
-	                           	| [$1ec7: inc  a]
+	moveq	#0,d1                           	| [$1ec7: inc  a]
 	move.b	d0,d1                           	| [$1ec8: ld   b,a]
 	clr.b	d0                               	| [$1ec9: xor  a]
 	moveq	#1,d7
@@ -4905,7 +4910,6 @@ l_1ee2:
 	and.b	#0x0F,d0                         	| [$1f09: and  $0F]
 	move.b	d0,l_8483(a6)                   	| [$1f0b: ld   ($8483),a]
 	jbsr	l_1ffb                            	| [$1f0e: call $1FFB]
-l_1f11:
 	jbsr	l_1f18                            	| [$1f11: call $1F18]
 	jbsr	l_34c9                            	| [$1f14: call $34C9]
 	rts                                    	| [$1f17: ret]
@@ -4982,7 +4986,7 @@ l_1f68:
 	clr.b	d0                               	| [$1f79: xor  a]
 l_1f7a:
 	LOAD_ROM	0x1FA3,a0                          	| [$1f7a: ld   hl,$1FA3]
-	jbsr	load_16bit_rom_pointer_0c45                            	| [$1f7d: call $0C45]
+	jbsr	load_16bit_rom_pointer_0c45             | [$1f7d: call $0C45]
 	* flag colors
 	lea	l_8322(a6),a0                      	| [$1f80: ld   hl,$8322]
 	jbsr	update_left_flag_1F8C                  	| [$1f83: call update_left_flag_1F8C]
@@ -4991,7 +4995,8 @@ l_1f7a:
 table_1F87:
   .byte	0x09,0x14,0x1E,0x28,0x30,0x3E,0x04,0xED,0x47
 	.align	2
-* < HL: screen address (tile or color)
+* < A0: screen address (tile or color)
+* < A1: attribute/tiles to copy
 update_left_flag_1F8C:
 	move.b	#0x04,d0                        	| [$1f8c: ld   a,$04]
 	move.b	d0,i_reg                              	| [$1f8e: ld   i,a]
@@ -5118,7 +5123,7 @@ l_20e8:
 	                               	| [$20e9: and  a]
 l_20ea:
 	jne	l_241e                             	| [$20ea: jp   nz,$241E]
-	lea	player_structure_8A80(a6),a2      	| [$20ed: ld   ix,player_structure_8A80]
+	lea	player_bow_structure_8A80(a6),a2      	| [$20ed: ld   ix,player_bow_structure_8A80]
 	jbsr	l_2329                            	| [$20f1: call $2329]
 	jbsr	l_2101                            	| [$20f4: call $2101]
 	jbsr	animate_pigs_in_house_2563                            	| [$20f7: call $2563]
@@ -5132,7 +5137,7 @@ l_2101:
 	rts                                    	| [$210a: ret]
 
 l_210b:
-	lea	player_structure_8A80(a6),a2      	| [$210b: ld   ix,player_structure_8A80]
+	lea	player_bow_structure_8A80(a6),a2      	| [$210b: ld   ix,player_bow_structure_8A80]
 	btst.b	#4,(0x07,a2)                    	| [$210f: bit  4,(ix+$07)]
 	bne.b	0f                               	| [...]
 	clr.b	(0x07,a2)                        	| [$2113: ld   (ix+$07),$00]
@@ -5371,15 +5376,15 @@ l_22b1:
 	beq.b	0f                               	| [...]
 	rts                                    	| [$22b5: ret  nz] [...]
 0:
-	lea	player_structure_8A80(a6),a2      	| [$22b6: ld   ix,player_structure_8A80]
-	jbsr	l_22e6                            	| [$22ba: call $22E6]
+	lea	player_bow_structure_8A80(a6),a2      	| [$22b6: ld   ix,player_bow_structure_8A80]
+	jbsr	animate_object_22e6                            	| [$22ba: call $22E6]
 	move.w	#0x0018,d3                      	| [$22bd: ld   de,$0018] 24
 	add.w	d3,a2                            	| [$22c0: add  ix,de]
-	jbsr	l_22e6                            	| [$22c2: call $22E6]
+	jbsr	animate_object_22e6                            	| [$22c2: call $22E6]
 	add.w	d3,a2                            	| [$22c5: add  ix,de]
-	jbsr	l_22e6                            	| [$22c7: call $22E6]
+	jbsr	animate_object_22e6                            	| [$22c7: call $22E6]
 	add.w	d3,a2                            	| [$22ca: add  ix,de]
-	jbsr	l_22e6                            	| [$22cc: call $22E6]
+	jbsr	animate_object_22e6                            	| [$22cc: call $22E6]
 	rts                                    	| [$22cf: ret]
 l_22d0:
 	lea	l_8C90(a6),a3                      	| [$22d0: ld   iy,$8C90]
@@ -5396,24 +5401,25 @@ l_22e1:
 	subq.b	#1,d1                           	| [...]
 	jne	l_22da                             	| [$22e3: djnz $22DA]
 	rts                                    	| [$22e5: ret]
-l_22e6:
-	move.b	(0x0e,a2),d0                    	| [$22e6: ld   a,(ix+$0e)]
+	
+animate_object_22e6:
+	move.b	(animation_timer_0e,a2),d0                    	| [$22e6: ld   a,(ix+$0e)]
 	                               	| [$22e9: and  a]
 	jeq	l_22f0                             	| [$22ea: jr   z,$22F0]
-	subq.b	#1,(0x0e,a2)                    	| [$22ec: dec  (ix+$0e)]
+	subq.b	#1,(animation_timer_0e,a2)                    	| [$22ec: dec  (ix+$0e)]
 	rts                                    	| [$22ef: ret]
 l_22f0:
 	LOAD_ROM_POINTER	rom_pointer_8f00(a6),a0             	| [$22f0: ld   hl,($8F00)]
 	move.b	(a0),d0                         	| [$22f3: ld   a,(hl)]
 	cmp.b	#0xFF,d0                         	| [$22f4: cp   $FF]
 	jeq	l_230a                             	| [$22f6: jr   z,$230A]
-	move.b	d0,(0x10,a2)                    	| [$22f8: ld   (ix+$10),a]
+	move.b	d0,(sprite_attributes_10,a2)                    	| [$22f8: ld   (ix+$10),a]
 	addq.w	#1,a0                           	| [$22fb: inc  hl]
 	move.b	(a0)+,d0                         	| [$22fc: ld   a,(hl)]
-	move.b	d0,(0x0f,a2)                    	| [$22fd: ld   (ix+$0f),a]
+	move.b	d0,(sprite_code_0f,a2)                    	| [$22fd: ld   (ix+$0f),a]
 	                           	| [$2300: inc  hl]
 	move.b	(a0)+,d0                         	| [$2301: ld   a,(hl)]
-	move.b	d0,(0x0e,a2)                    	| [$2302: ld   (ix+$0e),a]
+	move.b	d0,(animation_timer_0e,a2)                    	| [$2302: ld   (ix+$0e),a]
 	                           	| [$2305: inc  hl]
 	STORE_ROM_POINTER	a0,rom_pointer_8f00(a6)            	| [$2306: ld   ($8F00),hl]
 	
@@ -5449,7 +5455,7 @@ l_2337:
 	jcc	l_233d                             	| [$2337: jr   nc,$233D]
 	move.b	#0x41,(0x04,a2)                 	| [$2339: ld   (ix+$04),$41]
 l_233d:
-	jbsr	l_23d7                            	| [$233d: call $23D7]
+	jbsr	sync_player_coords_with_bow_coords_23d7                            	| [$233d: call $23D7]
 	LOAD_RAM_POINTER	video_ram_wire_pointer_88BE(a6),a0            	| [$2340: ld   hl,($88BE)]
 	LOAD_D5D6_FROM_A0_RAM
 	move.b	D6,d0                           	| [$2343: ld   a,l]
@@ -5494,19 +5500,19 @@ l_236a:
 	jcs	l_237d                             	| [$2377: jr   c,$237D]
 	move.b	#0xC0,(0x04,a2)                 	| [$2379: ld   (ix+$04),$C0]
 l_237d:
-	jbsr	l_23d7                            	| [$237d: call $23D7]
+	jbsr	sync_player_coords_with_bow_coords_23d7                            	| [$237d: call $23D7]
 	move.b	video_ram_wire_pointer_88BE(a6),d0                   	| [$2380: ld   a,($88BE)]
 	cmp.b	#0xF6,d0                         	| [$2383: cp   $F6]
 	jne	l_239e                             	| [$2385: jr   nz,$239E]
-	lea	checksum_failed_8A38(a6),a0                      	| [$2387: ld   hl,$8A38]
-	move.b	#0x03,d1                        	| [$238a: ld   b,$03]
+	                      	| [$2387: ld   hl,$8A38]
+	                        	| [$238a: ld   b,$03]
 l_238c:
-	move.b	(a0),d0                         	| [$238c: ld   a,(hl)]
-	                               	| [$238d: and  a]
-	jne	l_239e                             	| [$238e: jr   nz,$239E]
-	addq.w	#1,a0                           	| [$2390: inc  hl]
-	subq.b	#1,d1                           	| [...]
-	jne	l_238c                             	| [$2391: djnz $238C]
+	                     	| [$238c: ld   a,(hl)]
+	            	| [$238d: and  a]
+	                    	| [$238e: jr   nz,$239E]
+	                          	| [$2390: inc  hl]
+	                          	| [...]
+	                         	| [$2391: djnz $238C]
 	lea	l_8083(a6),a0                      	| [$2393: ld   hl,$8083]
 	move.b	l_8343(a6),d0                   	| [$2396: ld   a,($8343)]
 	add.b	(a0),d0                          	| [$2399: add  a,(hl)]
@@ -5550,12 +5556,12 @@ l_23ad:
 l_23d3:
 	jbsr	write_4x4_tile_block_3325         	| [$23d3: call write_4x4_tile_block_3325]
 	rts                                    	| [$23d6: ret]
-l_23d7:
-	lea	player_structure_8A80(a6),a2      	| [$23d7: ld   ix,player_structure_8A80]
+sync_player_coords_with_bow_coords_23d7:
+	lea	player_bow_structure_8A80(a6),a2      	| [$23d7: ld   ix,player_bow_structure_8A80]
 	move.b	(0x04,a2),d0                    	| [$23db: ld   a,(ix+$04)]
 	move.b	d0,(0x4c,a2)                    	| [$23de: ld   (ix+$4c),a]
 	sub.b	#0x10,d0                         	| [$23e1: sub  $10]
-	move.b	d0,(0x34,a2)                    	| [$23e3: ld   (ix+$34),a]
+	move.b	d0,(0x34,a2)                    	| [$23e3: ld   (ix+$34),a] also update player_structure_8AB0
 	add.b	#0x0A,d0                         	| [$23e6: add  a,$0A]
 	move.b	d0,(0x1c,a2)                    	| [$23e8: ld   (ix+$1c),a]
 	rts                                    	| [$23eb: ret]
@@ -5583,9 +5589,7 @@ l_2401:
 	rts                                    	| [$2404: ret]
 l_2405:
 	lea	wire_position_8F37(a6),a0                      	| [$2405: ld   hl,$8F37]
-	move.b	(a0),d0
-	addq.b	#1,d0                         	| [$2408: inc  (hl)]
-	jbsr	osd_w_videoram
+	addq.b	#1,(a0)                         	| [$2408: inc  (hl)]
 	btst.b	#0,(a0)                         	| [$2409: bit  0,(hl)]
 	bne.b	0f                               	| [...]
 	rts                                    	| [$240b: ret  z] [...]
@@ -5614,7 +5618,7 @@ l_241e:
 												| [...]
 											| [$242b: ret  nz] [...]
 0:
-	lea	player_structure_8A80(a6),a2      	| [$242c: ld   ix,player_structure_8A80]
+	lea	player_bow_structure_8A80(a6),a2      	| [$242c: ld   ix,player_bow_structure_8A80]
 	move.b	(0x02,a2),d0                    	| [$2430: ld   a,(ix+$02)] state
 	and.b	#0x07,d0                         	| [$2433: and  $07]
 	jbsr	jump_from_table_below_0028                            	| [$2435: rst  $28]
@@ -5636,7 +5640,7 @@ init_player_hit_2442:
 						
 	move.b	#0x10,(0x11,a2)                 	| [$244a: ld   (ix+$11),$10]
 	addq.b	#1,(0x02,a2)                    	| [$244e: inc  (ix+$02)]
-	lea	player_structure_8A80(a6),a0      	| [$2451: ld   hl,player_structure_8A80]
+	lea	player_bow_structure_8A80(a6),a0      	| [$2451: ld   hl,player_bow_structure_8A80]
 	lea	l_8A98(a6),a1                      	| [$2454: ld   de,$8A98]
 	move.w	#0x0018,d1                      	| [$2457: ld   bc,$0018] 24
 	jbsr	ldir                              	| [$245a: ldir]
@@ -5680,7 +5684,7 @@ player_hit_falls_2497:
 	addq.b	#1,(0x02,a2)                    	| [$249b: inc  (ix+$02)]
 	LOAD_ROM	0x26C5,a0                          	| [$249e: ld   hl,$26C5]
 	jbsr	l_250f                            	| [$24a1: call $250F]
-	lea	player_structure_8A80(a6),a2      	| [$24a4: ld   ix,player_structure_8A80]
+	lea	player_bow_structure_8A80(a6),a2      	| [$24a4: ld   ix,player_bow_structure_8A80]
 	move.b	(0x04,a2),d0                    	| [$24a8: ld   a,(ix+$04)]
 	addq.b	#0x04,d0                        	| [$24ab: add  a,$04]
 	move.b	d0,(0x04,a2)                    	| [$24ad: ld   (ix+$04),a]
@@ -6196,7 +6200,7 @@ l_28d6:
 	move.b	#0x04,(a0)                      	| [$28dc: ld   (hl),$04]
 	rts                                    	| [$28de: ret]
 l_28df:
-	lea	player_structure_8A80(a6),a2      	| [$28df: ld   ix,player_structure_8A80]
+	lea	player_bow_structure_8A80(a6),a2      	| [$28df: ld   ix,player_bow_structure_8A80]
 	pea	l_2B8D(pc)                          	| [$28e3: ld   hl,$2B8D]
 
 	                        	| [$28e6: push hl]
@@ -6222,7 +6226,7 @@ l_2901:
 	move.b	(0x04,a2),d0                    	| [$2908: ld   a,(ix+$04)]
 	cmp.b	#0xDC,d0                         	| [$290b: cp   $DC]
 	jcc	l_291e                             	| [$290d: jr   nc,$291E]
-	jbsr	l_23d7                            	| [$290f: call $23D7]
+	jbsr	sync_player_coords_with_bow_coords_23d7                            	| [$290f: call $23D7]
 	move.b	video_ram_wire_pointer_88BE(a6),d0                   	| [$2912: ld   a,($88BE)]
 	cmp.b	#0xF9,d0                         	| [$2915: cp   $F9]
 	bne.b	0f                               	| [...]
@@ -6459,7 +6463,7 @@ l_2acf:
 	rts                                    	| [$2ae7: ret]
 l_2ae8:
 	clr.b	d0                               	| [$2ae8: xor  a]
-	lea	player_structure_8A80(a6),a0      	| [$2ae9: ld   hl,player_structure_8A80]
+	lea	player_bow_structure_8A80(a6),a0      	| [$2ae9: ld   hl,player_bow_structure_8A80]
 	move.b	d0,(a0)                         	| [$2aec: ld   (hl),a]
 	lea	l_8A81(a6),a1                      	| [$2aed: ld   de,$8A81]
 	move.w	#0x0240,d1                          	| [$2af0: ld   bc,$0240]
@@ -6669,7 +6673,7 @@ l_2c3f:
 
 
 l_2c58:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$2c58: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$2c58: call $4006]
 	move.b	(0x05,a2),d0                    	| [$2c5b: ld   a,(ix+$05)]
 	add.b	(0x09,a2),d0                     	| [$2c5e: add  a,(ix+$09)]
 	jcc	l_2c66                             	| [$2c61: jr   nc,$2C66]
@@ -6710,7 +6714,7 @@ l_2c85:
 	rts                                    	| [$2ca2: ret]
 
 l_2cb3:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$2cb3: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$2cb3: call $4006]
 	move.b	(0x16,a2),d6                    	| [$2cb6: ld   l,(ix+$16)]
 	move.b	(0x17,a2),d5                    	| [$2cb9: ld   h,(ix+$17)]
 	LOAD_A0_FROM_D5D6
@@ -6753,7 +6757,7 @@ l_2cfc:
 	rts                                    	| [$2cff: ret]
 
 l_2d24:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$2d24: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$2d24: call $4006]
 	move.b	(0x05,a2),d0                    	| [$2d27: ld   a,(ix+$05)]
 	add.b	(0x09,a2),d0                     	| [$2d2a: add  a,(ix+$09)]
 	jcc	l_2d32                             	| [$2d2d: jr   nc,$2D32]
@@ -7498,7 +7502,7 @@ l_32e8:
 	move.b	(a0),d0                         	| [$32ed: ld   a,(hl)]
 	cmp.b	#0xDB,d0                         	| [$32ee: cp   $DB]
 	jcc	l_32f6                             	| [$32f0: jr   nc,$32F6]
-	jbsr	l_23d7                            	| [$32f2: call $23D7]
+	jbsr	sync_player_coords_with_bow_coords_23d7                            	| [$32f2: call $23D7]
 	rts                                    	| [$32f5: ret]
 l_32f6:
 	jbsr	l_0f30                            	| [$32f6: call $0F30]
@@ -7662,7 +7666,7 @@ table_3418:
 	.byte	0x00
 	.align	2
 l_3423:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$3423: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$3423: call $4006]
 	btst.b	#0,(0x01,a2)                    	| [$3426: bit  0,(ix+$01)]
 	jeq	l_3437                             	| [$342a: jr   z,$3437]
 	move.b	l_8F63(a6),d0                   	| [$342c: ld   a,($8F63)]
@@ -7839,7 +7843,7 @@ l_3524:
 0:
 	jra	l_3473                             	| [$3533: jp   $3473]
 l_3536:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$3536: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$3536: call $4006]
 	subq.b	#1,(0x11,a2)                    	| [$3539: dec  (ix+$11)]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$353c: ret  nz] [...]
@@ -7866,7 +7870,7 @@ l_3553:
 	jbsr	fill_area_0010                            	| [$3559: rst  $10]
 	rts                                    	| [$355a: ret]
 update_walking_wolves_355b:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$355b: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$355b: call $4006]
 	move.b	(0x08,a2),d0                    	| [$355e: ld   a,(ix+$08)]
 	                               	| [$3561: and  a]
 	jne	l_3757                             	| [$3562: jp   nz,$3757]
@@ -8113,9 +8117,9 @@ l_36b6:
 	LOAD_ROM	0x3994,a0                          	| [$36c3: ld   hl,$3994]
 l_36c6:
 	LOAD_D5D6_FROM_A0_ROM
-	move.b	d6,(0x0c,a2)                    	| [$36c6: ld   (ix+$0c),l]
-	move.b	d5,(0x0d,a2)                    	| [$36c9: ld   (ix+$0d),h]
-	clr.b	(0x0e,a2)                        	| [$36cc: ld   (ix+$0e),$00]
+	move.b	d6,(animation_rom_pointer_lsb_0c,a2)                    	| [$36c6: ld   (ix+$0c),l]
+	move.b	d5,(animation_rom_pointer_msb_0d,a2)                    	| [$36c9: ld   (ix+$0d),h]
+	clr.b	(animation_timer_0e,a2)                        	| [$36cc: ld   (ix+$0e),$00]
 	move.b	#0x28,(0x11,a2)                 	| [$36d0: ld   (ix+$11),$28]
 	move.b	#0x04,(0x02,a2)                 	| [$36d4: ld   (ix+$02),$04]
 	jbsr	l_36de                            	| [$36d8: call $36DE]
@@ -8240,10 +8244,10 @@ l_37e5:
 	jeq	l_37f0                             	| [$37ec: jr   z,$37F0]
 	neg.b	d0                               	| [$37ee: neg]
 l_37f0:
+	* reaches here when wolf is about to inflate a baloon on top
 	move.b	d0,(0x0a,a3)                    	| [$37f0: ld   (iy+$0a),a]
 	move.b	d0,(0x0a,a2)                    	| [$37f3: ld   (ix+$0a),a]
 	LOAD_ROM	0x38B5,a0                          	| [$37f6: ld   hl,$38B5]
-l_37f9:
 	move.b	(0x07,a2),d0                    	| [$37f9: ld   a,(ix+$07)]
 	and.b	#0xF0,d0                         	| [$37fc: and  $F0]
 	ror.b	#4,d0                            	| [$37fe: rrca] * 4
@@ -8251,12 +8255,16 @@ l_37f9:
 	move.b	(0x0b,a2),d0                    	| [$3805: ld   a,(ix+$0b)]
 	                               	| [$3808: and  a]
 	jeq	l_380e                             	| [$3809: jr   z,$380E]
-	LOAD_ROM	0x3952,a1                          	| [$380b: ld   de,$3952]
+	* direct load of half-addresses
+	move.b		#0x39,d3                          	| [$380b: ld   de,$3952]
+	move.b		#0x52,d4                          	| [$380b: ld   de,$3952]
+	jra			0f
 l_380e:
 	LOAD_D3D4_FROM_A1_ROM
+0:
 	move.b	d0,(0x0b,a3)                    	| [$380e: ld   (iy+$0b),a]
-	move.b	d4,(0x0c,a3)                    	| [$3811: ld   (iy+$0c),e]
-	move.b	d3,(0x0d,a3)                    	| [$3814: ld   (iy+$0d),d]
+	move.b	d4,(animation_rom_pointer_lsb_0c,a3)                    	| [$3811: ld   (iy+$0c),e]
+	move.b	d3,(animation_rom_pointer_msb_0d,a3)                    	| [$3814: ld   (iy+$0d),d]
 	move.b	#0x28,(0x11,a3)                 	| [$3817: ld   (iy+$11),$28]
 l_381b:
 	jra	l_0ee3                             	| [$381b: jp   $0EE3]
@@ -8267,13 +8275,13 @@ store_de_in_struct_381e:
 	move.l	a1,d3
 	sub.l	#rom_base,d3
 	LOAD_D3D4_FROM_D3_16
-	move.b	d4,(0x0c,a2)                    	| [$381e: ld   (ix+$0c),e]
-	move.b	d3,(0x0d,a2)                    	| [$3821: ld   (ix+$0d),d]
-	clr.b	(0x0e,a2)                        	| [$3824: ld   (ix+$0e),$00]
+	move.b	d4,(animation_rom_pointer_lsb_0c,a2)                    	| [$381e: ld   (ix+$0c),e]
+	move.b	d3,(animation_rom_pointer_msb_0d,a2)                    	| [$3821: ld   (ix+$0d),d]
+	clr.b	(animation_timer_0e,a2)                        	| [$3824: ld   (ix+$0e),$00]
 	rts                                    	| [$3828: ret]
 	
 wolf_updates_baloon_3865:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$3865: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$3865: call $4006]
 	subq.b	#1,(0x11,a2)                    	| [$3868: dec  (ix+$11)]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$386b: ret  nz] [...]
@@ -8328,7 +8336,7 @@ wolf_updates_baloon_3865:
 								| [$38a4: ret]
 
 wolf_vertical_movement_39af:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$39af: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$39af: call $4006]
 	move.b	round_number_8907(a6),d0                   	| [$39b2: ld   a,($8907)]
 	and.b	#0x01,d0                         	| [$39b5: and  $01]
 	jeq	wolf_descending_with_baloon_3b87                             	| [$39b7: jp   z,$3B87]
@@ -8508,9 +8516,9 @@ l_3ac7:
 	LOAD_ROM	0x4341,a1                          	| [$3af1: ld   de,$4341]
 l_3af4:
 	LOAD_D3D4_FROM_A1_ROM
-	move.b	d4,(0x0c,a3)                    	| [$3af4: ld   (iy+$0c),e]
-	move.b	d3,(0x0d,a3)                    	| [$3af7: ld   (iy+$0d),d]
-	clr.b	(0x0e,a3)                        	| [$3afa: ld   (iy+$0e),$00]
+	move.b	d4,(animation_rom_pointer_lsb_0c,a3)                    	| [$3af4: ld   (iy+$0c),e]
+	move.b	d3,(animation_rom_pointer_msb_0d,a3)                    	| [$3af7: ld   (iy+$0d),d]
+	clr.b	(animation_timer_0e,a3)                        	| [$3afa: ld   (iy+$0e),$00]
 	clr.b	(0x16,a3)                        	| [$3afe: ld   (iy+$16),$00]
 	move.b	#0x13,(0x11,a3)                 	| [$3b02: ld   (iy+$11),$13]
 
@@ -8571,7 +8579,7 @@ l_3bca:
 	rts                                    	| [$3bd0: ret]
 
 l_3be3:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$3be3: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$3be3: call $4006]
 	btst.b	#0,(0x08,a2)                    	| [$3be6: bit  0,(ix+$08)]
 	jne	l_3c10                             	| [$3bea: jr   nz,$3C10]
 	move.b	(0x05,a2),d0                    	| [$3bec: ld   a,(ix+$05)]
@@ -8676,7 +8684,7 @@ l_3c3b:
 							| [$3c90: inc  (hl)]
 							| [$3c91: ret]
 l_3c92:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$3c92: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$3c92: call $4006]
 	subq.b	#1,(0x11,a2)                    	| [$3c95: dec  (ix+$11)]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$3c98: ret  nz] [...]
@@ -8704,9 +8712,9 @@ l_3cae:
 	move.b	#0x10,(0x02,a3)                 	| [$3cbb: ld   (iy+$02),$10]
 	LOAD_ROM	0x3D0F,a0                          	| [$3cbf: ld   hl,$3D0F]
 	LOAD_D5D6_FROM_A0_ROM
-	move.b	d6,(0x0c,a3)                    	| [$3cc2: ld   (iy+$0c),l]
-	move.b	d5,(0x0d,a3)                    	| [$3cc5: ld   (iy+$0d),h]
-	move.b	d0,(0x0e,a3)                    	| [$3cc8: ld   (iy+$0e),a]
+	move.b	d6,(animation_rom_pointer_lsb_0c,a3)                    	| [$3cc2: ld   (iy+$0c),l]
+	move.b	d5,(animation_rom_pointer_msb_0d,a3)                    	| [$3cc5: ld   (iy+$0d),h]
+	move.b	d0,(animation_timer_0e,a3)                    	| [$3cc8: ld   (iy+$0e),a]
 	move.b	#0x06,(0x02,a2)                 	| [$3ccb: ld   (ix+$02),$06]
 	move.b	#0x01,(0x08,a2)                 	| [$3ccf: ld   (ix+$08),$01]
 	move.b	#0xE8,(0x0a,a2)                 	| [$3cd3: ld   (ix+$0a),$E8]
@@ -8724,7 +8732,7 @@ l_3cae:
 	move.b	d0,(0x05,a3)                    	| [$3cf6: ld   (iy+$05),a]
 	move.b	#0x01,(0x08,a3)                 	| [$3cf9: ld   (iy+$08),$01]
 	move.b	#0xE8,(0x0a,a3)                 	| [$3cfd: ld   (iy+$0a),$E8]
-	jbsr	l_403c                            	| [$3d01: call $403C]
+	jbsr	auto_animate_sprite_iy_403c                            	| [$3d01: call $403C]
 
 	move.l	a3,a0                        	| [$3d04: push iy]
 	LOAD_D5D6_FROM_A0_RAM                        	| [$3d06: pop  hl]
@@ -8773,7 +8781,7 @@ l_3d53:
 	jbsr	store_de_in_struct_381e                            	| [$3d56: call $381E]
 	addq.b	#1,(0x02,a2)                    	| [$3d59: inc  (ix+$02)]
 wolf_baloon_exploding_3d5c:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$3d5c: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$3d5c: call $4006]
 	subq.b	#1,(0x11,a2)                    	| [$3d5f: dec  (ix+$11)]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$3d62: ret  nz] [...]
@@ -8802,7 +8810,7 @@ l_3d88:
 	move.b	d2,(0x13,a2)                    	| [$3d89: ld   (ix+$13),c]
 	addq.b	#1,(0x02,a2)                    	| [$3d8c: inc  (ix+$02)]
 wolf_shot_by_arrow_falls_3d8f:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$3d8f: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$3d8f: call $4006]
 	subq.b	#1,(0x11,a2)                    	| [$3d92: dec  (ix+$11)]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$3d95: ret  nz] [...]
@@ -8851,7 +8859,7 @@ l_3e69:
 	clr.b	(0x15,a2)                        	| [$3e95: ld   (ix+$15),$00]
 	addq.b	#1,(0x02,a2)                    	| [$3e99: inc  (ix+$02)]
 l_3e9c:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$3e9c: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$3e9c: call $4006]
 	btst.b	#0,(0x01,a2)                    	| [$3e9f: bit  0,(ix+$01)]
 	jne	l_3f1d                             	| [$3ea3: jp   nz,$3F1D]
 	move.b	(0x12,a2),d6                    	| [$3ea6: ld   l,(ix+$12)]
@@ -8971,14 +8979,14 @@ l_3f5c:
 	move.b	#0x40,(0x09,a2)                 	| [$3f6b: ld   (ix+$09),$40]
 	addq.b	#1,(0x02,a2)                    	| [$3f6f: inc  (ix+$02)]
 l_3f72:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$3f72: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$3f72: call $4006]
 	subq.b	#1,(0x11,a2)                    	| [$3f75: dec  (ix+$11)]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$3f78: ret  nz] [...]
 0:
 	addq.b	#1,(0x02,a2)                    	| [$3f79: inc  (ix+$02)]
 l_3f7c:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$3f7c: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$3f7c: call $4006]
 	jbsr	l_3fd5                            	| [$3f7f: call $3FD5]
 	bcc.b	0f                               	| [...]
 	rts                                    	| [$3f82: ret  c] [...]
@@ -9065,71 +9073,75 @@ rom_check_3fe9:
 										| [$4001: ld   hl,$8A39]
 										| [$4004: inc  (hl)]
 	rts                                    	| [$4005: ret]
-internal_state_transition_on_timeout_4006:
-	move.b	(0x0e,a2),d0                    	| [$4006: ld   a,(ix+$0e)]
-	                               	| [$4009: and  a]
+	
+auto_animate_sprite_ix_4006:
+	move.b	(animation_timer_0e,a2),d0                    	| [$4006: ld   a,(ix+$0e)]
+	                               	        | [$4009: and  a]
 	jeq	l_4010                             	| [$400a: jr   z,$4010]
-	subq.b	#1,(0x0e,a2)                    	| [$400c: dec  (ix+$0e)]
+	subq.b	#1,(animation_timer_0e,a2)                    	| [$400c: dec  (ix+$0e)]
 	rts                                    	| [$400f: ret]
 l_4010:
-	move.b	(0x0c,a2),d6                    	| [$4010: ld   l,(ix+$0c)]
-	move.b	(0x0d,a2),d5                    	| [$4013: ld   h,(ix+$0d)]
+	move.b	(animation_rom_pointer_lsb_0c,a2),d6                    	| [$4010: ld   l,(ix+$0c)]
+	move.b	(animation_rom_pointer_msb_0d,a2),d5                    	| [$4013: ld   h,(ix+$0d)]
 	LOAD_A0_FROM_D5D6
 	move.b	(a0),d0                         	| [$4016: ld   a,(hl)]
 	cmp.b	#0xFF,d0                         	| [$4017: cp   $FF]
-	jeq	l_4030                             	| [$4019: jr   z,$4030]
-	move.b	d0,(0x10,a2)                    	| [$401b: ld   (ix+$10),a]
+	jeq	reload_animation_pointer_4030                             	| [$4019: jr   z,$4030]
+	move.b	d0,(sprite_attributes_10,a2)                    	| [$401b: ld   (ix+$10),a]
 	addq.w	#1,a0                           	| [$401e: inc  hl]
 	move.b	(a0)+,d0                         	| [$401f: ld   a,(hl)]
-	move.b	d0,(0x0f,a2)                    	| [$4020: ld   (ix+$0f),a]
+	move.b	d0,(sprite_code_0f,a2)                    	| [$4020: ld   (ix+$0f),a]
 	                           	| [$4023: inc  hl]
 	move.b	(a0)+,d0                         	| [$4024: ld   a,(hl)]
-	move.b	d0,(0x0e,a2)                    	| [$4025: ld   (ix+$0e),a]
+	move.b	d0,(animation_timer_0e,a2)                    	| [$4025: ld   (ix+$0e),a]
 	LOAD_D5D6_FROM_A0_ROM                           	| [$4028: inc  hl]
-	move.b	d6,(0x0c,a2)                    	| [$4029: ld   (ix+$0c),l]
-	move.b	d5,(0x0d,a2)                    	| [$402c: ld   (ix+$0d),h]
+	move.b	d6,(animation_rom_pointer_lsb_0c,a2)  | [$4029: ld   (ix+$0c),l]
+	move.b	d5,(animation_rom_pointer_msb_0d,a2)  | [$402c: ld   (ix+$0d),h]
 	rts                                    	| [$402f: ret]
 	
-l_4030:
+reload_animation_pointer_4030:
 	addq.w	#1,a0                           	| [$4030: inc  hl]
 	move.b	(a0)+,d0                         	| [$4031: ld   a,(hl)]
-	move.b	d0,(0x0c,a2)                    	| [$4032: ld   (ix+$0c),a]
+	move.b	d0,(animation_rom_pointer_lsb_0c,a2)                    	| [$4032: ld   (ix+$0c),a]
 	                           	| [$4035: inc  hl]
 	move.b	(a0),d0                         	| [$4036: ld   a,(hl)]
-	move.b	d0,(0x0d,a2)                    	| [$4037: ld   (ix+$0d),a]
+	move.b	d0,(animation_rom_pointer_msb_0d,a2)                    	| [$4037: ld   (ix+$0d),a]
 	jra	l_4010                             	| [$403a: jr   $4010]
-l_403c:
-	move.b	(0x0e,a3),d0                    	| [$403c: ld   a,(iy+$0e)]
+
+* exactly the same code but ix/a2 replaced by iy/a3
+auto_animate_sprite_iy_403c:
+	move.b	(animation_timer_0e,a3),d0                    	| [$403c: ld   a,(iy+$0e)]
 	                               	| [$403f: and  a]
 	jeq	l_4046                             	| [$4040: jr   z,$4046]
-	subq.b	#1,(0x0e,a3)                    	| [$4042: dec  (iy+$0e)]
+	subq.b	#1,(animation_timer_0e,a3)                    	| [$4042: dec  (iy+$0e)]
 	rts                                    	| [$4045: ret]
+
 l_4046:
-	move.b	(0x0c,a3),d6                    	| [$4046: ld   l,(iy+$0c)]
-	move.b	(0x0d,a3),d5                    	| [$4049: ld   h,(iy+$0d)]
+	move.b	(animation_rom_pointer_lsb_0c,a3),d6                    	| [$4046: ld   l,(iy+$0c)]
+	move.b	(animation_rom_pointer_msb_0d,a3),d5                    	| [$4049: ld   h,(iy+$0d)]
 	LOAD_A0_FROM_D5D6
 	move.b	(a0),d0                         	| [$404c: ld   a,(hl)]
 	cmp.b	#0xFF,d0                         	| [$404d: cp   $FF]
 	jeq	l_4066                             	| [$404f: jr   z,$4066]
-	move.b	d0,(0x10,a3)                    	| [$4051: ld   (iy+$10),a]
+	move.b	d0,(sprite_attributes_10,a3)                    	| [$4051: ld   (iy+$10),a]
 	addq.w	#1,a0                           	| [$4054: inc  hl]
 	move.b	(a0)+,d0                         	| [$4055: ld   a,(hl)]
-	move.b	d0,(0x0f,a3)                    	| [$4056: ld   (iy+$0f),a]
+	move.b	d0,(sprite_code_0f,a3)                    	| [$4056: ld   (iy+$0f),a]
 	                           	| [$4059: inc  hl]
 	move.b	(a0)+,d0                         	| [$405a: ld   a,(hl)]
-	move.b	d0,(0x0e,a3)                    	| [$405b: ld   (iy+$0e),a]
+	move.b	d0,(animation_timer_0e,a3)                    	| [$405b: ld   (iy+$0e),a]
 	                           	| [$405e: inc  hl]
 	LOAD_D5D6_FROM_A0_ROM
-	move.b	d6,(0x0c,a3)                    	| [$405f: ld   (iy+$0c),l]
-	move.b	d5,(0x0d,a3)                    	| [$4062: ld   (iy+$0d),h]
+	move.b	d6,(animation_rom_pointer_lsb_0c,a3)                    	| [$405f: ld   (iy+$0c),l]
+	move.b	d5,(animation_rom_pointer_msb_0d,a3)                    	| [$4062: ld   (iy+$0d),h]
 	rts                                    	| [$4065: ret]
 l_4066:
 	addq.w	#1,a0                           	| [$4066: inc  hl]
 	move.b	(a0)+,d0                         	| [$4067: ld   a,(hl)]
-	move.b	d0,(0x0c,a3)                    	| [$4068: ld   (iy+$0c),a]
+	move.b	d0,(animation_rom_pointer_lsb_0c,a3)                    	| [$4068: ld   (iy+$0c),a]
 	                           	| [$406b: inc  hl]
 	move.b	(a0),d0                         	| [$406c: ld   a,(hl)]
-	move.b	d0,(0x0d,a3)                    	| [$406d: ld   (iy+$0d),a]
+	move.b	d0,(animation_rom_pointer_msb_0d,a3)                    	| [$406d: ld   (iy+$0d),a]
 	jra	l_4046                             	| [$4070: jr   $4046]
 	
 l_40bd:
@@ -9178,7 +9190,7 @@ jump_table_40E1:
 	.long	do_nothing_4378
 
 l_4103:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$4103: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$4103: call $4006]
 	subq.b	#1,(0x11,a2)                    	| [$4106: dec  (ix+$11)]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$4109: ret  nz] [...]
@@ -9222,7 +9234,7 @@ l_4103:
 	                                    	| [$4136: ret]
 
 l_4137:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$4137: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$4137: call $4006]
 	move.b	(0x0a,a2),d0                    	| [$413a: ld   a,(ix+$0a)]
 	neg.b	d0                               	| [$413d: neg]
 	move.b	d0,d1                           	| [$413f: ld   b,a]
@@ -9249,7 +9261,7 @@ l_4149:
 	jbsr	load_16bit_rom_pointer_0c45                            	| [$4169: call $0C45]
 	jra	store_de_in_struct_381e                             	| [$416c: jp   $381E]
 l_416f:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$416f: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$416f: call $4006]
 	subq.b	#1,(0x11,a2)                    	| [$4172: dec  (ix+$11)]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$4175: ret  nz] [...]
@@ -9265,7 +9277,7 @@ l_417a:
 	move.b	#0x30,(0x11,a2)                 	| [$4186: ld   (ix+$11),$30]
 	addq.b	#1,(0x02,a2)                    	| [$418a: inc  (ix+$02)]
 l_418d:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$418d: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$418d: call $4006]
 	subq.b	#1,(0x11,a2)                    	| [$4190: dec  (ix+$11)]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$4193: ret  nz] [...]
@@ -9288,7 +9300,7 @@ l_419c:
 
 
 l_4221:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$4221: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$4221: call $4006]
 	btst.b	#0,(0x08,a2)                    	| [$4224: bit  0,(ix+$08)]
 	jne	l_4244                             	| [$4228: jr   nz,$4244]
 	jbsr	l_343e                            	| [$422a: call $343E]
@@ -9421,7 +9433,7 @@ l_42da:
 	subq.b	#1,d0                           	| [$430d: dec  a]
 	and.b	#0x03,d0                         	| [$430e: and  $03]
 	jbsr	load_16bit_rom_pointer_0c45                            	| [$4310: call $0C45]
-	jbsr	store_de_in_struct_5c75                            	| [$4313: call $5C75]
+	jbsr	store_animation_sequence_in_object_5c75                            	| [$4313: call $5C75]
 	clr.b	d0                               	| [$4316: xor  a]
 	move.b	d0,l_8D5B(a6)                   	| [$4317: ld   ($8D5B),a]
 	LOAD_ROM	0x4347,a1                          	| [$431a: ld   de,$4347]
@@ -9433,7 +9445,7 @@ l_42da:
 	rts                                    	| [$432c: ret]
 
 l_4350:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$4350: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$4350: call $4006]
 	subq.b	#1,(0x11,a2)                    	| [$4353: dec  (ix+$11)]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$4356: ret  nz] [...]
@@ -9449,7 +9461,7 @@ l_4364:
 	subq.b	#1,(0x11,a2)                    	| [$436a: dec  (ix+$11)]
 	rts                                    	| [$436d: ret]
 l_436e:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$436e: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$436e: call $4006]
 	jbsr	l_3fd5                            	| [$4371: call $3FD5]
 	bcc.b	0f                               	| [...]
 	rts                                    	| [$4374: ret  c] [...]
@@ -9924,10 +9936,10 @@ l_5433:
 	LOAD_ROM	0x5657,a0                          	| [$5470: ld   hl,$5657]
 	jbsr	load_16bit_rom_pointer_0c45                            	| [$5473: call $0C45]
 	LOAD_D3D4_FROM_D3_16
-	move.b	d4,(0x0c,a2)                    	| [$5476: ld   (ix+$0c),e]
-	move.b	d3,(0x0d,a2)                    	| [$5479: ld   (ix+$0d),d]
+	move.b	d4,(animation_rom_pointer_lsb_0c,a2)                    	| [$5476: ld   (ix+$0c),e]
+	move.b	d3,(animation_rom_pointer_msb_0d,a2)                    	| [$5479: ld   (ix+$0d),d]
 	move.b	#0x40,(0x11,a2)                 	| [$547c: ld   (ix+$11),$40]
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$5480: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$5480: call $4006]
 	move.b	d2,d0                           	| [$5483: ld   a,c]
 	addq.b	#1,d0                           	| [$5484: inc  a]
 	move.b	d0,l_8D01(a6)                   	| [$5485: ld   ($8D01),a]
@@ -10868,15 +10880,15 @@ l_5c54:
 	LOAD_ROM	0x5CF9,a1                          	| [$5c69: ld   de,$5CF9]
 l_5c6c:
 	move.b	#0x02,(0x16,a3)                 	| [$5c6c: ld   (iy+$16),$02]
-	jbsr	store_de_in_struct_5c75                            	| [$5c70: call $5C75]
+	jbsr	store_animation_sequence_in_object_5c75                            	| [$5c70: call $5C75]
 	addq	#4,a7                        	| [$5c73: pop  af]
 	rts                                    	| [$5c74: ret]
 	
-store_de_in_struct_5c75:
+store_animation_sequence_in_object_5c75:
 	LOAD_D3D4_FROM_A1_ROM
-	move.b	d4,(0x0c,a3)                    	| [$5c75: ld   (iy+$0c),e]
-	move.b	d3,(0x0d,a3)                    	| [$5c78: ld   (iy+$0d),d]
-	clr.b	(0x0e,a3)                        	| [$5c7b: ld   (iy+$0e),$00]
+	move.b	d4,(animation_rom_pointer_lsb_0c,a3)                    	| [$5c75: ld   (iy+$0c),e]
+	move.b	d3,(animation_rom_pointer_msb_0d,a3)                    	| [$5c78: ld   (iy+$0d),d]
+	clr.b	(animation_timer_0e,a3)                        	| [$5c7b: ld   (iy+$0e),$00]
 	rts                                    	| [$5c7f: ret]
 
 l_5d0c:
@@ -11768,7 +11780,7 @@ l_62f0:
 	add.b	d0,(0x0a,a3)                    	| [$62ff: ld   (iy+$0a),a]
 	bset.b	#5,(0x16,a3)                    	| [$6302: set  5,(iy+$16)]
 	LOAD_ROM	0x634F,a1                          	| [$6306: ld   de,$634F]
-	jbsr	store_de_in_struct_5c75                            	| [$6309: call $5C75]
+	jbsr	store_animation_sequence_in_object_5c75                            	| [$6309: call $5C75]
 	jra	l_6274                             	| [$630c: jp   $6274]
 l_630f:
 	move.b	#0x06,d4                        	| [$630f: ld   e,$06]
@@ -12350,7 +12362,7 @@ l_670b:
 	move.b	#0x2C,(0x09,a2)                 	| [$6725: ld   (ix+$09),$2C]
 	rts                                    	| [$6729: ret]
 l_game_intro_wolves_arriving_672a:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$672a: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$672a: call $4006]
 	move.b	(0x05,a2),d0                    	| [$672d: ld   a,(ix+$05)]
 	add.b	(0x09,a2),d0                     	| [$6730: add  a,(ix+$09)]
 	jcc	l_6738                             	| [$6733: jr   nc,$6738]
@@ -12413,7 +12425,7 @@ l_game_intro_wolves_departing_67a0:
 	subq.b	#1,(a0)                         	| [$67a7: dec  (hl)]
 	rts                                    	| [$67a8: ret]
 l_67a9:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$67a9: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$67a9: call $4006]
 	move.b	(0x07,a2),d6                    	| [$67ac: ld   l,(ix+$07)]
 	move.b	(0x08,a2),d5                    	| [$67af: ld   h,(ix+$08)]
 	move.b	d5,d0                           	| [$67b2: ld   a,h]
@@ -12466,7 +12478,7 @@ l_67e8:
 	lea	l_8928(a6),a0                      	| [$67ff: ld   hl,$8928]
 	move.b	#0x09,d1                        	| [$6802: ld   b,$09]
 	jbsr	fill_area_0010                            	| [$6804: rst  $10]
-	lea	player_structure_8A80(a6),a0      	| [$6805: ld   hl,player_structure_8A80]
+	lea	player_bow_structure_8A80(a6),a0      	| [$6805: ld   hl,player_bow_structure_8A80]
 	move.b	d0,(a0)                         	| [$6808: ld   (hl),a]
 	lea	l_8A81(a6),a1                      	| [$6809: ld   de,$8A81]
 	move.w	#0x0240,d1                          	| [$680c: ld   bc,$0240]
@@ -12510,7 +12522,7 @@ l_683a:
 	move.b	#0x18,(0x09,a2)                 	| [$6852: ld   (ix+$09),$18]
 	rts                                    	| [$6856: ret]
 intro_mama_arrives_6857:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$6857: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$6857: call $4006]
 	move.b	(0x05,a2),d0                    	| [$685a: ld   a,(ix+$05)]
 	sub.b	(0x09,a2),d0                     	| [$685d: sub  (ix+$09)]
 	jcc	l_6865                             	| [$6860: jr   nc,$6865]
@@ -12739,7 +12751,7 @@ l_69c6:
 	beq.b	0f                               	| [...]
 	rts                                    	| [$69cf: ret  nz] [...]
 0:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$69d0: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$69d0: call $4006]
 	move.b	(0x05,a3),d0                    	| [$69d3: ld   a,(iy+$05)]
 	sub.b	(0x09,a3),d0                     	| [$69d6: sub  (iy+$09)]
 	jcc	l_69de                             	| [$69d9: jr   nc,$69DE]
@@ -12883,7 +12895,7 @@ jump_table_6AA4:
 	.long	l_game_intro_sequence_end_67df
 
 l_6aa8:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$6aa8: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$6aa8: call $4006]
 	move.b	(0x05,a2),d0                    	| [$6aab: ld   a,(ix+$05)]
 	sub.b	(0x09,a2),d0                     	| [$6aae: sub  (ix+$09)]
 	jcc	l_6ab6                             	| [$6ab1: jr   nc,$6AB6]
@@ -13628,7 +13640,7 @@ l_6f2d:
 	jeq	l_3536                             	| [$6f32: jp   z,$3536]
 	sub.b	#0x0B,d0                         	| [$6f35: sub  $0B]
 	jcc	l_6f3d                             	| [$6f37: jr   nc,$6F3D]
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$6f39: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$6f39: call $4006]
 	rts                                    	| [$6f3c: ret]
 l_6f3d:
 	jbsr	jump_from_table_below_0028
@@ -14228,7 +14240,7 @@ l_738a:
 	move.b	#0x38,(0x09,a2)                 	| [$7390: ld   (ix+$09),$38]
 	rts                                    	| [$7394: ret]
 l_7395:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$7395: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$7395: call $4006]
 	jbsr  read_ixl_in_d0                         	| [$7398: ld   a,ixl]
 	btst.b	#3,d0                           	| [$739a: bit  3,a]
 	jne	l_73b6                             	| [$739c: jr   nz,$73B6]
@@ -14492,8 +14504,8 @@ l_7595:
 	LOAD_ROM	0x5657,a0                          	| [$75d0: ld   hl,$5657]
 	jbsr	load_16bit_rom_pointer_0c45                            	| [$75d3: call $0C45]
 	LOAD_D3D4_FROM_D3_16
-	move.b	d4,(0x0c,a3)                    	| [$75d6: ld   (iy+$0c),e]
-	move.b	d3,(0x0d,a3)                    	| [$75d9: ld   (iy+$0d),d]
+	move.b	d4,(animation_rom_pointer_lsb_0c,a3)                    	| [$75d6: ld   (iy+$0c),e]
+	move.b	d3,(animation_rom_pointer_msb_0d,a3)                    	| [$75d9: ld   (iy+$0d),d]
 	move.b	#0x18,(0x09,a3)                 	| [$75dc: ld   (iy+$09),$18]
 	move.b	#0x01,(0x00,a3)                 	| [$75e0: ld   (iy+$00),$01]
 	lea	l_8922(a6),a0                      	| [$75e4: ld   hl,$8922]
@@ -14556,7 +14568,7 @@ move_intro_pigs_to_left_7644:
 	bne.b	0f                               	| [...]
 	rts                                    	| [$7648: ret  z] [...]
 0:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$7649: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$7649: call $4006]
 	move.b	(0x05,a2),d0                    	| [$764c: ld   a,(ix+$05)]
 	sub.b	(0x09,a2),d0                     	| [$764f: sub  (ix+$09)]
 	jcc	l_7657                             	| [$7652: jr   nc,$7657]
@@ -14581,7 +14593,7 @@ l_766c:
 	addq	#4,a7                        	| [$7673: pop  af] pop/skip caller
 	rts                                    	| [$7674: ret]
 intro_balloons_related_7675:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$7675: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$7675: call $4006]
 	lea	l_892E(a6),a0                      	| [$7678: ld   hl,$892E]
 	move.b	(a0),d0                         	| [$767b: ld   a,(hl)]
 	                               	| [$767c: and  a]
@@ -14618,7 +14630,7 @@ intro_balloons_related_76a6:
 	beq.b	0f                               	| [...]
 	rts                                    	| [$76aa: ret  nz] [...]
 0:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$76ab: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$76ab: call $4006]
 	rts                                    	| [$76ae: ret]
 l_76af:
 	lea	l_892A(a6),a0                      	| [$76af: ld   hl,$892A]
@@ -14703,7 +14715,7 @@ intro_wait_and_release_baloons_771D:
 	move.b	d0,(0x0a,a2)                    	| [$773a: ld   (ix+$0a),a]
 	addq.b	#1,(0x02,a2)                    	| [$773d: inc  (ix+$02)]
 intro_balloons_related_7740:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$7740: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$7740: call $4006]
 	move.b	(0x0a,a2),d0                    	| [$7743: ld   a,(ix+$0a)]
 	neg.b	d0                               	| [$7746: neg]
 	move.b	d0,d1                           	| [$7748: ld   b,a]
@@ -14751,7 +14763,7 @@ l_7752:
 											| [$778e: inc  (hl)]
 	rts                                    	| [$778f: ret]
 intro_baloons_exploding_into_title_7790:
-	jbsr	internal_state_transition_on_timeout_4006                            	| [$7790: call $4006]
+	jbsr	auto_animate_sprite_ix_4006                            	| [$7790: call $4006]
 	subq.b	#1,(0x11,a2)                    	| [$7793: dec  (ix+$11)]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$7796: ret  nz] [...]
