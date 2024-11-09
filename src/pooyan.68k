@@ -1227,7 +1227,7 @@ l_04f2:
 	jcc	l_04ff                             	| [$04fa: jr   nc,$04FF]
 	lea	l_88A5(a6),a1                      	| [$04fc: ld   de,$88A5]
 l_04ff:
-	move.w	(sp)+,d0                        	| [$04ff: pop  af]
+	move.w	(sp)+,d0                        	| [$04ff: pop  af] restore D0!
 	rts                                    	| [$0500: ret]
 
 zero_and_display_highscores_0552:
@@ -6589,7 +6589,7 @@ l_2bbf:
 	move.b	(a0),d0                         	| [$2bc6: ld   a,(hl)]
 	cmp.b	#0xBA,d0                         	| [$2bc7: cp   $BA]
 	jne	l_2bcd                             	| [$2bc9: jr   nz,$2BCD]
-	move.w	(sp)+,d0                        	| [$2bcb: pop  af]
+	addq	#4,a7                        	| [$2bcb: pop  af]
 	rts                                    	| [$2bcc: ret]
 l_2bcd:
 	LOAD_ROM	0x2BE1,a1                          	| [$2bcd: ld   de,$2BE1]
@@ -6695,7 +6695,7 @@ l_2c76:
 	subq.b	#1,d1                           	| [...]
 	jne	l_2c76                             	| [$2c7e: djnz $2C76]
 	jbsr	l_0f3f                            	| [$2c80: call $0F3F]
-	move.w	(sp)+,d0                        	| [$2c83: pop  af]
+	addq	#4,a7                        	| [$2c83: pop  af]
 	rts                                    	| [$2c84: ret]
 l_2c85:
 	move.b	(0x02,a2),d0                    	| [$2c85: ld   a,(ix+$02)]
@@ -6770,17 +6770,16 @@ l_2d32:
 	rts                                    	| [$2d3a: ret  c] [...]
 0:
 	addq.b	#1,(0x02,a2)                    	| [$2d3b: inc  (ix+$02)]
-	CLEAR_XC_FLAGS                         	| [$2d3e: xor  a]
 	clr.b	d0                               	| [$2d3e: xor  a]
 	move.b	d0,(0x05,a2)                    	| [$2d3f: ld   (ix+$05),a]
 	move.b	d0,(0x06,a2)                    	| [$2d42: ld   (ix+$06),a]
 	move.b	d0,(0x16,a2)                    	| [$2d45: ld   (ix+$16),a]
-	move.w	(sp)+,d0                        	| [$2d48: pop  af]
+	addq	#4,a7                        	| [$2d48: pop  af]
 	rts                                    	| [$2d49: ret]
 l_2d4a:
 	clr.b	d0                               	| [$2d4a: ld   a,$00]
 	move.b	d0,l_8F36(a6)                   	| [$2d4c: ld   ($8F36),a]
-	move.w	(sp)+,d0                        	| [$2d4f: pop  af]
+	addq	#4,a7                        	| [$2d4f: pop  af]
 	rts                                    	| [$2d50: ret]
 
 l_2d66:
@@ -7140,7 +7139,7 @@ l_305f:
 	move.b	#0x01,d0                        	| [$307d: ld   a,$01]
 	move.b	d0,l_8D32(a6)                   	| [$307f: ld   ($8D32),a]
 	jbsr	l_0f15                            	| [$3082: call $0F15]
-	move.w	(sp)+,d0                        	| [$3085: pop  af]
+	addq	#4,a7                        	| [$3085: pop  af]
 	rts                                    	| [$3086: ret]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$3087: ret  nz] [...]
@@ -8707,7 +8706,6 @@ l_3cae:
 	rts                                    	| [$3cb5: ret  nz] [...]
 0:
 	move.b	#0x01,(0x01,a3)                 	| [$3cb6: ld   (iy+$01),$01]
-	CLEAR_XC_FLAGS                         	| [$3cba: xor  a]
 	clr.b	d0                               	| [$3cba: xor  a]
 	move.b	#0x10,(0x02,a3)                 	| [$3cbb: ld   (iy+$02),$10]
 	LOAD_ROM	0x3D0F,a0                          	| [$3cbf: ld   hl,$3D0F]
@@ -8738,7 +8736,7 @@ l_3cae:
 	LOAD_D5D6_FROM_A0_RAM                        	| [$3d06: pop  hl]
 	move.b	d6,(0x14,a2)                    	| [$3d07: ld   (ix+$14),l]
 	move.b	d5,(0x15,a2)                    	| [$3d0a: ld   (ix+$15),h]
-	move.w	(sp)+,d0                        	| [$3d0d: pop  af]
+	addq	#4,a7                        	| [$3d0d: pop  af]
 	rts                                    	| [$3d0e: ret]
 
 l_3d18:
@@ -9441,7 +9439,7 @@ l_42da:
 	move.b	#0x30,(0x11,a2)                 	| [$4320: ld   (ix+$11),$30]
 	move.b	#0x04,(0x11,a3)                 	| [$4324: ld   (iy+$11),$04]
 	addq.b	#1,(0x02,a2)                    	| [$4328: inc  (ix+$02)]
-	move.w	(sp)+,d0                        	| [$432b: pop  af]
+	addq	#4,a7                        	| [$432b: pop  af]
 	rts                                    	| [$432c: ret]
 
 l_4350:
@@ -11007,7 +11005,7 @@ l_5d9b:
 	move.b	d5,(0x13,a2)                    	| [$5db7: ld   (ix+$13),h]
 	move.b	d6,(0x12,a2)                    	| [$5dba: ld   (ix+$12),l]
 	jbsr	l_0f2b                            	| [$5dbd: call $0F2B]
-	move.w	(sp)+,d0                        	| [$5dc0: pop  af]
+	addq	#4,a7                        	| [$5dc0: pop  af]
 	rts                                    	| [$5dc1: ret]
 
 l_5df7:
@@ -11092,8 +11090,8 @@ l_5e54:
 	move.b	#0x01,d0                        	| [$5e55: ld   a,$01]
 	move.b	d0,l_8D32(a6)                   	| [$5e57: ld   ($8D32),a]
 
-	move.l	a0,-(sp)                        	| [$5e5a: push hl]
-	move.l	(sp)+,a2                        	| [$5e5b: pop  ix]
+	move.l	a0,a2                        	| [$5e5a: push hl]
+	                        	| [$5e5b: pop  ix]
 	LOAD_ROM	0x40B4,a1                          	| [$5e5d: ld   de,$40B4]
 	jbsr	store_de_in_struct_381e                            	| [$5e60: call $381E]
 	move.b	#0x0A,(0x11,a2)                 	| [$5e63: ld   (ix+$11),$0A]
@@ -11101,7 +11099,7 @@ l_5e54:
 	move.b	#0x01,(0x01,a2)                 	| [$5e6b: ld   (ix+$01),$01]
 	move.b	#0x02,(0x02,a2)                 	| [$5e6f: ld   (ix+$02),$02]
 	jbsr	l_0f15                            	| [$5e73: call $0F15]
-	move.w	(sp)+,d0                        	| [$5e76: pop  af]
+	addq	#4,a7                        	| [$5e76: pop  af]
 	rts                                    	| [$5e77: ret]
 l_5e78:
 	move.b	round_number_8907(a6),d0                   	| [$5e78: ld   a,($8907)]
@@ -11358,7 +11356,7 @@ l_600b:
 	add.w	d3,a0                            	| [$6010: add  hl,de]
 	move.b	#0x01,(a0)                      	| [$6011: ld   (hl),$01]
 	jbsr	l_0f01                            	| [$6013: call $0F01]
-	move.w	(sp)+,d0                        	| [$6016: pop  af]
+	addq	#4,a7                        	| [$6016: pop  af]
 	rts                                    	| [$6017: ret]
 l_6018:
 	move.w	#0x0004,d3                      	| [$6018: ld   de,$0004] 4
@@ -11370,15 +11368,14 @@ l_6018:
 	rts                                    	| [$6024: ret]
 l_6025:
 
-	move.l	a0,-(sp)                        	| [$6025: push hl]
-	move.l	(sp)+,a3                        	| [$6026: pop  iy]
+	move.l	a0,a3                        	| [$6025: push hl]
+	                        	| [$6026: pop  iy]
 	lea	l_8D45(a6),a0                      	| [$6028: ld   hl,$8D45]
 	addq.b	#1,(a0)                         	| [$602b: inc  (hl)]
 	jra	l_613d                             	| [$602c: jp   $613D]
 l_602f:
 	lea	l_8848(a6),a3                      	| [$602f: ld   iy,$8848]
 	move.b	#0x02,d1                        	| [$6033: ld   b,$02]
-	CLEAR_XC_FLAGS                         	| [$6035: xor  a]
 	clr.b	d0                               	| [$6035: xor  a]
 	move.b	d0,i_reg                             	| [$6036: ld   i,a]
 	move.w	#0x0004,d3                      	| [$6038: ld   de,$0004] 4
@@ -11475,9 +11472,10 @@ l_60d5:
 	move.w  #0xFFEC,d3                          	| [$60d5: ld   de,$FFEC]
 	add.w	d3,a0                            	| [$60d8: add  hl,de]
 l_60d9:
+	sne	d7		| capture Z flag (not Z above, but possible when jumped to l_60d9)
 	lea	l_8D1C(a6),a3                      	| [$60d9: ld   iy,$8D1C]
 	move.b	i_reg,d0                           	| [$60dd: ld   a,i]
-	illegal
+	tst.b	d7
 	jne	l_60e3                             	| [$60df: jr   nz,$60E3]
 	subq.w	#1,a3                           	| [$60e1: dec  iy]
 l_60e3:
@@ -11496,15 +11494,15 @@ l_60f2:
 	jne	l_6069                             	| [$60fb: jp   nz,$6069]
 	rts                                    	| [$60fe: ret]
 l_60ff:
-	lea	l_8C90(a6),a2                      	| [$60ff: ld   ix,$8C90]
+								| [$60ff: ld   ix,$8C90]
 	move.b	i_reg,d0                           	| [$6103: ld   a,i]
-	* can't happen, 60ff is called with Z flag unset                             	| [$6105: jr   z,$610B]
+	* can't happen, 60ff is called with Z flag unset   | [$6105: jr   z,$610B]
 	lea	l_8CA8(a6),a2                      	| [$6107: ld   ix,$8CA8]
 l_610b:
 	move.b	#0x01,(0x01,a2)                 	| [$610b: ld   (ix+$01),$01]
 	move.b	#0x01,(0x07,a2)                 	| [$610f: ld   (ix+$07),$01]
 	jbsr	l_0f01                            	| [$6113: call $0F01]
-	move.w	(sp)+,d0                        	| [$6116: pop  af]
+	addq	#4,a7                        	| [$6116: pop  af]
 	rts                                    	| [$6117: ret]
 
 	* unreached?
@@ -11565,7 +11563,7 @@ l_6166:
 l_618a:
 	clr.b	d0                               	| [$618a: xor  a]
 	move.b	d0,l_8D44(a6)                   	| [$618b: ld   ($8D44),a]
-	move.w	(sp)+,d0                        	| [$618e: pop  af]
+	addq	#4,a7                        	| [$618e: pop  af]
 	rts                                    	| [$618f: ret]
 l_6190:
 	move.b	#0x01,(0x08,a2)                 	| [$6190: ld   (ix+$08),$01]
@@ -11699,18 +11697,18 @@ l_625e:
 	add.b	d0,(0x0a,a3)                    	| [$626d: ld   (iy+$0a),a]
 	bset.b	#4,(0x16,a3)                    	| [$6270: set  4,(iy+$16)]
 l_6274:
+	sne	d7				| capture Z flag
 	lea	l_8C90(a6),a0                      	| [$6274: ld   hl,$8C90]
 	move.b	i_reg,d0                           	| [$6277: ld   a,i]
-	illegal
+	tst.b	d7
 	jeq	l_627e                             	| [$6279: jr   z,$627E]
 	lea	l_8CA8(a6),a0                      	| [$627b: ld   hl,$8CA8]
 l_627e:
 	move.b	#0x18,d1                        	| [$627e: ld   b,$18]
-	CLEAR_XC_FLAGS                         	| [$6280: xor  a]
 	clr.b	d0                               	| [$6280: xor  a]
 	jbsr	fill_area_0010                            	| [$6281: rst  $10]
 	jbsr	l_0ef1                            	| [$6282: call $0EF1]
-	move.w	(sp)+,d0                        	| [$6285: pop  af]
+	addq	#4,a7                        	| [$6285: pop  af]
 	rts                                    	| [$6286: ret]
 l_6287:
 	move.b	d0,d2                           	| [$6287: ld   c,a]
@@ -11865,8 +11863,8 @@ l_63b9:
 	cmp.b	#0x06,d0                         	| [$63b9: cp   $06]
 	jcc	l_63ef                             	| [$63bb: jr   nc,$63EF]
 
-	move.l	a0,-(sp)                        	| [$63bd: push hl]
-	move.l	(sp)+,a2                        	| [$63be: pop  ix]
+	move.l	a0,a2                        	| [$63bd: push hl]
+	                        	| [$63be: pop  ix]
 	clr.b	(0x00,a2)                        	| [$63c0: ld   (ix+$00),$00]
 	move.b	#0x01,(0x01,a2)                 	| [$63c4: ld   (ix+$01),$01]
 	move.b	#0x02,(0x02,a2)                 	| [$63c8: ld   (ix+$02),$02]
@@ -11884,7 +11882,7 @@ l_63de:
 	jbsr	l_0ef9                            	| [$63e6: call $0EF9]
 	move.w	#0x0315,d3                          	| [$63e9: ld   de,$0315]
 	jbsr	update_88A0_0038                            	| [$63ec: rst  $38]
-	move.w	(sp)+,d0                        	| [$63ed: pop  af]
+	addq	#4,a7                        	| [$63ed: pop  af]
 	rts                                    	| [$63ee: ret]
 l_63ef:
 	move.w	#0x0004,d3                      	| [$63ef: ld   de,$0004] 4
@@ -12724,7 +12722,7 @@ l_698f:
 l_69a7:
 	lea	l_892D(a6),a0                      	| [$69a7: ld   hl,$892D]
 	addq.b	#1,(a0)                         	| [$69aa: inc  (hl)]
-	move.w	(sp)+,d0                        	| [$69ab: pop  af]
+	addq	#4,a7                        	| [$69ab: pop  af]
 	rts                                    	| [$69ac: ret]
 l_69ad:
 	lea	wolf_structure_array_8AE0(a6),a2                      	| [$69ad: ld   ix,$8AE0]
@@ -12831,7 +12829,6 @@ l_6a35:
 	bcc.b	0f                               	| [...]
 	rts                                    	| [$6a3c: ret  c] [...]
 0:
-	CLEAR_XC_FLAGS                         	| [$6a3d: xor  a]
 	clr.b	d0                               	| [$6a3d: xor  a]
 	move.b	d0,(0x03,a2)                    	| [$6a3e: ld   (ix+$03),a]
 	move.b	d0,(0x05,a2)                    	| [$6a41: ld   (ix+$05),a]
@@ -12863,7 +12860,7 @@ l_6a77:
 	LOAD_ROM	0x6B0A,a1                          	| [$6a77: ld   de,$6B0A]
 l_6a7a:
 	jbsr	store_de_in_struct_381e                            	| [$6a7a: call $381E]
-	move.w	(sp)+,d0                        	| [$6a7d: pop  af]
+	addq	#4,a7                        	| [$6a7d: pop  af]
 	rts                                    	| [$6a7e: ret]
 l_6a7f:
 	move.b	l_892B(a6),d0                   	| [$6a7f: ld   a,($892B)]
@@ -13201,7 +13198,7 @@ l_6c86:
 	move.b	d2,(a0)+                         	| [$6c89: ld   (hl),c]
 	                           	| [$6c8a: inc  l]
 	move.b	#0x18,(a0)                      	| [$6c8b: ld   (hl),$18]
-	move.w	(sp)+,d0                        	| [$6c8d: pop  af]
+	addq	#4,a7                        	| [$6c8d: pop  af]
 	rts                                    	| [$6c8e: ret]
 l_6c8f:
 	cmp.b	#0x51,d0                         	| [$6c8f: cp   $51]
@@ -13216,12 +13213,12 @@ l_6c9b:
 	jcs	l_6c93                             	| [$6c9d: jr   c,$6C93]
 	bset.b	#3,(a0)                         	| [$6c9f: set  3,(hl)]
 	bclr.b	#2,(a0)                         	| [$6ca1: res  2,(hl)]
-	move.w	(sp)+,d0                        	| [$6ca3: pop  af]
+	addq	#4,a7                        	| [$6ca3: pop  af]
 	rts                                    	| [$6ca4: ret]
 l_6ca5:
 	bset.b	#2,(a0)                         	| [$6ca5: set  2,(hl)]
 	bclr.b	#3,(a0)                         	| [$6ca7: res  3,(hl)]
-	move.w	(sp)+,d0                        	| [$6ca9: pop  af]
+	addq	#4,a7                        	| [$6ca9: pop  af]
 	rts                                    	| [$6caa: ret]
 l_6cab:
 	move.b	l_8806(a6),d0                   	| [$6cab: ld   a,($8806)]
@@ -13238,7 +13235,6 @@ l_6cab:
 	                               	| [$6cb8: and  a]
 	lea	l_8A87(a6),a0                      	| [$6cb9: ld   hl,$8A87]
 	jeq	l_6cc1                             	| [$6cbc: jr   z,$6CC1]
-	CLEAR_XC_FLAGS                         	| [$6cbe: xor  a]
 	clr.b	d0                               	| [$6cbe: xor  a]
 	move.b	d0,(a0)                         	| [$6cbf: ld   (hl),a]
 	rts                                    	| [$6cc0: ret]

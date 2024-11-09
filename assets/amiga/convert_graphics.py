@@ -135,7 +135,7 @@ add_sprite(7,"basket_bottom")
 add_sprite(0xA,"basket_top")
 add_sprite(0xF,"basket_bottom")
 add_sprite(0x10,"meat")
-add_sprite(0x3A,"points")           # 1600
+add_sprite(0x3A,"points",[0xF])           # 1600
 add_sprite(0x37,"points",[8,2,3])  # 100, 200, 50
 add_sprite(0x39,"points",[3,2])  # 400, 800
 
@@ -156,7 +156,7 @@ add_sprite([0x2,0x2d],"baloon",baloon_cluts)
 add_sprite([0x17,0x18,0x13],"bow")
 add_sprite([0x30,0x3F,0x35,0x38],"rock")
 
-add_sprite(range(0x31,0x35),"burst",[0,1,4,7,9])
+add_sprite(range(0x31,0x35),"burst",[0,1,4,5,7,9,0xF])
 add_sprite([0x15,0x1E],"mama")
 add_sprite([0xD,0x36],"buuyan",[5])
 

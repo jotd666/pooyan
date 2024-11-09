@@ -1,17 +1,11 @@
 
-
-
-
-
 break on all jump table entrypoints, figure them all out
 
+- remaining protection? 4 wolves on ladders right from start
+- meat not flashing
 - nb wolfs flag color should be cyan at start, not red: 8324 should be 8B
-- flipped bobs!
+- implement flipped bobs!
 - fix to have just 1 wolf
-- remaining protection? 3 wolves on ladders right from start
-- wire not properly drawn / basket too
-- wolves falling missing sprites/buggy sprites
-- unregistered tiles or sprites 29/8, 1A/8, 16/9, 39/5 all look bogus
 - double buffering
 - capture screenshot memory dumps to filter out unused tiles/cluts
   to save A LOT OF memory
