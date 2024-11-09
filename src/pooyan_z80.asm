@@ -5268,6 +5268,7 @@ table_2774:
 2D7B: EF          rst  $28
 	.word	$2D80
 	.word	$2DBC
+	.word	$2D3A
 
 2D80: 3A 03 89    ld   a,($8903)
 2D83: D6 02       sub  $02

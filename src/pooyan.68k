@@ -3587,7 +3587,7 @@ clear_character_intro_screen_1601:
 	lea	ram_pointer_8e21(a6),a0                      	| [$1615: ld   hl,$8E21]
 	move.b	#0x0C,d1                        	| [$1618: ld   b,$0C]
 	jbsr	fill_area_0010                            	| [$161a: rst  $10]
-	move.b	d0,l_8F16(a6)                   	| [$161b: ld   ($8F16),a]
+	move.b	d0,ladder_wolf_animation_timer_8f16(a6)                   	| [$161b: ld   ($8F16),a]
 	move.b	d0,l_8F17(a6)                   	| [$161e: ld   ($8F17),a]
 	                               	| [$1624: and  a]
 	move.b	#0x02,d0                        	| [$1625: ld   a,$02]
@@ -6799,10 +6799,13 @@ l_2d66:
 l_2d78:
 	move.b	l_8F14(a6),d0                   	| [$2d78: ld   a,($8F14)]
 	jbsr	jump_from_table_below_0028                            	| [$2d7b: rst  $28]
-	.long	l_2d80
-	.long	l_2dbc
-
-l_2d80:
+	.long	wolf_reaches_ladder_2d98
+	.long	animate_wolf_on_ladder_2dBc
+	.long	do_nothing_2d3a
+	
+do_nothing_2d3a:
+	rts
+wolf_reaches_ladder_2d80:
 	move.b	l_8903(a6),d0                   	| [$2d80: ld   a,($8903)]
 	subq.b	#0x02,d0                        	| [$2d83: sub  $02]
 	lea	l_8931(a6),a0                      	| [$2d85: ld   hl,$8931]
@@ -6811,16 +6814,17 @@ l_2d80:
 	rts                                    	| [$2d89: ret  z] [...]
 0:
 	addq.b	#1,(a0)                         	| [$2d8a: inc  (hl)]
-	lea	l_8F18(a6),a0                      	| [$2d8b: ld   hl,$8F18]
+	lea	nb_wolves_on_ladders_8F18(a6),a0                      	| [$2d8b: ld   hl,$8F18]
 	move.b	(a0),d0                         	| [$2d8e: ld   a,(hl)]
 	cmp.b	#0x04,d0                         	| [$2d8f: cp   $04]
-	jcs	l_2d98                             	| [$2d91: jr   c,$2D98]
+	jcs	one_more_wolf_on_ladder_2d98                             	| [$2d91: jr   c,$2D98]
                    	| [$2d93: ld   a,($89EF)]
  	| [$2d96: and  a]
            	| [...]
 	rts                                    	| [$2d97: ret  z] [...]
 0:
-l_2d98:
+one_more_wolf_on_ladder_2d98:
+	* one more wolf on ladder
 	addq.b	#1,(a0)                         	| [$2d98: inc  (hl)]
 	LOAD_ROM	0x2DB8,a0                          	| [$2d99: ld   hl,$2DB8]
 	jbsr	read_byte_a0_plus_d0_0020                            	| [$2d9c: rst  $20]
@@ -6829,23 +6833,23 @@ l_2d98:
 	LOAD_A0_FROM_D5D6
 	STORE_RAM_POINTER	a0,video_ram_pointer_8f19(a6)            	| [$2da0: ld   ($8F19),hl]
 	
-	move.b	l_8F18(a6),d0                   	| [$2da3: ld   a,($8F18)]
+	move.b	nb_wolves_on_ladders_8F18(a6),d0                   	| [$2da3: ld   a,($8F18)]
 	move.b	d0,d1                           	| [$2da6: ld   b,a]
 	lea	l_8F26(a6),a0                      	| [$2da7: ld   hl,$8F26]
 l_2daa:
-	addq.w	#1,a0                           	| [$2daa: inc  hl]
-	addq.w	#1,a0                           	| [$2dab: inc  hl]
+	addq.w	#2,a0                           	| [$2daa: inc  hl]
+	                           	| [$2dab: inc  hl]
 	subq.b	#1,d1                           	| [...]
 	jne	l_2daa                             	| [$2dac: djnz $2DAA]
 	move.b	#0x10,(a0)                      	| [$2dae: ld   (hl),$10]
 	lea	l_8F14(a6),a0                        	| [$2db0: ld   l,$14]
 	addq.b	#1,(a0)                         	| [$2db2: inc  (hl)]
-	lea	l_8F16(a6),a0                        	| [$2db3: ld   l,$16]
+	lea	ladder_wolf_animation_timer_8f16(a6),a0                        	| [$2db3: ld   l,$16]
 	move.b	#0x10,(a0)                      	| [$2db5: ld   (hl),$10]
 	rts                                    	| [$2db7: ret]
 
-l_2dbc:
-	lea	l_8F16(a6),a0                      	| [$2dbc: ld   hl,$8F16]
+animate_wolf_on_ladder_2dBc:
+	lea	ladder_wolf_animation_timer_8f16(a6),a0                      	| [$2dbc: ld   hl,$8F16]
 	move.b	(a0),d0                         	| [$2dbf: ld   a,(hl)]
 	                               	| [$2dc0: and  a]
 	jeq	l_2dc5                             	| [$2dc1: jr   z,$2DC5]
@@ -6857,13 +6861,12 @@ l_2dc5:
 	move.b	(a0),d0                         	| [$2dc9: ld   a,(hl)]
 	cmp.b	#0x08,d0                         	| [$2dca: cp   $08]
 	jne	l_2ddd                             	| [$2dcc: jr   nz,$2DDD]
-	CLEAR_XC_FLAGS                         	| [$2dce: xor  a]
 	clr.b	d0                               	| [$2dce: xor  a]
 	move.b	d0,(a0)                         	| [$2dcf: ld   (hl),a]
 	lea	l_8F14(a6),a0                        	| [$2dd0: ld   l,$14]
 	move.b	d0,(a0)                         	| [$2dd2: ld   (hl),a]
 	moveq	#0,d0
-	move.b	l_8F18(a6),d0                   	| [$2dd3: ld   a,($8F18)]
+	move.b	nb_wolves_on_ladders_8F18(a6),d0                   	| [$2dd3: ld   a,($8F18)]
 	add.b	#0x1B,d0                        	| [$2dd6: ld   l,$1B]
 	add.w	d0,a0                            	| [$2dd8: add  a,l]
 												| [$2dd9: ld   l,a]
@@ -6880,7 +6883,7 @@ l_2ddd:
 
 
 l_2e22:
-	move.b	l_8F18(a6),d0                   	| [$2e22: ld   a,($8F18)]
+	move.b	nb_wolves_on_ladders_8F18(a6),d0                   	| [$2e22: ld   a,($8F18)]
 	                               	| [$2e25: and  a]
 	bne.b	0f                               	| [...]
 	rts                                    	| [$2e26: ret  z] [...]
@@ -8020,7 +8023,7 @@ l_362d:
 	jcs	l_361d                             	| [$3632: jr   c,$361D]
 	cmp.b	#0x14,d0                         	| [$3634: cp   $14]
 	jcc	l_3625                             	| [$3636: jr   nc,$3625]
-	move.b	l_8D7D(a6),d0                   	| [$3638: ld   a,($8D7D)]
+	move.b	nb_pigs_taken_8D7D(a6),d0                   	| [$3638: ld   a,($8D7D)]
 	cmp.b	#0x0E,d0                         	| [$363b: cp   $0E]
 	jcs	l_3645                             	| [$363d: jr   c,$3645]
 	move.b	(0x06,a2),d0                    	| [$363f: ld   a,(ix+$06)]
@@ -8362,7 +8365,7 @@ l_39c9:
 	rts                                    	| [$39df: ret  c] [...]
 0:
 l_39e0:
-	lea	l_8D7D(a6),a0                      	| [$39e0: ld   hl,$8D7D]
+	lea	nb_pigs_taken_8D7D(a6),a0                      	| [$39e0: ld   hl,$8D7D]
 	move.b	(a0),d0                         	| [$39e3: ld   a,(hl)]
 	cmp.b	#0x0E,d0                         	| [$39e4: cp   $0E]
 	jcc	l_3a08                             	| [$39e6: jr   nc,$3A08]
@@ -10287,7 +10290,7 @@ l_57b4:
 	bcs.b	0f                               	| [...]
 	rts                                    	| [$57b9: ret  nc] [...]
 0:
-	move.b	l_8D7D(a6),d0                   	| [$57ba: ld   a,($8D7D)]
+	move.b	nb_pigs_taken_8D7D(a6),d0                   	| [$57ba: ld   a,($8D7D)]
 	sub.b	#0x0C,d0                         	| [$57bd: sub  $0C]
 	bcc.b	0f                               	| [...]
 	rts                                    	| [$57bf: ret  c] [...]
