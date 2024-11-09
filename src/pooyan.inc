@@ -16,8 +16,7 @@
 	OPT_SKIP_GAME_DEMO=0                        | do not change!
 	OPT_ONLY_ONE_ENEMY=0                        | do not change!
 	OPT_ONLY_ONE_LIFE=0                         | do not change!
-	OPT_NO_ENEMIES=0                            | do not change!
-	OPT_DEBUG_SCROLLING=0                       | do not change!
+	
 	.else
 	
 	* debug release, options can be changed
@@ -33,8 +32,7 @@
 	OPT_SKIP_GAME_DEMO=0
 	OPT_ONLY_ONE_ENEMY=0
 	OPT_ONLY_ONE_LIFE=0
-	OPT_NO_ENEMIES=0
-	OPT_DEBUG_SCROLLING=0
+
 	
 	
 	.endif

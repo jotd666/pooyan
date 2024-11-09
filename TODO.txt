@@ -7,12 +7,11 @@ break on all jump table entrypoints, figure them all out
 
 
 
-8810: when is it set?
-
-- number of wolves not written into flag
-- code insert coin & start
-- wolves don't fall, but go up instead!
-- unregistered tiles 29/8, 1A/8
+- fix to have just 1 wolf
+- skip game intro (option)
+- wire not properly drawn / basket too
+- wolves falling missing sprites/buggy sprites
+- unregistered tiles or sprites 29/8, 1A/8, 16/9, 39/5 all look bogus
 - remove "N" screen
 - double buffering
 - capture screenshot memory dumps to filter out unused tiles/cluts
@@ -21,3 +20,4 @@ break on all jump table entrypoints, figure them all out
 converter: lf address >= 0xFC00 consider as negative data
 converter: postproc: 	move.b	d0,(ax) and addq.w #1,ax => (ax)+
 converter: postproc: 	subq.w #1,ax and move.b d0,(ax) => -(ax)
+converter: create dummy LOAD_D1D2_FROM_D1_16 macros

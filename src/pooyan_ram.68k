@@ -4,6 +4,7 @@
 	.global vb_ticks_count
 	.global break_at_startup_flag
 	.global skip_intro_flag
+	.global must_skip_konami_logo_flag
 	.global log_ptr
 	.global	i_reg
 	.global highscore_needs_saving_flag
@@ -54,6 +55,8 @@ regscopy:
 i_reg:
 	.byte	0
 skip_intro_flag:
+	.byte	0
+must_skip_konami_logo_flag:
 	.byte	0
 invincible_flag:
 	.byte	0

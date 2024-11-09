@@ -6542,7 +6542,7 @@ table_35C7:
 39AF: CD 06 40    call $4006
 39B2: 3A 07 89    ld   a,($8907)
 39B5: E6 01       and  $01
-39B7: CA 87 3B    jp   z,$3B87		; anti-cheat? bogus
+39B7: CA 87 3B    jp   z,$3B87
 39BA: DD 7E 0A    ld   a,(ix+$0a)
 39BD: ED 44       neg
 39BF: 47          ld   b,a
@@ -6713,9 +6713,7 @@ table_35C7:
 3B26: DD 77 15    ld   (ix+$15),a
 3B29: C9          ret
 
-
-3B88: CB 08       rrc  b
-3B8A: 46          ld   b,(hl)
+3B87: DD CB 08 46 bit  0,(ix+$08)                                     
 3B8B: C2 BA 39    jp   nz,$39BA
 3B8E: DD 7E 03    ld   a,(ix+$03)
 3B91: DD 86 0A    add  a,(ix+$0a)
@@ -9734,6 +9732,7 @@ jump_table_64FF:
 668F: DD 7E 06    ld   a,(ix+$06)
 6692: FE 1D       cp   $1D
 6694: D8          ret  c
+; reached when wolves abduct the pigs and are fleeing
 6695: DD 36 01 02 ld   (ix+$01),$02
 6699: AF          xor  a
 669A: DD 77 04    ld   (ix+$04),a
