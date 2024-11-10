@@ -6804,7 +6804,7 @@ handle_ladder_wolves_2d66:
 	jbsr	handle_wolves_on_ladders_2e22                            	| [$2d74: call $2E22]
 	rts                                    	| [$2d77: ret]
 handle_wolf_that_escaped_2d78:
-	move.b	l_8F14(a6),d0                   	| [$2d78: ld   a,($8F14)]
+	move.b	ladder_wolves_state_8F14(a6),d0     | [$2d78: ld   a,($8F14)]
 	jbsr	jump_from_table_below_0028          | [$2d7b: rst  $28]
 	.long	wolf_reaches_ladder_2d80
 	.long	animate_wolf_on_ladder_2dBc
@@ -6850,7 +6850,7 @@ l_2daa:
 	subq.b	#1,d1                           	| [...]
 	jne	l_2daa                             	| [$2dac: djnz $2DAA]
 	move.b	#0x10,(a0)                      	| [$2dae: ld   (hl),$10]
-	lea	l_8F14(a6),a0                        	| [$2db0: ld   l,$14]
+	lea	ladder_wolves_state_8F14(a6),a0                        	| [$2db0: ld   l,$14]
 	addq.b	#1,(a0)                         	| [$2db2: inc  (hl)]
 	lea	ladder_wolf_animation_timer_8f16(a6),a0                        	| [$2db3: ld   l,$16]
 	move.b	#0x10,(a0)                      	| [$2db5: ld   (hl),$10]
@@ -6864,28 +6864,29 @@ animate_wolf_on_ladder_2dBc:
 	subq.b	#1,(a0)                         	| [$2dc3: dec  (hl)]
 	rts                                    	| [$2dc4: ret]
 l_2dc5:
+	move.b	#0,0x200
 	move.b	#0x08,(a0)                      	| [$2dc5: ld   (hl),$08]
-	lea	l_8F1B(a6),a0                        	| [$2dc7: ld   l,$1B]
+	lea	ladder_wolves_slots_8F1B(a6),a0                        	| [$2dc7: ld   l,$1B]
 	move.b	(a0),d0                         	| [$2dc9: ld   a,(hl)]
 	cmp.b	#0x08,d0                         	| [$2dca: cp   $08]
-	jne	l_2ddd                             	| [$2dcc: jr   nz,$2DDD]
+	jne	l_2ddd                             	    | [$2dcc: jr   nz,$2DDD]
 	clr.b	d0                               	| [$2dce: xor  a]
 	move.b	d0,(a0)                         	| [$2dcf: ld   (hl),a]
-	lea	l_8F14(a6),a0                        	| [$2dd0: ld   l,$14]
+	lea	ladder_wolves_state_8F14(a6),a0         | [$2dd0: ld   l,$14]
 	move.b	d0,(a0)                         	| [$2dd2: ld   (hl),a]
 	moveq	#0,d0
-	move.b	nb_wolves_on_ladders_8F18(a6),d0                   	| [$2dd3: ld   a,($8F18)]
-	add.b	#0x1B,d0                        	| [$2dd6: ld   l,$1B]
+	move.b	nb_wolves_on_ladders_8F18(a6),d0    | [$2dd3: ld   a,($8F18)]
+	lea	ladder_wolves_slots_8F1B(a6),a0                           | [$2dd6: ld   l,$1B]
 	add.w	d0,a0                            	| [$2dd8: add  a,l]
-												| [$2dd9: ld   l,a]
+	* mark wolf on ladder slot					| [$2dd9: ld   l,a]
 	move.b	#0x01,(a0)                      	| [$2dda: ld   (hl),$01]
-	rts                                    	| [$2ddc: ret]
+	rts                                    	    | [$2ddc: ret]
 l_2ddd:
 	LOAD_ROM	0x2DEE,a0                          	| [$2ddd: ld   hl,$2DEE]
 	jbsr	load_16bit_rom_pointer_0c45                            	| [$2de0: call $0C45]
 	LOAD_RAM_POINTER	video_ram_pointer_8f19(a6),a0             	| [$2de3: ld   hl,($8F19)]
 	jbsr	write_4x4_tile_block_3325         	| [$2de6: call write_4x4_tile_block_3325]
-	lea	l_8F1B(a6),a0                      	| [$2de9: ld   hl,$8F1B]
+	lea	ladder_wolves_slots_8F1B(a6),a0                      	| [$2de9: ld   hl,$8F1B]
 	addq.b	#1,(a0)                         	| [$2dec: inc  (hl)]
 	rts                                    	| [$2ded: ret]
 
@@ -6920,7 +6921,6 @@ l_2e36:
 	.long	wolf_retreating_on_ladder_2f2f
 
 decrease_ladder_wolf_state_timer_2e45:
-	move.b	#1,0x200
 	jbsr  read_ixl_in_d0                         	| [$2e45: ld   a,ixl]
 	move.b	d0,d2                           	| [$2e47: ld   c,a]
 	and.b	#0x03,d0                         	| [$2e48: and  $03]

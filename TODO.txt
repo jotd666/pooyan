@@ -6,7 +6,6 @@ break on all jump table entrypoints, figure them all out
 - baloon shot with arrow: wolf not falling (looks ok with meat)
 - after a while wolves not descending (after a wolf descended on hard left)
 - still 4 wolves when skipping intro
-- when wolves are on ladder they don't attack
 - nb wolfs flag color should be cyan at start, not red: 8324 should be 8B
 - implement flipped bobs!
 - fix to have just 1 wolf at a time, easier debug!
