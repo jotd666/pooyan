@@ -4856,6 +4856,7 @@ table_2774:
 29D0: 32 30 8D    ld   ($8D30),a
 29D3: DD 36 11 18 ld   (ix+$11),$18
 29D7: DD 34 02    inc  (ix+$02)
+; 1 rom checksum
 29DA: 21 79 08    ld   hl,$0879
 29DD: 01 00 20    ld   bc,$2000
 29E0: 7E          ld   a,(hl)
@@ -4865,6 +4866,7 @@ table_2774:
 29E4: 10 FA       djnz $29E0
 29E6: FE 37       cp   $37
 29E8: C2 B3 2A    jp   nz,$2AB3
+; 1 rom compare check!!
 29EB: 21 59 08    ld   hl,$0859
 29EE: 06 20       ld   b,$20
 29F0: 11 80 29    ld   de,$2980
@@ -4889,6 +4891,7 @@ table_2774:
 2A12: 77          ld   (hl),a
 2A13: DD 34 02    inc  (ix+$02)
 2A16: AF          xor  a
+; another ROM checksum
 2A17: 21 39 08    ld   hl,$0839
 2A1A: 06 20       ld   b,$20
 2A1C: 86          add  a,(hl)
@@ -5523,7 +5526,7 @@ table_2774:
 3063: 21 87 30    ld   hl,$3087
 3066: E7          rst  $20
 3067: 47          ld   b,a
-3068: 3A 84 8A    ld   a,(lift_speed_8A84)
+3068: 3A 84 8A    ld   a,(player_y_8A84)
 306B: D6 07       sub  $07
 306D: 4F          ld   c,a
 306E: C6 0E       add  a,$0E
@@ -5703,7 +5706,7 @@ table_2774:
 31BA: 07          rlca
 31BB: C6 18       add  a,$18
 31BD: 4F          ld   c,a
-31BE: 3A 84 8A    ld   a,(lift_speed_8A84)
+31BE: 3A 84 8A    ld   a,(player_y_8A84)
 31C1: B9          cp   c
 31C2: 30 21       jr   nc,$31E5
 31C4: 3E 01       ld   a,$01
@@ -5876,7 +5879,7 @@ code_clone_3278:
 32E4: C2 40 1F    jp   nz,$1F40
 32E7: C9          ret
 
-32E8: 21 84 8A    ld   hl,lift_speed_8A84
+32E8: 21 84 8A    ld   hl,player_y_8A84
 32EB: 34          inc  (hl)
 32EC: 34          inc  (hl)
 32ED: 7E          ld   a,(hl)
@@ -11119,7 +11122,7 @@ jump_table_71C1:
 71E3: 3A 5B 8F    ld   a,($8F5B)
 71E6: A7          and  a
 71E7: 20 0F       jr   nz,$71F8
-71E9: 3A 84 8A    ld   a,(lift_speed_8A84)
+71E9: 3A 84 8A    ld   a,(player_y_8A84)
 71EC: FE 60       cp   $60
 71EE: 38 03       jr   c,$71F3
 71F0: 32 5B 8F    ld   ($8F5B),a
@@ -11129,7 +11132,7 @@ jump_table_71C1:
 71F8: CB D6       set  2,(hl)
 71FA: CB 9E       res  3,(hl)
 71FC: C9          ret
-71FD: 3A 84 8A    ld   a,(lift_speed_8A84)
+71FD: 3A 84 8A    ld   a,(player_y_8A84)
 7200: FE 59       cp   $59
 7202: 28 07       jr   z,$720B
 7204: 30 DD       jr   nc,$71E3

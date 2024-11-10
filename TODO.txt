@@ -2,8 +2,9 @@
 break on all jump table entrypoints, figure them all out
 
 - crash on game over (illegal) in highscore screen
+- baloon not positioned properly vs wolf, too low, too to the right
 - baloon shot with arrow: wolf not falling (looks ok with meat)
-- after a while wolves not descending
+- after a while wolves not descending (after a wolf descended on hard left)
 - still 4 wolves when skipping intro
 - when wolves are on ladder they don't attack
 - nb wolfs flag color should be cyan at start, not red: 8324 should be 8B

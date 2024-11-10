@@ -1314,8 +1314,8 @@ display_string_05b2:
 	clr.b	must_skip_konami_logo_flag
 	* compensate for the init not done because intro is skipped
 	* not sure if it's enough...
-	lea	l_8903(a6),a0                      	| [$675e: ld   hl,$8903]
-	move.b	#2,(a0)                         	| [$6761: inc  (hl)]
+	lea	l_8903(a6),a0
+	move.b	#2,(a0)
 
 0:
 	add.b	d0,d0                            	| [$05b2: add  a,a]
@@ -3514,8 +3514,8 @@ l_1583:
 	beq.b	0f                               	| [...]
 	rts                                    	| [$158b: ret  nz] [...]
 0:
-	btst.b	#4,d1                           	| [$158c: bit  4,b]
 	LOAD_ROM	0x0635,a1                          	| [$158e: ld   de,$0635]
+	btst.b	#4,d1                           	| [$158c: bit  4,b]
 	jeq	l_1595                             	| [$1591: jr   z,$1595]
 	move.b	#0xB5,d3                        	| [$1593: ld   e,$B5]
 l_1595:
@@ -3840,8 +3840,8 @@ l_17c1:
 	lea	l_84F6(a6),a1                      	| [$17c9: ld   de,$84F6]
 	jne	l_17d8                             	| [$17cc: jr   nz,$17D8]
 	move.b	round_number_8907(a6),d0                   	| [$17ce: ld   a,($8907)]
-	btst.b	#0,d0                           	| [$17d1: bit  0,a]
 	LOAD_ROM	0x1E2C,a0                          	| [$17d3: ld   hl,$1E2C]
+	btst.b	#0,d0                           	| [$17d1: bit  0,a]
 	jne	l_17dd                             	| [$17d6: jr   nz,$17DD]
 l_17d8:
 	LOAD_ROM	0x1E34,a0                          	| [$17d8: ld   hl,$1E34]
@@ -5846,7 +5846,7 @@ write_two_4x4_tile_block_2599:
 l_25a6:
 	move.b	round_number_8907(a6),d0                   	| [$25a6: ld   a,($8907)]
 	btst.b	#0,d0                           	| [$25a9: bit  0,a]
-	jeq	l_2d66                             	| [$25ab: jp   z,$2D66]
+	jeq	handle_ladder_wolves_2d66                             	| [$25ab: jp   z,$2D66]
 	lea	l_8F09(a6),a0                      	| [$25ae: ld   hl,$8F09]
 	subq.b	#1,(a0)                         	| [$25b1: dec  (hl)]
 	beq.b	0f                               	| [...]
@@ -5884,7 +5884,6 @@ l_25db:
 	move.b	ram_pointer_8932(a6),d0                   	| [$25df: ld   a,($8932)]
 	cmp.b	#0xA3,d0                         	| [$25e2: cp   $A3]
 	jne	l_25eb                             	| [$25e4: jr   nz,$25EB]
-	CLEAR_XC_FLAGS                         	| [$25e6: xor  a]
 	clr.b	d0                               	| [$25e6: xor  a]
 	move.b	d0,(a1)                         	| [$25e7: ld   (de),a]
 	move.b	d0,l_8F63(a6)                   	| [$25e8: ld   ($8F63),a]
@@ -5913,8 +5912,9 @@ l_25fe:
 	STORE_RAM_POINTER	a2,ram_pointer_8932(a6)            	| [$2616: ld   ($8932),ix]
 	
 	addq.w	#1,a0                           	| [$261a: inc  hl]
+	move.b	(a0),d7                         	| [$261b: bit  0,(hl)]
 	LOAD_ROM	0x276C,a0                          	| [$261d: ld   hl,$276C]
-	btst.b	#0,(a0)                         	| [$261b: bit  0,(hl)]
+	btst.b	#0,d7                         	| [$261b: bit  0,(hl)]
 	jne	l_2625                             	| [$2620: jr   nz,$2625]
 	LOAD_ROM	0x2768,a0                          	| [$2622: ld   hl,$2768]
 l_2625:
@@ -5951,8 +5951,8 @@ l_265a:
 	jra	l_2678                             	| [$2669: jr   $2678]
 l_266b:
 	move.b	l_8F0A(a6),d0                   	| [$266b: ld   a,($8F0A)]
-	btst.b	#0,d0                           	| [$266e: bit  0,a]
 	LOAD_ROM	0x2768,a0                          	| [$2670: ld   hl,$2768]
+	btst.b	#0,d0                           	| [$266e: bit  0,a]
 	jeq	l_2678                             	| [$2673: jr   z,$2678]
 	LOAD_ROM	0x276C,a0                          	| [$2675: ld   hl,$276C]
 l_2678:
@@ -6313,29 +6313,29 @@ l_29bc:
 	move.b	d0,l_8D30(a6)                   	| [$29d0: ld   ($8D30),a]
 	move.b	#0x18,(0x11,a2)                 	| [$29d3: ld   (ix+$11),$18]
 	addq.b	#1,(0x02,a2)                    	| [$29d7: inc  (ix+$02)]
-	LOAD_ROM	0x0879,a0                          	| [$29da: ld   hl,$0879]
-	move.w	#0x2000,d1                          	| [$29dd: ld   bc,$2000]
-	LOAD_D1D2_FROM_D1_16
-l_29e0:
-	move.b	(a0),d0                         	| [$29e0: ld   a,(hl)]
-	add.b	d2,d0                            	| [$29e1: add  a,c]
-	move.b	d0,d2                           	| [$29e2: ld   c,a]
-	addq.w	#1,a0                           	| [$29e3: inc  hl]
-	subq.b	#1,d1                           	| [...]
-	jne	l_29e0                             	| [$29e4: djnz $29E0]
-	cmp.b	#0x37,d0                         	| [$29e6: cp   $37]
-	jne	l_2ab3                             	| [$29e8: jp   nz,$2AB3]
-	LOAD_ROM	0x0859,a0                          	| [$29eb: ld   hl,$0859]
-	move.b	#0x20,d1                        	| [$29ee: ld   b,$20]
-	LOAD_ROM	0x2980,a1                          	| [$29f0: ld   de,$2980]
-l_29f3:
-	move.b	(a1),d0                         	| [$29f3: ld   a,(de)]
-	cmp.b	(a0),d0                          	| [$29f4: cp   (hl)]
-	jne	l_2901                             	| [$29f5: jp   nz,$2901]
-	addq.w	#1,a0                           	| [$29f8: inc  hl]
-	addq.w	#1,a1                           	| [$29f9: inc  de]
-	subq.b	#1,d1                           	| [...]
-	jne	l_29f3                             	| [$29fa: djnz $29F3]
+	* 1 rom checksum											| [$29da: ld   hl,$0879]
+											| [$29dd: ld   bc,$2000]
+						
+						
+										| [$29e0: ld   a,(hl)]
+										| [$29e1: add  a,c]
+										| [$29e2: ld   c,a]
+										| [$29e3: inc  hl]
+										| [...]
+										| [$29e4: djnz $29E0]
+										| [$29e6: cp   $37]
+						| [$29e8: jp   nz,$2AB3]
+												| [$29eb: ld   hl,$0859]
+										| [$29ee: ld   b,$20]
+	* 1 rom compare check!											| [$29f0: ld   de,$2980]
+						
+										| [$29f3: ld   a,(de)]
+										| [$29f4: cp   (hl)]
+										| [$29f5: jp   nz,$2901]
+										| [$29f8: inc  hl]
+										| [$29f9: inc  de]
+										| [...]
+										| [$29fa: djnz $29F3]
 	move.w	#0x0614,d3                          	| [$29fc: ld   de,$0614]
 	jbsr	update_88A0_0038                            	| [$29ff: rst  $38]
 	rts                                    	| [$2a00: ret]
@@ -6345,23 +6345,22 @@ l_2a01:
 	bset.b	#7,(0x10,a2)                    	| [$2a05: set  7,(ix+$10)]
 	lea	l_875A(a6),a0                      	| [$2a09: ld   hl,$875A]
 	move.b	#0xBC,d0                        	| [$2a0c: ld   a,$BC]
-	move.b	d0,(a0)                         	| [$2a0e: ld   (hl),a]
-	addq.w	#1,a0                           	| [$2a0f: inc  hl]
-	move.b	d0,(a0)                         	| [$2a10: ld   (hl),a]
-	addq.w	#1,a0                           	| [$2a11: inc  hl]
+	move.b	d0,(a0)+                         	| [$2a0e: ld   (hl),a]
+	                           	| [$2a0f: inc  hl]
+	move.b	d0,(a0)+                         	| [$2a10: ld   (hl),a]
+	                           	| [$2a11: inc  hl]
 	move.b	d0,(a0)                         	| [$2a12: ld   (hl),a]
 	addq.b	#1,(0x02,a2)                    	| [$2a13: inc  (ix+$02)]
-	CLEAR_XC_FLAGS                         	| [$2a16: xor  a]
-	clr.b	d0                               	| [$2a16: xor  a]
-	LOAD_ROM	0x0839,a0                          	| [$2a17: ld   hl,$0839]
-	move.b	#0x20,d1                        	| [$2a1a: ld   b,$20]
-l_2a1c:
-	add.b	(a0),d0                          	| [$2a1c: add  a,(hl)]
-	addq.w	#1,a0                           	| [$2a1d: inc  hl]
-	subq.b	#1,d1                           	| [...]
-	jne	l_2a1c                             	| [$2a1e: djnz $2A1C]
-	subq.b	#1,d0                           	| [$2a20: dec  a]
-	jne	l_2c58                             	| [$2a21: jp   nz,$2C58]
+												| [$2a16: xor  a]
+	* another ROM checksum!!											| [$2a17: ld   hl,$0839]
+											| [$2a1a: ld   b,$20]
+							
+											| [$2a1c: add  a,(hl)]
+											| [$2a1d: inc  hl]
+											| [...]
+										| [$2a1e: djnz $2A1C]
+											| [$2a20: dec  a]
+										| [$2a21: jp   nz,$2C58]
 	move.w	#0x0615,d3                          	| [$2a24: ld   de,$0615]
 	jbsr	update_88A0_0038                            	| [$2a27: rst  $38]
 	lea	l_8903(a6),a0                      	| [$2a28: ld   hl,$8903]
@@ -6795,7 +6794,7 @@ l_2d4a:
 	addq	#4,a7                        	| [$2d4f: pop  af]
 	rts                                    	| [$2d50: ret]
 
-l_2d66:
+handle_ladder_wolves_2d66:
 	move.b	l_8D32(a6),d0                   	| [$2d66: ld   a,($8D32)]
 	                               	| [$2d69: and  a]
 	beq.b	0f                               	| [...]
@@ -6807,7 +6806,7 @@ l_2d66:
 	rts                                    	| [$2d70: ret  z] [...]
 0:
 	jbsr	handle_wolf_that_escaped_2d78        | [$2d71: call $2D78]
-	jbsr	l_2e22                            	| [$2d74: call $2E22]
+	jbsr	handle_wolves_on_ladders_2e22                            	| [$2d74: call $2E22]
 	rts                                    	| [$2d77: ret]
 handle_wolf_that_escaped_2d78:
 	move.b	l_8F14(a6),d0                   	| [$2d78: ld   a,($8F14)]
@@ -6896,13 +6895,13 @@ l_2ddd:
 	rts                                    	| [$2ded: ret]
 
 
-l_2e22:
+handle_wolves_on_ladders_2e22:
 	move.b	nb_wolves_on_ladders_8F18(a6),d0                   	| [$2e22: ld   a,($8F18)]
 	                               	| [$2e25: and  a]
 	bne.b	0f                               	| [...]
 	rts                                    	| [$2e26: ret  z] [...]
 0:
-	lea	l_8F1C(a6),a2                      	| [$2e27: ld   ix,$8F1C]
+	lea	wolves_on_ladder_struct_array_8F1C(a6),a2                      	| [$2e27: ld   ix,$8F1C]
 	move.b	d0,d1                           	| [$2e2b: ld   b,a]
 l_2e2c:
 	jbsr	exx                               	| [$2e2c: exx]
@@ -6920,12 +6919,12 @@ l_2e36:
 	rts                                    	| [$2e3b: ret  c] [...]
 0:
 	jbsr	jump_from_table_below_0028                            	| [$2e3c: rst  $28]
-	.long	l_2e5e
-	.long	l_2ecb
-	.long	l_2f01
-	.long	l_2f2f
+	.long	wolf_inactive_on_ladder_2e5e
+	.long	wolf_starting_attack_on_ladder_2ecb
+	.long	wolf_attacking_on_ladder_2f01			| state where wolf is dangerous
+	.long	wolf_retreating_on_ladder_2f2f
 
-l_2e45:
+decrease_ladder_wolf_state_timer_2e45:
 	jbsr  read_ixl_in_d0                         	| [$2e45: ld   a,ixl]
 	move.b	d0,d2                           	| [$2e47: ld   c,a]
 	and.b	#0x03,d0                         	| [$2e48: and  $03]
@@ -6945,16 +6944,18 @@ compute_screen_address_2e52:
 	move.b	#0x84,D5                        	| [$2e5b: ld   h,$84]
 	LOAD_A0_FROM_D5D6
 	rts                                    	| [$2e5d: ret]
-l_2e5e:
+
+wolf_inactive_on_ladder_2e5e:
 	move.b	l_8A5F(a6),d0                   	| [$2e5e: ld   a,($8A5F)]
 	and.b	#0x03,d0                         	| [$2e61: and  $03]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$2e63: ret  nz] [...]
 0:
-	jbsr	l_2e45                            	| [$2e64: call $2E45]
+	jbsr	decrease_ladder_wolf_state_timer_2e45                            	| [$2e64: call $2E45]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$2e67: ret  nz] [...]
 0:
+	* change state!
 	move.b	#0x01,(a0)                      	| [$2e68: ld   (hl),$01]
 	lea	l_8C48(a6),a3                      	| [$2e6a: ld   iy,$8C48]
 	move.w	#0x0018,d3                      	| [$2e6e: ld   de,$0018] 24
@@ -6976,8 +6977,8 @@ l_2e81:
 l_2e8a:
 	sub.b	#0x28,d0                         	| [$2e8a: sub  $28]
 	not.b	d0                               	| [$2e8c: cpl]
-	move.b	d0,(a0)                         	| [$2e8d: ld   (hl),a]
-	addq.w	#1,a0                           	| [$2e8e: inc  hl]
+	move.b	d0,(a0)+                         	| [$2e8d: ld   (hl),a]
+	                           	| [$2e8e: inc  hl]
 	move.b	d1,d0                           	| [$2e8f: ld   a,b]
 	not.b	d0                               	| [$2e90: cpl]
 	and.b	#0x03,d0                         	| [$2e91: and  $03]
@@ -6993,7 +6994,7 @@ l_2e8a:
 	move.b	#0x1A,(0x06,a3)                 	| [$2eab: ld   (iy+$06),$1A]
 	move.b	#0x2E,(0x0f,a3)                 	| [$2eaf: ld   (iy+$0f),$2E]
 	move.b	#0x40,(0x10,a3)                 	| [$2eb3: ld   (iy+$10),$40]
-	addq.b	#1,(0x00,a2)                    	| [$2eb7: inc  (ix+$00)]
+	addq.b	#1,(0x00,a2)                    	| [$2eb7: inc  (ix+$00)] change ladder wolf attack state
 	jbsr	compute_screen_address_2e52                            	| [$2eba: call $2E52]
 	LOAD_ROM	0x2DFE,a1                          	| [$2ebd: ld   de,$2DFE]
 	jbsr	write_4x4_tile_block_3325         	| [$2ec0: call write_4x4_tile_block_3325]
@@ -7002,8 +7003,8 @@ l_2e8a:
 	                         	| [$2ec7: jr   $2EDD]
 	                          	| [...]
 	                         	| [$2ec9: djnz $2ED6]
-l_2ecb:
-	jbsr	l_2e45                            	| [$2ecb: call $2E45]
+wolf_starting_attack_on_ladder_2ecb:
+	jbsr	decrease_ladder_wolf_state_timer_2e45                            	| [$2ecb: call $2E45]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$2ece: ret  nz] [...]
 0:
@@ -7033,9 +7034,9 @@ l_2ee6:
 	LOAD_ROM	0x2E1E,a1                          	| [$2efa: ld   de,$2E1E]
 	jbsr	write_4x4_tile_block_3325         	| [$2efd: call write_4x4_tile_block_3325]
 	rts                                    	| [$2f00: ret]
-l_2f01:
-	jbsr	l_305f                            	| [$2f01: call $305F]
-	jbsr	l_2e45                            	| [$2f04: call $2E45]
+wolf_attacking_on_ladder_2f01:
+	jbsr	check_attacking_ladder_wolf_collision_305f                            	| [$2f01: call $305F]
+	jbsr	decrease_ladder_wolf_state_timer_2e45                            	| [$2f04: call $2E45]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$2f07: ret  nz] [...]
 0:
@@ -7057,8 +7058,8 @@ l_2f14:
 	LOAD_ROM	0x2DFE,a1                          	| [$2f28: ld   de,$2DFE]
 	jbsr	write_4x4_tile_block_3325         	| [$2f2b: call write_4x4_tile_block_3325]
 	rts                                    	| [$2f2e: ret]
-l_2f2f:
-	jbsr	l_2e45                            	| [$2f2f: call $2E45]
+wolf_retreating_on_ladder_2f2f:
+	jbsr	decrease_ladder_wolf_state_timer_2e45                            	| [$2f2f: call $2E45]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$2f32: ret  nz] [...]
 0:
@@ -7127,13 +7128,13 @@ l_2f7e:
 	jbsr	write_4x4_tile_block_3325         	| [$2f8f: call write_4x4_tile_block_3325]
 	rts                                    	| [$2f92: ret]
 
-l_305f:
+check_attacking_ladder_wolf_collision_305f:
 	jbsr  read_ixl_in_d0                   	| [$305f: ld   a,ixl]
 	and.b	#0x03,d0                         	| [$3061: and  $03]
 	LOAD_ROM	0x3087,a0                          	| [$3063: ld   hl,$3087]
 	jbsr	read_byte_a0_plus_d0_0020                            	| [$3066: rst  $20]
 	move.b	d0,d1                           	| [$3067: ld   b,a]
-	move.b	lift_speed_8A84(a6),d0          	| [$3068: ld   a,(lift_speed_8A84)]
+	move.b	player_y_8A84(a6),d0          	| [$3068: ld   a,(player_y_8A84)]
 	subq.b	#0x07,d0                        	| [$306b: sub  $07]
 	move.b	d0,d2                           	| [$306d: ld   c,a]
 	add.b	#0x0E,d0                         	| [$306e: add  a,$0E]
@@ -7158,12 +7159,12 @@ l_305f:
 	jbsr	l_0f15                            	| [$3082: call $0F15]
 	addq	#4,a7                        	| [$3085: pop  af]
 	rts                                    	| [$3086: ret]
-	beq.b	0f                               	| [...]
-	rts                                    	| [$3087: ret  nz] [...]
-0:
-	and.b	d1,d0                            	| [$3088: and  b]
-	add.b	d1,d0                            	| [$3089: add  a,b]
-	move.b	d1,d4                           	| [$308a: ld   e,b]
+										| [...]
+									| [$3087: ret  nz] [...]
+				
+										| [$3088: and  b]
+										| [$3089: add  a,b]
+										| [$308a: ld   e,b]
 l_308b:
 	move.b	l_8F04(a6),d0                   	| [$308b: ld   a,($8F04)]
 	                               	| [$308e: and  a]
@@ -7349,7 +7350,7 @@ l_31ac:
 	rol.b	#3,d0                            	| [$31b8: rlca] * 3
 	add.b	#0x18,d0                         	| [$31bb: add  a,$18]
 	move.b	d0,d2                           	| [$31bd: ld   c,a]
-	move.b	lift_speed_8A84(a6),d0          	| [$31be: ld   a,(lift_speed_8A84)]
+	move.b	player_y_8A84(a6),d0          	| [$31be: ld   a,(player_y_8A84)]
 	cmp.b	d2,d0                            	| [$31c1: cp   c]
 	jcc	l_31e5                             	| [$31c2: jr   nc,$31E5]
 	move.b	#0x01,d0                        	| [$31c4: ld   a,$01]
@@ -7513,7 +7514,7 @@ l_32BD:
 												| [$32e4: jp   nz,$1F40]
 	rts                                    	| [$32e7: ret]
 l_32e8:
-	lea	lift_speed_8A84(a6),a0             	| [$32e8: ld   hl,lift_speed_8A84]
+	lea	player_y_8A84(a6),a0             	| [$32e8: ld   hl,player_y_8A84]
 	addq.b	#2,(a0)                         	| [$32eb: inc  (hl)] * 2
 	move.b	(a0),d0                         	| [$32ed: ld   a,(hl)]
 	cmp.b	#0xDB,d0                         	| [$32ee: cp   $DB]
@@ -7639,8 +7640,11 @@ l_33ca:
 	cmp.b	(0x06,a2),d0                     	| [$33d6: cp   (ix+$06)]
 	jeq	l_33ec                             	| [$33d9: jr   z,$33EC]
 	LOAD_ROM	0x3829,a1                          	| [$33dd: ld   de,$3829]
+	cmp.b	(0x06,a2),d0                     	| [$33d6: cp   (ix+$06)]
+	scs		d7
 	clr.b	d0                               	| [$33db: ld   a,$00]
-	jcc	l_33e6                             	| [$33e0: jr   nc,$33E6]
+	tst.b	d7
+	jne	l_33e6                             	| [$33e0: jr   nc,$33E6]
 	addq.b	#1,d0                           	| [$33e2: inc  a]
 l_33e3:
 	LOAD_ROM	0x3838,a1                          	| [$33e3: ld   de,$3838]
@@ -8226,7 +8230,6 @@ l_379d:
 	move.b	#0x01,(0x00,a3)                 	| [$379d: ld   (iy+$00),$01]
 	move.b	#0x04,(0x02,a3)                 	| [$37a1: ld   (iy+$02),$04]
 	move.b	d2,(0x14,a3)                    	| [$37a5: ld   (iy+$14),c]
-	CLEAR_XC_FLAGS                         	| [$37a8: xor  a]
 	clr.b	d0                               	| [$37a8: xor  a]
 	move.b	d0,(0x07,a3)                    	| [$37a9: ld   (iy+$07),a]
 	move.b	d0,(0x0e,a3)                    	| [$37ac: ld   (iy+$0e),a]
@@ -11704,6 +11707,7 @@ l_6254:
 	jne	l_6254                             	| [$625c: jr   nz,$6254]
 l_625e:
 	LOAD_ROM	0x6358,a0                          	| [$625e: ld   hl,$6358]
+	CLEAR_XC_FLAGS
 	move.b	round_number_8907(a6),d0                   	| [$6261: ld   a,($8907)]
 	and.b	#0x07,d0                         	| [$6264: and  $07]
 	roxr.b	#1,d0                           	| [$6266: rra]
@@ -11787,6 +11791,7 @@ l_62f0:
 	LOAD_ROM	0x6360,a0                          	| [$62f0: ld   hl,$6360]
 	move.b	round_number_8907(a6),d0                   	| [$62f3: ld   a,($8907)]
 	and.b	#0x07,d0                         	| [$62f6: and  $07]
+	CLEAR_XC_FLAGS
 	roxr.b	#1,d0                           	| [$62f8: rra]
 	jbsr	read_byte_a0_plus_d0_0020                            	| [$62f9: rst  $20]
 												| [$62fa: ld   l,a]
@@ -13992,7 +13997,7 @@ l_71e3:
 	move.b	l_8F5B(a6),d0                   	| [$71e3: ld   a,($8F5B)]
 	                               	| [$71e6: and  a]
 	jne	l_71f8                             	| [$71e7: jr   nz,$71F8]
-	move.b	lift_speed_8A84(a6),d0          	| [$71e9: ld   a,(lift_speed_8A84)]
+	move.b	player_y_8A84(a6),d0          	| [$71e9: ld   a,(player_y_8A84)]
 	cmp.b	#0x60,d0                         	| [$71ec: cp   $60]
 	jcs	l_71f3                             	| [$71ee: jr   c,$71F3]
 	move.b	d0,l_8F5B(a6)                   	| [$71f0: ld   ($8F5B),a]
@@ -14005,7 +14010,7 @@ l_71f8:
 	bclr.b	#3,(a0)                         	| [$71fa: res  3,(hl)]
 	rts                                    	| [$71fc: ret]
 l_71fd:
-	move.b	lift_speed_8A84(a6),d0          	| [$71fd: ld   a,(lift_speed_8A84)]
+	move.b	player_y_8A84(a6),d0          	| [$71fd: ld   a,(player_y_8A84)]
 	cmp.b	#0x59,d0                         	| [$7200: cp   $59]
 	jeq	l_720b                             	| [$7202: jr   z,$720B]
 	jcc	l_71e3                             	| [$7204: jr   nc,$71E3]
