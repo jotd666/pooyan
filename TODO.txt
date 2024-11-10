@@ -8,7 +8,6 @@ break on all jump table entrypoints, figure them all out
 - still 4 wolves when skipping intro
 - nb wolfs flag color should be cyan at start, not red: 8324 should be 8B
 - implement flipped bobs!
-- fix to have just 1 wolf at a time, easier debug!
 - double buffering
 - capture screenshot memory dumps to filter out unused tiles/cluts
   to save A LOT OF memory
