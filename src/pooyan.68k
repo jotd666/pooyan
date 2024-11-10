@@ -147,6 +147,8 @@
 	.ifndef	RELEASE
 	cmp.w	#0x9000,d5
 	jcs		110f
+	lea		load_a0_from_d5_rom_fail_msg,a5
+	jbsr	osd_break
 	illegal
 110:
 	.endif
@@ -167,6 +169,8 @@
 	.ifndef	RELEASE
 	cmp.w	#0x9000,d3
 	jcs		110f
+	lea		load_a1_from_d3d4_rom_fail_msg,a5
+	jbsr	osd_break
 	illegal
 110:
 	.endif
@@ -274,6 +278,10 @@ load_d5d6_from_a0_rom_fail_msg:
 	.asciz	"load d5d6 from a0 ROM failed"
 load_d5d6_from_a0_ram_fail_msg:
 	.asciz	"load d5d6 from a0 RAM failed"
+load_a0_from_d5_rom_fail_msg:
+	.asciz	"load a0 from d5 ROM failed"
+load_a1_from_d3d4_rom_fail_msg:
+	.asciz	"load a1 from d3d4 ROM failed"
 	.align	2
 	.endif
 	
@@ -1304,6 +1312,11 @@ display_string_05b2:
 	rts
 2:
 	clr.b	must_skip_konami_logo_flag
+	* compensate for the init not done because intro is skipped
+	* not sure if it's enough...
+	lea	l_8903(a6),a0                      	| [$675e: ld   hl,$8903]
+	move.b	#2,(a0)                         	| [$6761: inc  (hl)]
+
 0:
 	add.b	d0,d0                            	| [$05b2: add  a,a]
 	scs	d7
@@ -2498,7 +2511,6 @@ init_play_0E00:
 	bne.b	0f                               	| [...]
 	rts                                    	| [$0e37: ret  z] [...]
 0:
-	CLEAR_XC_FLAGS                         	| [$0e38: xor  a]
 	clr.b	d0                               	| [$0e38: xor  a]
 	move.b	d0,l_8F3F(a6)                   	| [$0e39: ld   ($8F3F),a]
 	move.b	d0,l_8F30(a6)                   	| [$0e3c: ld   ($8F30),a]
@@ -5131,7 +5143,7 @@ l_20ea:
 	jbsr	l_308b                            	| [$20fd: call $308B]
 	rts                                    	| [$2100: ret]
 l_2101:
-	jbsr	l_2778                            	| [$2101: call $2778]
+	jbsr	pickup_meat_management_2778                            	| [$2101: call $2778]
 	jbsr	l_210b                            	| [$2104: call $210B]
 	jbsr	l_2157                            	| [$2107: call $2157]
 	rts                                    	| [$210a: ret]
@@ -5992,12 +6004,12 @@ table_2774:
 	.byte	0x74,0x54,0x74,0x54
 
 
-l_2778:
+pickup_meat_management_2778:
 	move.b	l_8F30(a6),d0                   	| [$2778: ld   a,($8F30)]
 	and.b	#0x07,d0                         	| [$277b: and  $07]
 	jbsr	jump_from_table_below_0028                            	| [$277d: rst  $28]
 	.long	unknown_in_game_278F
-	.long	handle_meat_27f3
+	.long	meat_flashing_27f3
 	.long	meat_taken_2856
 	.long	l_28ad
 	.long	do_nothing_28c5
@@ -6068,7 +6080,8 @@ l_27ea:
 	lea	l_84A7(a6),a0                      	| [$27ea: ld   hl,$84A7]
 	LOAD_ROM	0x2D51,a1                          	| [$27ed: ld   de,$2D51]
 	jra	write_4x4_tile_block_3325          	| [$27f0: jp   write_4x4_tile_block_3325]
-handle_meat_27f3:
+
+meat_flashing_27f3:
 	move.b	l_8AB4(a6),d0                   	| [$27f3: ld   a,($8AB4)]
 	cmp.b	#0x34,d0                         	| [$27f6: cp   $34]
 	jcs	l_2813                             	| [$27f8: jr   c,$2813] collect meat
@@ -6081,11 +6094,11 @@ handle_meat_27f3:
 	                           	| [$2801: dec  hl]
 	addq.b	#1,-(a0)                         	| [$2802: inc  (hl)]
 	LOAD_ROM	0x2D51,a1                          	| [$2808: ld   de,$2D51]
-	lea	l_84A7(a6),a0                      	| [$2805: ld   hl,$84A7]
 	btst.b	#0,(a0)                         	| [$2803: bit  0,(hl)]
 	jne	l_2810                             	| [$280b: jr   nz,$2810]
 	LOAD_ROM	0x2D55,a1                          	| [$280d: ld   de,$2D55]
 l_2810:
+	lea	l_84A7(a6),a0                      	| [$2805: ld   hl,$84A7]
 	jra	write_4x4_tile_block_3325          	| [$2810: jp   write_4x4_tile_block_3325]
 l_2813:
 	lea	l_8C90(a6),a0                      	| [$2813: ld   hl,$8C90]
@@ -6793,18 +6806,19 @@ l_2d66:
 	bne.b	0f                               	| [...]
 	rts                                    	| [$2d70: ret  z] [...]
 0:
-	jbsr	l_2d78                            	| [$2d71: call $2D78]
+	jbsr	handle_wolf_that_escaped_2d78        | [$2d71: call $2D78]
 	jbsr	l_2e22                            	| [$2d74: call $2E22]
 	rts                                    	| [$2d77: ret]
-l_2d78:
+handle_wolf_that_escaped_2d78:
 	move.b	l_8F14(a6),d0                   	| [$2d78: ld   a,($8F14)]
-	jbsr	jump_from_table_below_0028                            	| [$2d7b: rst  $28]
-	.long	wolf_reaches_ladder_2d98
+	jbsr	jump_from_table_below_0028          | [$2d7b: rst  $28]
+	.long	wolf_reaches_ladder_2d80
 	.long	animate_wolf_on_ladder_2dBc
 	.long	do_nothing_2d3a
 	
 do_nothing_2d3a:
 	rts
+	
 wolf_reaches_ladder_2d80:
 	move.b	l_8903(a6),d0                   	| [$2d80: ld   a,($8903)]
 	subq.b	#0x02,d0                        	| [$2d83: sub  $02]
@@ -8961,7 +8975,7 @@ l_3f44:
 	jne	l_3f4d                             	| [$3f48: jr   nz,$3F4D]
 	subq.w	#3,a0                           	| [$3f4a: dec  hl] * 3
 l_3f4d:
-	LOAD_A0_FROM_D5D6
+	LOAD_D5D6_FROM_A0_ROM
 	move.b	d6,(0x12,a2)                    	| [$3f4d: ld   (ix+$12),l]
 	move.b	d5,(0x13,a2)                    	| [$3f50: ld   (ix+$13),h]
 	move.b	(0x04,a2),d0                    	| [$3f53: ld   a,(ix+$04)]
@@ -14440,7 +14454,6 @@ display_intro_tiles_7517:
 	rts                                    	| [$755c: ret]
 
 init_intro_pigs_755d:
-	move.b	#0,0x200
 	jbsr	l_756d                            	| [$755d: call $756D]
 	jbsr	l_7621                            	| [$7560: call $7621]
 	jbsr	animate_pigs_in_house_intro_6b13                            	| [$7563: call $6B13]

@@ -1,11 +1,14 @@
 
 break on all jump table entrypoints, figure them all out
 
-- remaining protection? 4 wolves on ladders right from start
-- meat not flashing
+- crash on game over (illegal) in highscore screen
+- baloon shot with arrow: wolf not falling (looks ok with meat)
+- after a while wolves not descending
+- still 4 wolves when skipping intro
+- when wolves are on ladder they don't attack
 - nb wolfs flag color should be cyan at start, not red: 8324 should be 8B
 - implement flipped bobs!
-- fix to have just 1 wolf
+- fix to have just 1 wolf at a time, easier debug!
 - double buffering
 - capture screenshot memory dumps to filter out unused tiles/cluts
   to save A LOT OF memory
