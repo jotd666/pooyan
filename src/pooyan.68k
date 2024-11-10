@@ -365,11 +365,6 @@ read_iyl_in_d0:
 	.include "pooyan.inc"
 	.include "data.inc"
 
-	.ifne	OPT_ONLY_ONE_ENEMY
-NB_WOLVES = 1
-	.else
-NB_WOLVES = 14
-	.endif
 	
 * wolf structure
 wolf_state_02 = 2
@@ -758,7 +753,7 @@ jump_table_0242:
   .long	l_0644
 
 l_0254:
-	move.b	l_883F(a6),d0					| [$0254: ld   a,($883F)    ]
+	move.b	main_timer_1_883F(a6),d0					| [$0254: ld   a,($883F)    ]
 	move.b	d0,d1                           	| [$0257: ld   b,a]
 	and.b	#0x0F,d0                         	| [$0258: and  $0F]
 	jeq	l_0261                             	| [$025a: jp   z,$0261]
@@ -1545,9 +1540,9 @@ l_06ae:
 	jbsr	osd_read_inputs_0                     	| [$06d5: ld   a,(in0_a080)]
 	not.b	d0                               	| [$06d8: cpl]
 	move.b	d0,(a0)                         	| [$06d9: ld   (hl),a]
-	lea	l_883F(a6),a0                      	| [$06da: ld   hl,$883F]
+	lea	main_timer_1_883F(a6),a0                | [$06da: ld   hl,$883F]
 	subq.b	#1,(a0)                         	| [$06dd: dec  (hl)]
-	lea	l_8A5F(a6),a0                      	| [$06de: ld   hl,$8A5F]
+	lea	main_timer_2_8A5F(a6),a0                | [$06de: ld   hl,$8A5F]
 	subq.b	#1,(a0)                         	| [$06e1: dec  (hl)]
 	jbsr	l_59e8                            	| [$06e2: call $59E8]
 	jbsr	l_0e64                            	| [$06e5: call $0E64]
@@ -3964,7 +3959,7 @@ main_game_sequence_18af:
 	jbsr	l_6cab                            	| [$18b2: call $6CAB]
 	jbsr	l_20d4                            	| [$18b5: call $20D4]
 	jbsr	l_511b                            	| [$18b8: call $511B]
-	jbsr	l_3377                            	| [$18bb: call $3377]
+	jbsr	update_wolves_3377                            	| [$18bb: call $3377]
 	jbsr	l_40bd                            	| [$18be: call $40BD]
 	jbsr	update_sprite_shadows_02EF        	| [$18c1: call update_sprite_shadows_02EF]
 	jbsr	l_18da                            	| [$18c4: call $18DA]
@@ -4168,7 +4163,7 @@ l_19e7:
 l_19ee:
 	jbsr	l_308b                            	| [$19ee: call $308B]
 	jbsr	l_25a6                            	| [$19f1: call $25A6]
-	jbsr	l_3377                            	| [$19f4: call $3377]
+	jbsr	update_wolves_3377                            	| [$19f4: call $3377]
 	jbsr	l_40bd                            	| [$19f7: call $40BD]
 	jbsr	l_28c6                            	| [$19fa: call $28C6]
 	jbsr	update_sprite_shadows_02EF        	| [$19fd: call update_sprite_shadows_02EF]
@@ -6913,7 +6908,7 @@ l_2e2c:
 	rts                                    	| [$2e35: ret]
 
 l_2e36:
-	move.b	(0x00,a2),d0                    	| [$2e36: ld   a,(ix+$00)]
+	move.b	(0x00,a2),d0                    	| [$2e36: ld   a,(ix+$00)] wolf on array state
 	subq.b	#0x01,d0                        	| [$2e39: sub  $01]
 	bcc.b	0f                               	| [...]
 	rts                                    	| [$2e3b: ret  c] [...]
@@ -6925,6 +6920,7 @@ l_2e36:
 	.long	wolf_retreating_on_ladder_2f2f
 
 decrease_ladder_wolf_state_timer_2e45:
+	move.b	#1,0x200
 	jbsr  read_ixl_in_d0                         	| [$2e45: ld   a,ixl]
 	move.b	d0,d2                           	| [$2e47: ld   c,a]
 	and.b	#0x03,d0                         	| [$2e48: and  $03]
@@ -6946,7 +6942,7 @@ compute_screen_address_2e52:
 	rts                                    	| [$2e5d: ret]
 
 wolf_inactive_on_ladder_2e5e:
-	move.b	l_8A5F(a6),d0                   	| [$2e5e: ld   a,($8A5F)]
+	move.b	main_timer_2_8A5F(a6),d0                   	| [$2e5e: ld   a,($8A5F)]
 	and.b	#0x03,d0                         	| [$2e61: and  $03]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$2e63: ret  nz] [...]
@@ -7577,10 +7573,10 @@ write_4x4_tile_block_3325:
 	rts                                    	| [$3336: ret]
 
 
-l_3377:
+update_wolves_3377:
 	lea	wolf_structure_array_8AE0(a6),a2                      	| [$3377: ld   ix,$8AE0]
 	move.w	#0x0018,d3                      	| [$337b: ld   de,$0018] 24
-	move.b	#NB_WOLVES,d1                        	| [$337e: ld   b,$0E]
+	move.b	#0xE,d1                        	| [$337e: ld   b,$0E]
 l_3380:
 	jbsr	exx                               	| [$3380: exx]
 	jbsr	l_338a                            	| [$3381: call $338A]
@@ -8322,7 +8318,7 @@ wolf_updates_baloon_3865:
 0:
 	subq.b	#1,(0x04,a2)                    	| [$387e: dec  (ix+$04)]
 	subq.b	#1,(0x06,a2)                    	| [$3881: dec  (ix+$06)]
-	move.b	l_8A5F(a6),d0                   	| [$3884: ld   a,($8A5F)]
+	move.b	main_timer_2_8A5F(a6),d0                   	| [$3884: ld   a,($8A5F)]
 	                               	| [$3887: and  a]
 	                               	| [...]
 	rts                                    	| [$3888: ret  nz] [...]
@@ -8580,7 +8576,6 @@ l_3b99:
 	jra	l_39e0                             	| [$3bab: jp   $39E0]
 l_3bae:
 	addq.b	#1,(0x02,a2)                    	| [$3bae: inc  (ix+$02)]
-	CLEAR_XC_FLAGS                         	| [$3bb1: xor  a]
 	clr.b	d0                               	| [$3bb1: xor  a]
 	move.b	d0,(0x00,a2)                    	| [$3bb2: ld   (ix+$00),a]
 	move.b	#0x01,(0x01,a2)                 	| [$3bb5: ld   (ix+$01),$01]
@@ -9855,7 +9850,7 @@ l_53b0:
 	beq.b	0f                               	| [...]
 	rts                                    	| [$53b6: ret  nz] [...]
 0:
-	move.b	l_8A5F(a6),d0                   	| [$53b7: ld   a,($8A5F)]
+	move.b	main_timer_2_8A5F(a6),d0                   	| [$53b7: ld   a,($8A5F)]
 	                               	| [$53ba: and  a]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$53bb: ret  nz] [...]
@@ -14179,18 +14174,18 @@ l_72fb:
 	lea	wolf_structure_array_8AE0(a6),a2                      	| [$7306: ld   ix,$8AE0]
 l_730a:
 	move.b	#0x01,(0x00,a2)                 	| [$730a: ld   (ix+$00),$01]
-	move.b	(a0),d0                         	| [$730e: ld   a,(hl)]
+	move.b	(a0)+,d0                         	| [$730e: ld   a,(hl)]
 	move.b	d0,(0x06,a2)                    	| [$730f: ld   (ix+$06),a]
-	addq.w	#1,a0                           	| [$7312: inc  hl]
-	move.b	(a0),d0                         	| [$7313: ld   a,(hl)]
+	                           	| [$7312: inc  hl]
+	move.b	(a0)+,d0                         	| [$7313: ld   a,(hl)]
 	move.b	d0,(0x10,a2)                    	| [$7314: ld   (ix+$10),a]
-	addq.w	#1,a0                           	| [$7317: inc  hl]
-	move.b	(a0),d0                         	| [$7318: ld   a,(hl)]
+	                           	| [$7317: inc  hl]
+	move.b	(a0)+,d0                         	| [$7318: ld   a,(hl)]
 	move.b	d0,(0x04,a2)                    	| [$7319: ld   (ix+$04),a]
-	addq.w	#1,a0                           	| [$731c: inc  hl]
-	move.b	(a0),d0                         	| [$731d: ld   a,(hl)]
+	                           	| [$731c: inc  hl]
+	move.b	(a0)+,d0                         	| [$731d: ld   a,(hl)]
 	move.b	d0,(0x0f,a2)                    	| [$731e: ld   (ix+$0f),a]
-	addq.w	#1,a0                           	| [$7321: inc  hl]
+	                           	| [$7321: inc  hl]
 	jbsr  read_ixl_in_d0                         	| [$7322: ld   a,ixl]
 	btst.b	#3,d0                           	| [$7324: bit  3,a]
 	jeq	l_732c                             	| [$7326: jr   z,$732C]
