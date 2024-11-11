@@ -60,7 +60,7 @@ ONE_TICK = 1
 	.endif
 	
 
-OPT_ENABLE_DOUBLE_BUFFERING = 0
+OPT_ENABLE_DOUBLE_BUFFERING = 1
 
 _custom = 0xDFF000
 
@@ -323,6 +323,7 @@ _user:
 
 	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
 	lea		bg_screen_buffer_2,a0
+	addq	#2,a0	| leave 16 bits hidden for left side clipping
 	move.l	a0,bg_screen_data_2
 	move.l	a0,playfield_displayed_screen_ptr
 	.endif
@@ -1299,7 +1300,7 @@ switch_screen_buffers:
 	move.l	a6,playfield_displayed_screen_ptr
 	move.l	a2,bob_previous_drawed_sprites
 
-	jbra		set_bg_bitplanes
+	jbra		set_static_bitplanes
 	.endif
 	
 	
@@ -1535,7 +1536,7 @@ osd_interrupt_control:
 
 osd_w_colorram:
     .ifeq OPT_DISABLE_BG_LAYER
-	movem.l	d0-d7/a0-a4,-(a7)
+	movem.l	d0-d7/a0-a5,-(a7)
 	move.l	a0,d7		| save address
 	sub.l	a6,d7
 	jcs		0f
@@ -1564,7 +1565,7 @@ osd_w_colorram:
 	jbsr	update_bg_tile
 
 0:
-	movem.l	(a7)+,d0-d7/a0-a4
+	movem.l	(a7)+,d0-d7/a0-a5
     .endif | OPT_DISABLE_BG_LAYER
 	rts	
 	
@@ -1668,6 +1669,12 @@ update_bg_tile:
 	add.w	d1,d0
 	add.w	d0,a1
 	add.w	d0,a3
+
+
+	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
+	move.l	playfield_displayed_screen_ptr,a5
+	.endif
+
 	
 	add.w	d2,d2
 	add.w	d2,d2	
@@ -1702,6 +1709,34 @@ update_bg_tile:
 	move.l	(a4,d1.w),a4
 	jmp		(a4)
 	
+	.macro	COPY_TILE_PLANE_ROW
+	move.b	d0,(offset,a1)  | buffer
+	move.b	d0,(offset,a3)  | backbuffer
+	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
+	move.b	d0,(offset,a5)  | buffer 2
+	.endif	
+	.endm
+	
+	.macro	CLEAR_TILE_PLANE
+	.set	offset,0
+	.rept	8
+	clr.b	(offset,a1)
+	clr.b	(offset,a3)
+	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
+	clr.b	(offset,a5)  | buffer 2
+	.endif
+	.set	offset,offset+NB_BYTES_PER_ROW
+	.endr	
+	.endm
+	
+	.macro	TILE_NEXT_PLANE
+	add.w	d5,a1
+	add.w	d5,a3
+	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
+	add.l	d5,a5
+	.endif	
+	.endm
+	
 standard_tile:
 
 	* just copy
@@ -1713,24 +1748,16 @@ standard_tile:
 	.set	offset,0
 	.rept	8
 	move.b	(a0)+,d0
-	move.b	d0,(offset,a1)  | buffer
-	move.b	d0,(offset,a3)  | backbuffer
-
+	COPY_TILE_PLANE_ROW
 	.set	offset,offset+NB_BYTES_PER_ROW
 	.endr
 41:
-	add.l	d5,a1
-	add.l	d5,a3
+	TILE_NEXT_PLANE
 	dbf		d4,4b
 0:
 	rts
 5:
-	.set	offset,0
-	.rept	8
-	clr.b	(offset,a1)
-	clr.b	(offset,a3)
-	.set	offset,offset+NB_BYTES_PER_ROW
-	.endr
+	CLEAR_TILE_PLANE
 	jra		41b
 
 flipped_tile:	
@@ -1742,23 +1769,15 @@ flipped_tile:
 	.rept	8
 	.set	offset,offset-NB_BYTES_PER_ROW
 	move.b	(a0)+,d0
-	move.b	d0,(offset,a1)  | buffer
-	move.b	d0,(offset,a3)  | backbuffer
-
+	COPY_TILE_PLANE_ROW
 	.endr
 41:
-	add.l	d5,a1
-	add.l	d5,a3
+	TILE_NEXT_PLANE
 	dbf		d4,4b
 0:
 	rts
 5:
-	.set	offset,0
-	.rept	8
-	clr.b	(offset,a1)
-	clr.b	(offset,a3)
-	.set	offset,offset+NB_BYTES_PER_ROW
-	.endr
+	CLEAR_TILE_PLANE
 	jra		41b
 	
 mirror_tile:
@@ -1772,24 +1791,17 @@ mirror_tile:
 	.rept	8
 	move.b	(a0)+,d1
 	move.b	(a4,d1.w),d0	| mirror
-	move.b	d0,(offset,a1)  | buffer
-	move.b	d0,(offset,a3)  | backbuffer
+	COPY_TILE_PLANE_ROW
 
 	.set	offset,offset+NB_BYTES_PER_ROW
 	.endr
 41:
-	add.l	d5,a1
-	add.l	d5,a3
+	TILE_NEXT_PLANE
 	dbf		d4,4b
 0:
 	rts
 5:
-	.set	offset,0
-	.rept	8
-	clr.b	(offset,a1)
-	clr.b	(offset,a3)
-	.set	offset,offset+NB_BYTES_PER_ROW
-	.endr
+	CLEAR_TILE_PLANE
 	jra		41b
 	
 mirror_flipped_tile:
@@ -1804,23 +1816,16 @@ mirror_flipped_tile:
 	.set	offset,offset-NB_BYTES_PER_ROW
 	move.b	(a0)+,d1
 	move.b	(a4,d1.w),d0	| mirror
-	move.b	d0,(offset,a1)  | buffer
-	move.b	d0,(offset,a3)  | backbuffer
+	COPY_TILE_PLANE_ROW
 
 	.endr
 41:
-	add.l	d5,a1
-	add.l	d5,a3
+	TILE_NEXT_PLANE
 	dbf		d4,4b
 0:
 	rts
 5:
-	.set	offset,0
-	.rept	8
-	clr.b	(offset,a1)
-	clr.b	(offset,a3)
-	.set	offset,offset+NB_BYTES_PER_ROW
-	.endr
+	CLEAR_TILE_PLANE
 	jra		41b
 
 	* clear tile
@@ -1831,10 +1836,12 @@ mirror_flipped_tile:
 	.rept	8
 	clr.b	(offset,a1)
 	clr.b	(offset,a3)
+	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
+	clr.b	(offset,a5)  | buffer 2
+	.endif
 	.set	offset,offset+NB_BYTES_PER_ROW
 	.endr
-	add.w	d5,a1
-	add.w	d5,a3
+	TILE_NEXT_PLANE
 	dbf		d4,111b
 2:
 	rts

@@ -1,6 +1,7 @@
 
 break on all jump table entrypoints, figure them all out
 
+- reverse all wolf_structure_array_8AE0 loops
 - double buffering
 - baloon not positioned properly vs wolf, too low, too to the right
 - baloon shot with arrow: wolf not falling (looks ok with meat)
