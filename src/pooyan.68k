@@ -2792,9 +2792,9 @@ l_0fd5:
 	and.b	#0x07,d0                         	| [$0fd8: and  $07]
 	cmp.b	#0x02,d0                         	| [$0fda: cp   $02]
 	jcs	l_0fe2                             	| [$0fdc: jr   c,$0FE2]
-	LOAD_ROM	0x1035,a0                          	| [$0fde: ld   hl,$1035]
+	pea		l_1035(pc)                          	| [$0fde: ld   hl,$1035]
 
-	move.l	a0,-(sp)                        	| [$0fe1: push hl]
+	                        	| [$0fe1: push hl]
 l_0fe2:
 	jbsr	jump_from_table_below_0028                            	| [$0fe2: rst  $28]
 	.long	l_0FEF
@@ -2838,7 +2838,7 @@ l_1016:
 	jbsr	l_5ae4                            	| [$102e: call $5AE4]
 	jbsr	l_0e64                            	| [$1031: call $0E64]
 	rts                                    	| [$1034: ret]
-
+l_1035:
 	jbsr	l_2157                            	| [$1035: call $2157]
 	jbsr	l_1219                            	| [$1038: call $1219]
 	jbsr	l_40bd                            	| [$103b: call $40BD]
@@ -3531,9 +3531,9 @@ l_1595:
 
 in_game_159B:
 	jbsr	l_7912                            	| [$159b: call $7912]
-	lea	continue_15D1,a0                   	| [$159e: ld   hl,continue_15D1]
+	pea	continue_15D1(pc)                   	| [$159e: ld   hl,continue_15D1]
 
-	move.l	a0,-(sp)                        	| [$15a1: push hl]
+	                        	| [$15a1: push hl]
 	move.b	in_game_sub_state_880A(a6),d0   	| [$15a2: ld   a,(in_game_sub_state_880A)]
 	and.b	#0x1F,d0                         	| [$15a5: and  $1F]
 	jbsr	jump_from_table_below_0028                            	| [$15a7: rst  $28]
@@ -3645,6 +3645,12 @@ l_1653:
 	lea	play_variables_player_2_8980(a6),a0                      	| [$1669: ld   hl,$8980]
 l_166c:
 	jbsr	ldir                              	| [$166c: ldir]
+
+	.ifne	OPT_ONLY_ONE_LIFE
+	lea	nb_lives_8908(a6),a1 	| [$1660: ld   de,play_variables_player_1_8900]
+	clr.b	(a1)
+	.endif
+	
 	move.b	l_8903(a6),d0                   	| [$166e: ld   a,($8903)]
 	                               	| [$1671: and  a]
 	jeq	l_1679                             	| [$1672: jr   z,$1679]
@@ -4001,7 +4007,6 @@ l_18ed:
 	jcc	l_18f9                             	| [$18f6: jr   nc,$18F9]
 	addq.b	#1,(a0)                         	| [$18f8: inc  (hl)]
 l_18f9:
-	CLEAR_XC_FLAGS                               	| [$18fc: and  a]
 	moveq	#0x08,d0                        	| [$18fd: ld   a,$08]
 	tst.b	l_8800(a6)                   	| [$18f9: ld   a,($8800)]
 	jeq	l_1902                             	| [$18ff: jr   z,$1902]
@@ -4234,7 +4239,6 @@ l_1a64:
 	jne	l_1a01                             	| [$1a68: jr   nz,$1A01]
 	jbsr	l_0f4e                            	| [$1a6a: call $0F4E]
 	jbsr	l_2527                            	| [$1a6d: call $2527]
-	CLEAR_XC_FLAGS                         	| [$1a70: xor  a]
 	clr.b	d0                               	| [$1a70: xor  a]
 	move.b	d0,l_89E3(a6)                   	| [$1a71: ld   ($89E3),a]
 	move.b	l_8806(a6),d0                   	| [$1a74: ld   a,($8806)]
@@ -13973,9 +13977,9 @@ l_708a:
 
 l_71b9:
 	move.b	l_8F38(a6),d0                   	| [$71b9: ld   a,($8F38)]
-	lea	update_sprite_shadows_02EF,a0      	| [$71bc: ld   hl,update_sprite_shadows_02EF]
+	pea	update_sprite_shadows_02EF      	| [$71bc: ld   hl,update_sprite_shadows_02EF]
 
-	move.l	a0,-(sp)                        	| [$71bf: push hl]
+												| [$71bf: push hl]
 	jbsr	jump_from_table_below_0028                            	| [$71c0: rst  $28]
 jump_table_71C1:
 	.long	l_71c7
@@ -15495,9 +15499,9 @@ perform_rom_checksum_7e6d:
 								| [$7e92: inc  (hl)]
 								| [$7e93: ret]
 l_7e94:
-	LOAD_ROM	0x7FD6,a0                          	| [$7e94: ld   hl,$7FD6]
+	pea	l_7fd6(pc)                          	| [$7e94: ld   hl,$7FD6]
 
-	move.l	a0,-(sp)                        	| [$7e97: push hl]
+												| [$7e97: push hl]
 	move.b	l_8E2A(a6),d0                   	| [$7e98: ld   a,($8E2A)]
 	                               	| [$7e9b: and  a]
 	beq.b	0f                               	| [...]
@@ -15692,6 +15696,8 @@ l_7fc7:
 	move.b	#0x01,d0                        	| [$7fd0: ld   a,$01]
 	move.b	d0,l_8E2A(a6)                   	| [$7fd2: ld   ($8E2A),a]
 	rts                                    	| [$7fd5: ret]
+	
+l_7fd6:
 	move.b	nb_credits_8802(a6),d0          	| [$7fd6: ld   a,(nb_credits_8802)]
 	                               	| [$7fd9: and  a]
 	bne.b	0f                               	| [...]

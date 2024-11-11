@@ -955,7 +955,7 @@ update_one_bob:
 	
 	moveq	#0,d1
 	move.b	(TARGET_SPRITE_Y,a0),d1  | sprite Y
-	beq.b	2f			| Y set to 0: not shown
+	jeq	2f			| Y set to 0: not shown
 	
 
 	.ifne	SPRITE_Y_CORRECTION
@@ -1019,6 +1019,14 @@ update_one_bob:
 	move.w	d5,(a6)+			| store width in bytes
 	move.w	d5,d2			| width in bytes, 4 for 16 pixels+shift
 	moveq	#0,d5			| Y-offset
+
+	btst	#6,d3
+	jne		101f
+	* flip
+	neg.w	d4
+101:
+
+
 	moveq	#NB_PLAYFIELD_PLANES,d3		| 5 planes
 
 	bsr		blit_planes_any_internal_cookie_cut
