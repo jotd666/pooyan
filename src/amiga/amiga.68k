@@ -316,6 +316,7 @@ _user:
 	
 	lea		bg_screen_buffer_1,a0
 	addq	#2,a0	| leave 16 bits hidden for left side clipping
+	move.l	a0,bg_screen_data_1
 	move.l	a0,playfield_drawed_screen_ptr
 	move.l	a0,playfield_displayed_screen_ptr
 
@@ -1283,10 +1284,11 @@ switch_screen_buffers:
 	* let's switch screen buffers, background (chars)
 	* toggle fg planes (double buffering)
 	* also toggle previous sprite positions
+	lea		playfield_drawed_screen_ptr(pc),a0
 	lea		bob_previous_positions_1(pc),a2
 	lea		bob_previous_positions_2(pc),a3
-	move.l	bg_screen_data_1,a4
-	move.l	bg_screen_data_2,a6
+	move.l	bg_screen_data_1,a1
+	move.l	bg_screen_data_2,a5
 	* also switch previous state memory
 	cmp.l	(a0),a1
 	bne.b	2f
@@ -1294,10 +1296,10 @@ switch_screen_buffers:
 	* set it to drawn screen
 	exg		a1,a5
 	exg		a2,a3
-	exg		a4,a6
 2:
 	move.l	a1,(a0)
-	move.l	a6,playfield_displayed_screen_ptr
+	move.l	a5,playfield_displayed_screen_ptr
+	move.l	a3,bob_previous_displayed_sprites
 	move.l	a2,bob_previous_drawed_sprites
 
 	jbra		set_static_bitplanes
@@ -1662,6 +1664,9 @@ update_bg_tile:
 	move.w	#NB_PLAYFIELD_PLANES-1,d4
 	move.l	playfield_drawed_screen_ptr,a1
 	lea		background_restore_buffer,a3
+	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
+	move.l	playfield_displayed_screen_ptr,a5
+	.endif
 
 	lea		mulNB_BYTES_PER_ROW_table,A2
 	add.w	d1,d1
@@ -1669,11 +1674,11 @@ update_bg_tile:
 	add.w	d1,d0
 	add.w	d0,a1
 	add.w	d0,a3
-
-
 	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
-	move.l	playfield_displayed_screen_ptr,a5
+	add.w	d0,a5
 	.endif
+
+
 
 	
 	add.w	d2,d2
@@ -1707,6 +1712,9 @@ update_bg_tile:
 	add.w	d1,d1
 	lea		mirror_jump_table(pc),a4
 	move.l	(a4,d1.w),a4
+0:
+	BTST	#6,(_custom+dmaconr)
+	BNE.S	0b
 	jmp		(a4)
 	
 	.macro	COPY_TILE_PLANE_ROW
@@ -1832,15 +1840,7 @@ mirror_flipped_tile:
 
 11:
 111:
-	.set	offset,0
-	.rept	8
-	clr.b	(offset,a1)
-	clr.b	(offset,a3)
-	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
-	clr.b	(offset,a5)  | buffer 2
-	.endif
-	.set	offset,offset+NB_BYTES_PER_ROW
-	.endr
+	CLEAR_TILE_PLANE
 	TILE_NEXT_PLANE
 	dbf		d4,111b
 2:

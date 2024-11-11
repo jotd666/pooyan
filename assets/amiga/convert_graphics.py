@@ -144,6 +144,7 @@ add_sprite(0x39,"points",[3,2])  # 400, 800
 add_sprite(0x11,"player_in_basket_top")
 add_sprite(0x1c,"fruit",[6,7]) # strawberry or apple!
 add_sprite(0x12,"player_in_basket_bottom")
+add_sprite(0x2C,"facing_boss",[4])
 add_sprite([0x14,0x1B],"arrow")
 
 add_sprite(0x25,"player_in_basket_top")
