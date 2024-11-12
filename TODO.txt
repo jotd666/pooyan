@@ -3,7 +3,9 @@ break on all jump table entrypoints, figure them all out
 
 - update_88A0_0038: sound??
 - baloon shot with arrow: wolf not falling (looks ok with meat)
-  => debugging with 1 wolf at a time
+  => debugging with 1 wolf at a time on MAME
+  030b: reduce 0x12 => 0x6 see if balloons follow
+  wolf_hit reached, but then ... maybe use trace?
 - reverse all wolf_structure_array_8AE0 loops
 - double buffering: coded but not working! seems that background restore makes
   sprites disappear???

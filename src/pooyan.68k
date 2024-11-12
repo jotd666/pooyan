@@ -373,9 +373,9 @@ read_iyl_in_d0:
 wolf_flying_00 = 0
 wolf_walking_01 = 1
 character_state_02 = 2
-unknown_03 = 3
+fine_y_pos_03 = 3
 y_pos_04 = 4
-unknown_05 = 5
+fine_x_pos_05 = 5
 x_pos_06 = 6
 unknown_07 = 7
 unknown_08 = 0x8
@@ -890,7 +890,7 @@ update_sprite_shadows_02EF:
 	lea	wolf_structure_array_8AE0(a6),a2        | [$0307: ld   ix,$8AE0]
 	move.b	#0x12,d1                        	| [$030b: ld   b,$12]
 	* at this point, HL=$8850
-	jbsr	update_wolves_sprite_shadow_ram_0343    | [$030d: call $0343]
+	jbsr	update_wolves_and_balloons_sprite_shadow_ram_0343    | [$030d: call $0343]
 	lea	player_structure_8AB0(a6),a2                      	| [$0310: ld   ix,$8AB0]
 	move.b	#0x02,d1                        	| [$0314: ld   b,$02]
 	jbsr	update_sprite_shadow_0321         	| [$0316: call update_sprite_shadow_0321]
@@ -927,8 +927,8 @@ update_sprite_shadow_0321:
 	jne	update_sprite_shadow_0321          	| [$0340: djnz update_sprite_shadow_0321]
 	rts                                    	| [$0342: ret]
 
-update_wolves_sprite_shadow_ram_0343:
-	move.b	(0x05,a2),d2                    	| [$0343: ld   c,(ix+$05)]
+update_wolves_and_balloons_sprite_shadow_ram_0343:
+	move.b	(fine_x_pos_05,a2),d2                    	| [$0343: ld   c,(ix+$05)]
 	move.b	(x_pos_06,a2),d0                    	| [$0346: ld   a,(ix+$06)]
 	rol.b	#1,d2                            	| [$0349: rlc  c]
 	SET_X_FROM_C
@@ -946,7 +946,7 @@ update_wolves_sprite_shadow_ram_0343:
 	move.b	d0,(a0)+                         	| [$0359: ld   (hl),a]
 	                           	| [$035a: inc  l]
 	move.b	(y_pos_04,a2),d0                    	| [$035b: ld   a,(ix+$04)]
-	move.b	(0x03,a2),d2                    	| [$035e: ld   c,(ix+$03)]
+	move.b	(fine_y_pos_03,a2),d2                    	| [$035e: ld   c,(ix+$03)]
 	rol.b	#1,d2                            	| [$0361: rlc  c]
 	SET_X_FROM_C
 	roxl.b	#1,d0                           	| [$0363: rla]
@@ -957,14 +957,14 @@ update_wolves_sprite_shadow_ram_0343:
 	SET_X_FROM_C
 	roxl.b	#1,d0                           	| [$0369: rla]
 	sub.b	#0x08,d0                         	| [$036a: sub  $08]
-	move.b	d0,(a0)+                         	| [$036c: ld   (hl),a]
+	move.b	d0,(a0)+                         	| [$036c: ld   (hl),a]  wolf or balloon Y
 	                           	| [$036d: inc  l]
 	move.b	(sprite_code_0f,a2),d0                    	| [$036e: ld   a,(ix+$0f)]
 	move.b	d0,(a0)+                         	| [$0371: ld   (hl),a]
 	                           	| [$0372: inc  l]
 	add.w	d3,a2                            	| [$0373: add  ix,de] next wolf
 	subq.b	#1,d1                           	| [...]
-	jne	update_wolves_sprite_shadow_ram_0343                             	| [$0375: djnz $0343]
+	jne	update_wolves_and_balloons_sprite_shadow_ram_0343                             	| [$0375: djnz $0343]
 	rts                                    	| [$0377: ret]
 
 mirror_coords_for_cocktail_mode_0378:
