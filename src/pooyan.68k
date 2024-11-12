@@ -373,13 +373,27 @@ read_iyl_in_d0:
 wolf_flying_00 = 0
 wolf_walking_01 = 1
 character_state_02 = 2
+unknown_03 = 3
 y_pos_04 = 4
+unknown_05 = 5
 x_pos_06 = 6
+unknown_07 = 7
+unknown_08 = 0x8
+unknown_09 = 0x9
+unknown_0a = 0xa
+unknown_0b = 0xb
 animation_rom_pointer_lsb_0c = 0xc
 animation_rom_pointer_msb_0d = 0xd
 animation_timer_0e = 0xe
 sprite_code_0f = 0xf
 sprite_attributes_10 = 0x10
+unknown_11 = 0x11
+unknown_12 = 0x12
+unknown_13 = 0x13
+unknown_14 = 0x14
+unknown_15 = 0x15
+unknown_16 = 0x16
+unknown_17 = 0x17
 
 GAME_IN_PLAY_03 = 3
 
@@ -1014,7 +1028,7 @@ l_03bc:
 	rts                                    	| [$03c1: ret]
 
 display_nb_lives_03c2:
-	lea	l_863F(a6),a0                      	| [$03c2: ld   hl,$863F]
+	lea	lives_screen_addressn_863F(a6),a0                      	| [$03c2: ld   hl,$863F]
 	move.w    #0xFFE0,d3                          	| [$03c5: ld   de,$FFE0]
 	move.b	nb_lives_8908(a6),d0            	| [$03c8: ld   a,(nb_lives_8908)]
 	                               	| [$03cb: and  a]
@@ -2210,10 +2224,10 @@ l_0c3d:
 	rts                                    	| [$0c44: ret]
 
 * loads a rom pointer or just 16 bit value in some cases...
-* > d3 (16 bit rom offset/value)
-* > a1: pointer
 * < a0: input table
 * < d0: pointer number
+* > d3 (16 bit rom offset/value)
+* > a1: pointer
 load_16bit_rom_pointer_0c45:
 	add.b	d0,d0                            	| [$0c45: add  a,a] double
 	clr.w	d3                               	| [$0c46: ld   d,$00]
@@ -3155,23 +3169,23 @@ l_122c:
 0:
 	jbsr	jump_from_table_below_0028                            	| [$123c: rst  $28]
 
-	.long	l_125f
-	.long	l_1270
-	.long	wolf_shot_exploding_3536
-	.long	l_12af
-	.long	wolf_updates_baloon_3865
-	.long	l_1496
-	.long	wolf_walking_to_ladders_3be3
-	.long	l_3c92
-	.long	l_14dc
-	.long	l_1518
-	.long	l_154d
-	.long	flying_wolf_prepares_to_shoot_3e69
-	.long	flying_wolf_shoots_3e9c
-	.long	l_3f5c
-	.long	l_3f72
-	.long	wolf_falling_3f7c
-	.long	rom_check_3fe9
+	.long	l_125f                                          | 0x00
+	.long	l_1270                                          | 0x01
+	.long	wolf_shot_exploding_3536                        | 0x02
+	.long	l_12af                                          | 0x03
+	.long	wolf_updates_baloon_3865                        | 0x04
+	.long	l_1496                                          | 0x05
+	.long	wolf_walking_to_ladders_3be3                    | 0x06
+	.long	l_3c92                                          | 0x07
+	.long	l_14dc                                          | 0x08
+	.long	l_1518                                          | 0x09
+	.long	l_154d                                          | 0x0A
+	.long	flying_wolf_prepares_to_shoot_3e69              | 0x0B
+	.long	flying_wolf_shoots_3e9c                         | 0x0C
+	.long	l_3f5c                                          | 0x0D
+	.long	l_3f72                                          | 0x0E
+	.long	wolf_falling_3f7c                               | 0x0F
+	.long	rom_check_3fe9                                  | 0x10
 
 l_125f:
 	subq.b	#1,(0x11,a2)                    	| [$125f: dec  (ix+$11)]
@@ -3231,7 +3245,7 @@ l_12af:
 	move.b	(0x05,a2),d0                    	| [$12b9: ld   a,(ix+$05)]
 	add.b	(0x09,a2),d0                     	| [$12bc: add  a,(ix+$09)]
 	jcc	l_12c4                             	| [$12bf: jr   nc,$12C4]
-	addq.b	#1,(0x06,a2)                    	| [$12c1: inc  (ix+$06)]
+	addq.b	#1,(x_pos_06,a2)                    	| [$12c1: inc  (ix+$06)]
 l_12c4:
 	move.b	d0,(0x05,a2)                    	| [$12c4: ld   (ix+$05),a]
 	move.b	d0,d1                           	| [$12c7: ld   b,a]
@@ -3249,7 +3263,7 @@ l_12d0:
 	and.b	#0x0F,d0                         	| [$12e3: and  $0F]
 	jbsr	read_byte_a0_plus_d0_0020                            	| [$12e5: rst  $20]
 	move.b	d0,d2                           	| [$12e6: ld   c,a]
-	move.b	(0x06,a2),d0                    	| [$12e7: ld   a,(ix+$06)]
+	move.b	(x_pos_06,a2),d0                    	| [$12e7: ld   a,(ix+$06)]
 	cmp.b	d2,d0                            	| [$12ea: cp   c]
 	jeq	l_1383                             	| [$12eb: jp   z,$1383]
 	cmp.b	#0x14,d0                         	| [$12ee: cp   $14]
@@ -3280,7 +3294,7 @@ l_1391:
 0:
 	jra	l_12d0                             	| [$1396: jp   $12D0]
 l_1399:
-	move.b	(0x06,a2),d0                    	| [$1399: ld   a,(ix+$06)]
+	move.b	(x_pos_06,a2),d0                    	| [$1399: ld   a,(ix+$06)]
 	cmp.b	#0x07,d0                         	| [$139c: cp   $07]
 	jcs	l_1389                             	| [$139e: jr   c,$1389]
 	cmp.b	#0x14,d0                         	| [$13a0: cp   $14]
@@ -3341,7 +3355,7 @@ l_13fe:
 	move.b	(0x05,a2),d0                    	| [$1404: ld   a,(ix+$05)]
 	cmp.b	d1,d0                            	| [$1407: cp   b]
 	jcc	l_140d                             	| [$1408: jr   nc,$140D]
-	subq.b	#1,(0x06,a2)                    	| [$140a: dec  (ix+$06)]
+	subq.b	#1,(x_pos_06,a2)                    	| [$140a: dec  (ix+$06)]
 l_140d:
 	add.b	(0x0a,a2),d0                     	| [$140d: add  a,(ix+$0a)]
 	move.b	d0,(0x05,a2)                    	| [$1410: ld   (ix+$05),a]
@@ -3350,7 +3364,7 @@ l_140d:
 	cmp.b	#0x03,d0                         	| [$1417: cp   $03]
 	jcs	l_1399                             	| [$1419: jp   c,$1399]
 l_141c:
-	move.b	(0x06,a2),d0                    	| [$141c: ld   a,(ix+$06)]
+	move.b	(x_pos_06,a2),d0                    	| [$141c: ld   a,(ix+$06)]
 	cmp.b	#0x02,d0                         	| [$141f: cp   $02]
 	bcs.b	0f                               	| [...]
 	rts                                    	| [$1421: ret  nc] [...]
@@ -8777,6 +8791,7 @@ wolf_hit_3d18:
 	move.b	l_8D45(a6),d0                   	| [$3d1d: ld   a,($8D45)]
 	                               	| [$3d20: and  a]
 	jeq	l_3d3b                             	| [$3d21: jr   z,$3D3B]
+	* seems that in that case, wolf+balloon get score
 	move.b	(0x12,a2),d2                    	| [$3d23: ld   c,(ix+$12)]
 	addq.w	#1,d2                           	| [$3d26: inc  c]
 	jeq	l_3d3b                             	| [$3d27: jr   z,$3D3B]
@@ -8798,15 +8813,14 @@ l_3d3b:
 	btst.b	#1,(0x07,a2)                    	| [$3d3f: bit  1,(ix+$07)]
 	jeq	l_3d50                             	| [$3d43: jr   z,$3D50]
 	addq.w	#1,d2                           	| [$3d45: inc  c]
-	                               	            | [$3d49: and  a]
 	move.b	d2,d0                           	| [$3d4a: ld   a,c]
 	tst.b	l_8D45(a6)                   	| [$3d46: ld   a,($8D45)]
+	                               	            | [$3d49: and  a]
 	jeq	l_3d50                             	| [$3d4b: jr   z,$3D50]
 	move.b	#0x03,d0                        	| [$3d4d: ld   a,$03]
 	add.b	d2,d0                            	| [$3d4f: add  a,c]
 l_3d50:
 	LOAD_ROM	0x3DD3,a0                          	| [$3d50: ld   hl,$3DD3]
-l_3d53:
 	jbsr	load_16bit_rom_pointer_0c45                            	| [$3d53: call $0C45]
 	jbsr	store_de_in_struct_381e                            	| [$3d56: call $381E]
 	addq.b	#1,(character_state_02,a2)                    	| [$3d59: inc  (ix+$02)]
@@ -8820,7 +8834,7 @@ wolf_baloon_exploding_3d5c:
 	cmp.b	#0x07,d0                         	| [$3d66: cp   $07]
 	jeq	l_3d99                             	| [$3d68: jp   z,$3D99]
 	move.b	d0,d2                           	| [$3d6b: ld   c,a]
-	tst.b	d0                               	| [$3d6c: and  a]
+												| [$3d6c: and  a]
 	jeq	l_3d70                             	| [$3d6d: jr   z,$3D70]
 	subq.b	#1,d0                           	| [$3d6f: dec  a]
 l_3d70:
@@ -8836,7 +8850,7 @@ l_3d70:
 	jbsr	store_de_in_struct_381e                            	| [$3d81: call $381E]
 	move.b	#0x30,(0x11,a2)                 	| [$3d84: ld   (ix+$11),$30]
 l_3d88:
-	addq.w	#1,d2                           	| [$3d88: inc  c]
+	addq.b	#1,d2                           	| [$3d88: inc  c]
 	move.b	d2,(0x13,a2)                    	| [$3d89: ld   (ix+$13),c]
 	addq.b	#1,(character_state_02,a2)                    	| [$3d8c: inc  (ix+$02)]
 wolf_shot_by_arrow_falls_3d8f:

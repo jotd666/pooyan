@@ -1,6 +1,7 @@
 
 break on all jump table entrypoints, figure them all out
 
+- update_88A0_0038: sound??
 - baloon shot with arrow: wolf not falling (looks ok with meat)
   => debugging with 1 wolf at a time
 - reverse all wolf_structure_array_8AE0 loops
