@@ -30,6 +30,10 @@
     OPT_START_SCORE=0
 
 	OPT_SKIP_GAME_DEMO=0
+	* when only one enemy:
+	* wolf struct at 8AE0, sprite shadow at 8850
+	* balloon struct at 8B70 (y @8B74), sprite shadow at 8868
+	* 
 	OPT_ONLY_ONE_ENEMY=1
 	OPT_ONLY_ONE_LIFE=0
 

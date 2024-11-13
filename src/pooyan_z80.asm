@@ -6236,54 +6236,7 @@ table_35C7:
 	 .word	$3607  
 	 .word	$360F 
 
-35D7: 09          add  hl,bc                                          
-35D8: 0D          dec  c
-35D9: 11 09 0D    ld   de,$0D09
-35DC: 11 09 0D    ld   de,$0D09
-35DF: 09          add  hl,bc
-35E0: 11 0D 11    ld   de,$110D
-35E3: 0D          dec  c
-35E4: 09          add  hl,bc
-35E5: 0D          dec  c
-35E6: 09          add  hl,bc
-35E7: 11 0D 09    ld   de,$090D
-35EA: 11 0D 09    ld   de,$090D
-35ED: 11 0D 08    ld   de,$080D
-(35EF: ex   af,af'), jumped from jump table!
-35F0: 0B          dec  bc
-35F1: 0F          rrca
-35F2: 12          ld   (de),a
-35F3: 08          ex   af,af'
-35F4: 12          ld   (de),a
-35F5: 0B          dec  bc
-35F6: 0F          rrca
-35F7: 12          ld   (de),a
-35F8: 0F          rrca
-35F9: 0B          dec  bc
-35FA: 08          ex   af,af'
-35FB: 0F          rrca
-35FC: 12          ld   (de),a
-35FD: 08          ex   af,af'
-35FE: 0B          dec  bc
-35FF: 08          ex   af,af'
-3600: 0B          dec  bc
-3601: 0E 11       ld   c,$11
-3603: 0B          dec  bc
-3604: 08          ex   af,af'
-3605: 11 0E 11    ld   de,$110E
-(3607) 3607  ld   de,$0B0E                                       11 0E 0B
- or
-(3608: 0E 0B       ld   c,$0B)
-360A: 08          ex   af,af'
-360B: 0E 11       ld   c,$11
-360D: 0B          dec  bc
-360E: 08          ex   af,af'
-360F: 08          ex   af,af'
-3610: 0B          dec  bc
-3611: 0F          rrca
-3612: 12          ld   (de),a
-3613: 0A          ld   a,(bc)
-3614: 11 09 0D    ld   de,$0D09
+
 3617: 78          ld   a,b
 3618: FE 20       cp   $20
 361A: D0          ret  nc
