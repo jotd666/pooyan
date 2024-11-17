@@ -471,7 +471,7 @@ update_88A0_0038:
 	move.l	a0,-(sp)                        	| [$0038: push hl]
 	move.w	d3,-(sp)
 	LOAD_D3D4_FROM_D3_16
-	lea	l_8800(a6),a0                        	| [$0039: ld   h,$88]
+	lea	bonus_life_30k_70k_8800(a6),a0                        	| [$0039: ld   h,$88]
 	moveq	#0,D6			| a0/d6 coherence
 	moveq	#0,d0
 	move.b	l_88A0(a6),d0                   	| [$003b: ld   a,($88A0)]
@@ -502,7 +502,7 @@ irq_0066:
 bootup_0092:
 	                	| [$0092: ld   (watchdog_a000),a]
 	*move	ram_top_9000,sp                   	| [$0095: ld   sp,ram_top_9000]
-	move.b	d0,l_8800(a6)                   	| [$0098: ld   ($8800),a] set to 0
+	move.b	d0,bonus_life_30k_70k_8800(a6)                   	| [$0098: ld   ($8800),a] set to 0
 												| [$009b: ld   b,$08]
 												| [$009d: push bc]
 	                      	| [$009e: ld   hl,$0000] 0
@@ -567,7 +567,7 @@ bootup_0092:
 
 
 	                	| [$0103: ld   (watchdog_a000),a]
-	lea	l_8800(a6),a0                      	| [$0106: ld   hl,$8800]
+	lea	bonus_life_30k_70k_8800(a6),a0                      	| [$0106: ld   hl,$8800]
 	lea	l_8801(a6),a1                      	| [$0109: ld   de,$8801]
 	move.w	#0x07FD,d1                          	| [$010c: ld   bc,$07FD]
 	clr.b	(a0)                             	| [$010f: ld   (hl),$00]
@@ -589,7 +589,7 @@ bootup_0092:
 	                	| [$012c: ld   (watchdog_a000),a]
 	move.b	#0x01,d0                        	| [$012f: ld   a,$01]
 	*move.b	d0,l_A187                       	| [$0131: ld   ($A187),a]
-	move.b	d0,cabinet_upright_881F(a6)                   	| [$0134: ld   ($881F),a]
+	move.b	d0,screen_flipped_881F(a6)                   	| [$0134: ld   ($881F),a]
 	move.w	#0xC0C0,d5                          	| [$0137: ld   hl,$C0C0]
 	STORE_WORD	d5,l_88A0(a6)            	| [$013a: ld   ($88A0),hl]
 	
@@ -609,22 +609,22 @@ bootup_0092:
 	ror.b	#2,d0                            	| [$0154: rrca] * 2
 	move.b	d0,d1                           	| [$0156: ld   b,a]
 	and.b	#0x01,d0                         	| [$0157: and  $01]
-	move.b	d0,l_880F(a6)                   	| [$0159: ld   ($880F),a]
+	move.b	d0,cabinet_upright_880F(a6)                   	| [$0159: ld   ($880F),a]
 	move.b	d1,d0                           	| [$015c: ld   a,b]
 	ror.b	#1,d0                            	| [$015d: rrca]
 	move.b	d0,d1                           	| [$015e: ld   b,a]
 	and.b	#0x01,d0                         	| [$015f: and  $01]
-	move.b	d0,l_8800(a6)                   	| [$0161: ld   ($8800),a]
+	move.b	d0,bonus_life_30k_70k_8800(a6)                   	| [$0161: ld   ($8800),a]
 	move.b	d1,d0                           	| [$0164: ld   a,b]
 	ror.b	#1,d0                            	| [$0165: rrca]
 	move.b	d0,d1                           	| [$0166: ld   b,a]
 	and.b	#0x07,d0                         	| [$0167: and  $07]
-	move.b	d0,l_8820(a6)                   	| [$0169: ld   ($8820),a]
+	move.b	d0,difficulty_8820(a6)                   	| [$0169: ld   ($8820),a]
 	move.b	d1,d0                           	| [$016c: ld   a,b]
 	ror.b	#3,d0                            	| [$016d: rrca] * 3
 	move.b	d0,d1                           	| [$0170: ld   b,a]
 	and.b	#0x01,d0                         	| [$0171: and  $01]
-	move.b	d0,l_8821(a6)                   	| [$0173: ld   ($8821),a]
+	move.b	d0,demo_sounds_on_8821(a6)                   	| [$0173: ld   ($8821),a]
 	jbsr	osd_read_dsw1                    	| [$0176: ld   a,(dsw1_a000)]
 	not.b	d0                               	| [$0179: cpl]
 	and.b	#0x03,d0                         	| [$017a: and  $03]
@@ -1030,7 +1030,7 @@ l_03bc:
 
 display_nb_lives_03c2:
 	lea	lives_screen_addressn_863F(a6),a0                      	| [$03c2: ld   hl,$863F]
-	move.w    #0xFFE0,d3                          	| [$03c5: ld   de,$FFE0]
+	move.w    #-0x20,d3                          	| [$03c5: ld   de,$FFE0]
 	move.b	nb_lives_8908(a6),d0            	| [$03c8: ld   a,(nb_lives_8908)]
 	                               	| [$03cb: and  a]
 	bne.b	0f                               	| [...]
@@ -1143,7 +1143,7 @@ l_0460:
 	lea	l_8567(a6),a0                      	| [$0464: ld   hl,$8567]
 	move.b	#0x0A,d1                        	| [$0467: ld   b,$0A]
 l_0469:
-	move.w    #0xFFE0,d3                          	| [$0469: ld   de,$FFE0]
+	move.w    #-0x20,d3                          	| [$0469: ld   de,$FFE0]
 	move.b	(0x00,a2),d0                    	| [$046c: ld   a,(ix+$00)]
 	                               	| [$046f: and  a]
 	jne	l_0474                             	| [$0470: jr   nz,$0474]
@@ -1280,7 +1280,7 @@ display_score_056B:
 	lea	high_score_88AA(a6),a0                      	| [$057f: ld   hl,$88AA]
 	lea	l_8641(a6),a2                      	| [$0582: ld   ix,$8641]
 l_0586:
-	move.w    #0xFFE0,d3                          	| [$0586: ld   de,$FFE0]
+	move.w    #-0x20,d3                          	| [$0586: ld   de,$FFE0]
 	move.b	#0x03,d1                        	| [$0589: ld   b,$03]
 	move.b	#0x04,d2                        	| [$058b: ld   c,$04]
 l_058d:
@@ -1577,7 +1577,7 @@ jump_table_06FF:
 	.long	l_0e53
 
 continue_06FA:
-	move.b	cabinet_upright_881F(a6),d0                   	| [$06fa: ld   a,($881F)]
+	move.b	screen_flipped_881F(a6),d0                   	| [$06fa: ld   a,($881F)]
 	*move.b	d0,l_A187                       	| [$06fd: ld   ($A187),a]
 	move.l	(sp)+,a3                        	| [$0700: pop  iy]
 	move.l	(sp)+,a2                        	| [$0702: pop  ix]
@@ -2054,7 +2054,7 @@ l_0ad1:
 * called until next character name is displayed
 character_introduction_related_0b32:
 	lea	l_82BC(a6),a0                      	| [$0b32: ld   hl,$82BC]
-	move.w    #0xFFE0,d3                          	| [$0b35: ld   de,$FFE0]
+	move.w    #-0x20,d3                          	| [$0b35: ld   de,$FFE0]
 	move.b	#0x0A,d1                        	| [$0b38: ld   b,$0A]
 l_0b3a:
 	move.b	(a0),d0                         	| [$0b3a: ld   a,(hl)]
@@ -2148,7 +2148,7 @@ l_0bb5:
 	cmp.b	#0x08,d0                         	| [$0bcc: cp   $08]
 	jne	l_0bfc                             	| [$0bce: jr   nz,$0BFC]
 l_0bd0:
-	move.w    #0xFFE0,d3                          	| [$0bd0: ld   de,$FFE0]
+	move.w    #-0x20,d3                          	| [$0bd0: ld   de,$FFE0]
 	lea	l_8EFE(a6),a0                      	| [$0bd3: ld   hl,$8EFE]
 	addq.b	#1,(a0)                         	| [$0bd6: inc  (hl)]
 	* another rom checksum!!				| [$0bd7: ld   hl,$86BC]
@@ -2308,7 +2308,7 @@ clear_screen_as_first_credit_inserted_0c77:
 	jbsr	apply_color_075d                            	| [$0cab: call $075D]
 	move.b	d0,current_player_is_p2_880D(a6)                   	| [$0cae: ld   ($880D),a]
 	jbsr	l_0e54                            	| [$0cb1: call $0E54]
-	jbsr	l_0cf8                            	| [$0cb4: call $0CF8]
+	jbsr	write_pooyan_title_0cf8                            	| [$0cb4: call $0CF8]
 	move.w	#0x0601,d3                          	| [$0cb7: ld   de,$0601]
 	jbsr	update_88A0_0038                            	| [$0cba: rst  $38]
 	move.b	#0x11,d3                        	| [$0cbb: ld   e,$11]
@@ -2316,14 +2316,14 @@ clear_screen_as_first_credit_inserted_0c77:
 	move.b	#0x16,d3                        	| [$0cbe: ld   e,$16]
 	jbsr	update_88A0_0038                            	| [$0cc0: rst  $38]
 	addq.w	#1,d3                           	| [$0cc1: inc  e]
-	move.b	l_8800(a6),d0                   	| [$0cc2: ld   a,($8800)]
+	move.b	bonus_life_30k_70k_8800(a6),d0                   	| [$0cc2: ld   a,($8800)]
 	and.b	#0x01,d0                         	| [$0cc5: and  $01]
 	jeq	l_0ccb                             	| [$0cc7: jr   z,$0CCB]
 	move.b	#0x28,d3                        	| [$0cc9: ld   e,$28]
 l_0ccb:
 	jbsr	update_88A0_0038                            	| [$0ccb: rst  $38]
 	move.b	#0x2A,d3                        	| [$0ccc: ld   e,$2A]
-	move.b	l_8800(a6),d0                   	| [$0cce: ld   a,($8800)]
+	move.b	bonus_life_30k_70k_8800(a6),d0                   	| [$0cce: ld   a,($8800)]
 	and.b	#0x01,d0                         	| [$0cd1: and  $01]
 	jeq	l_0cd6                             	| [$0cd3: jr   z,$0CD6]
 	subq.w	#1,d3                           	| [$0cd5: dec  e]
@@ -2359,15 +2359,18 @@ l_0cd6:
 	                                    	| [$0cf6: nop]
 	rts                                    	| [$0cf7: ret]
 
-l_0cf8:
+write_pooyan_title_0cf8:
 	LOAD_ROM	0x0D2F,a0                          	| [$0cf8: ld   hl,$0D2F]
 	lea	l_86A7(a6),a2                      	| [$0cfb: ld   ix,$86A7]
-	move.w    #0xFFE0,d3                          	| [$0cff: ld   de,$FFE0]
+	move.w    #-0x20,d3                          	| [$0cff: ld   de,$FFE0]
 	move.b	#0x0C,d1                        	| [$0d02: ld   b,$0C]
+	* write a row of tiles/attributes for "pooyan"
 l_0d04:
-	move.b	(a0),d0                         	| [$0d04: ld   a,(hl)]
-	move.b	d0,(0x00,a2)                    	| [$0d05: ld   (ix+$00),a]
-	addq.w	#1,a0                           	| [$0d08: inc  hl]
+	move.b	(a0)+,d0                         	| [$0d04: ld   a,(hl)]
+	exg		a0,a2
+	jbsr	write_to_screen                    	| [$0d05: ld   (ix+$00),a]
+	exg		a0,a2
+												| [$0d08: inc  hl]
 	add.w	d3,a2                            	| [$0d09: add  ix,de]
 	subq.b	#1,d1                           	| [...]
 	jne	l_0d04                             	| [$0d0b: djnz $0D04]
@@ -2380,13 +2383,14 @@ l_0d04:
 0:
 	move.w	#0x0181,d3                          	| [$0d15: ld   de,$0181]
 	add.w	d3,a2                            	| [$0d18: add  ix,de]
-	move.w    #0xFFE0,d3                          	| [$0d1a: ld   de,$FFE0]
+	move.w    #-0x20,d3                          	| [$0d1a: ld   de,$FFE0]
 	move.b	#0x0C,d1                        	| [$0d1d: ld   b,$0C]
 	jra	l_0d04                             	| [$0d1f: jr   $0D04]
 l_0d21:
+	* start over with attributes
 	LOAD_ROM	0x0D48,a0                          	| [$0d21: ld   hl,$0D48]
 	lea	l_82A7(a6),a2                      	| [$0d24: ld   ix,$82A7]
-	move.w    #0xFFE0,d3                          	| [$0d28: ld   de,$FFE0]
+	move.w    #-0x20,d3                          	| [$0d28: ld   de,$FFE0]
 	move.b	#0x0C,d1                        	| [$0d2b: ld   b,$0C]
 	jra	l_0d04                             	| [$0d2d: jr   $0D04]
 
@@ -2449,14 +2453,13 @@ l_0dab:
 	STORE_WORD	d5,current_player_is_p2_880D(a6)            	| [$0dab: ld   ($880D),hl]
 	
 	jbsr	l_0e54                            	| [$0dae: call $0E54]
-	CLEAR_XC_FLAGS                         	| [$0db1: xor  a]
 	clr.b	d0                               	| [$0db1: xor  a]
 	move.b	d0,in_game_sub_state_880A(a6)   	| [$0db2: ld   (in_game_sub_state_880A),a]
 	move.b	#0x03,d0                        	| [$0db5: ld   a,$03]
 	move.b	d0,game_state_8805(a6)          	| [$0db7: ld   (game_state_8805),a]
 	move.b	#0x01,d0                        	| [$0dba: ld   a,$01]
 	move.b	d0,l_8806(a6)                   	| [$0dbc: ld   ($8806),a]
-	move.b	d0,cabinet_upright_881F(a6)                   	| [$0dbf: ld   ($881F),a]
+	move.b	d0,screen_flipped_881F(a6)                   	| [$0dbf: ld   ($881F),a]
 	move.w	#0x0604,d3                          	| [$0dc2: ld   de,$0604]
 	jbsr	update_88A0_0038                            	| [$0dc5: rst  $38]
 	jbsr	init_play_0E00                    	| [$0dc6: call init_play_0E00]
@@ -2499,7 +2502,6 @@ l_0df4:
 
 init_play_0E00:
 	lea	play_variables_player_1_8900(a6),a0 	| [$0e00: ld   hl,play_variables_player_1_8900]
-	CLEAR_XC_FLAGS                         	| [$0e03: xor  a]
 	clr.b	d0                               	| [$0e03: xor  a]
 	move.b	d0,in_game_sub_state_880A(a6)   	| [$0e04: ld   (in_game_sub_state_880A),a]
 	move.b	d0,l_89E1(a6)                   	| [$0e07: ld   ($89E1),a]
@@ -2515,7 +2517,7 @@ init_play_0E00:
 	move.b	#0x20,d0                        	| [$0e1f: ld   a,$20]
 	move.b	d0,l_8941(a6)                   	| [$0e21: ld   ($8941),a]
 	move.b	d0,l_8981(a6)                   	| [$0e24: ld   ($8981),a]
-	move.b	l_8820(a6),d0                   	| [$0e27: ld   a,($8820)]
+	move.b	difficulty_8820(a6),d0                   	| [$0e27: ld   a,($8820)]
 	move.b	d0,l_8940(a6)                   	| [$0e2a: ld   ($8940),a]
 	move.b	d0,play_variables_player_2_8980(a6)                   	| [$0e2d: ld   ($8980),a]
 	jbsr	l_02e3                            	| [$0e30: call $02E3]
@@ -2565,7 +2567,7 @@ l_0e64:
 	rts                                    	| [$0e6e: ret  z] [...]
 0:
 	move.b	d0,d1                           	| [$0e6f: ld   b,a]
-	move.b	l_8821(a6),d0                   	| [$0e70: ld   a,($8821)]
+	move.b	demo_sounds_on_8821(a6),d0                   	| [$0e70: ld   a,($8821)]
 	and.b	#0x01,d0                         	| [$0e73: and  $01]
 	jne	l_0e7d                             	| [$0e75: jr   nz,$0E7D]
 	move.b	l_8806(a6),d0                   	| [$0e77: ld   a,($8806)]
@@ -3630,10 +3632,10 @@ clear_character_intro_screen_1601:
 	move.b	d0,l_89E3(a6)                   	| [$1630: ld   ($89E3),a]
 	                               	| [$1636: and  a]
 	move.b	current_player_is_p2_880D(a6),d0                   	| [$1637: ld   a,($880D)]
-	tst.b	l_880F(a6)                   	| [$1633: ld   a,($880F)]
+	tst.b	cabinet_upright_880F(a6)                   	| [$1633: ld   a,($880F)]
 	jne	l_1642                             	| [$163a: jr   nz,$1642]
 	subq.b	#1,d0                           	| [$163c: dec  a]
-	move.b	d0,cabinet_upright_881F(a6)                   	| [$163d: ld   ($881F),a]
+	move.b	d0,screen_flipped_881F(a6)                   	| [$163d: ld   ($881F),a]
 	jra	l_1643                             	| [$1640: jr   $1643]
 l_1642:
 	subq.b	#1,d0                           	| [$1642: dec  a]
@@ -3890,7 +3892,7 @@ l_17e6:
 	subq.b	#1,d1                           	| [...]
 	jne	l_17e6                             	| [$17f6: djnz $17E6]
 	lea	player_bow_structure_8A80(a6),a2      	| [$17f8: ld   ix,player_bow_structure_8A80]
-	move.b	cabinet_upright_881F(a6),d0                   	| [$17fc: ld   a,($881F)]
+	move.b	screen_flipped_881F(a6),d0                   	| [$17fc: ld   a,($881F)]
 	                               	| [$17ff: and  a]
 	jne	l_1808                             	| [$1800: jr   nz,$1808]
 	subq.b	#2,(x_pos_06,a2)                    	| [$1802: dec  (ix+$06)] * 2
@@ -4026,7 +4028,7 @@ l_18ed:
 	addq.b	#1,(a0)                         	| [$18f8: inc  (hl)]
 l_18f9:
 	moveq	#0x08,d0                        	| [$18fd: ld   a,$08]
-	tst.b	l_8800(a6)                   	| [$18f9: ld   a,($8800)]
+	tst.b	bonus_life_30k_70k_8800(a6)                   	| [$18f9: ld   a,($8800)]
 	jeq	l_1902                             	| [$18ff: jr   z,$1902]
 	subq.b	#1,d0                           	| [$1901: dec  a]
 l_1902:
@@ -4039,7 +4041,7 @@ l_1902:
 l_190e:
 	                               	| [$1911: and  a]
 	move.b	#0x05,d0                        	| [$1912: ld   a,$05]
-	tst.b	l_8800(a6)                   	| [$190e: ld   a,($8800)]
+	tst.b	bonus_life_30k_70k_8800(a6)                   	| [$190e: ld   a,($8800)]
 	jeq	l_1918                             	| [$1914: jr   z,$1918]
 	move.b	#0x03,d0                        	| [$1916: ld   a,$03]
 l_1918:
@@ -4076,7 +4078,7 @@ l_1930:
 	jne	l_1955                             	| [$193e: jr   nz,$1955]
 	lsr.b	#1,d0                            	| [$1940: srl  a]
 	move.b	d0,d1                           	| [$1942: ld   b,a]
-	move.b	l_8820(a6),d0                   	| [$1943: ld   a,($8820)]
+	move.b	difficulty_8820(a6),d0                   	| [$1943: ld   a,($8820)]
 	add.b	d1,d0                            	| [$1946: add  a,b]
 	move.b	d0,d1                           	| [$1947: ld   b,a]
 	move.b	l_8903(a6),d0                   	| [$1948: ld   a,($8903)]
@@ -4089,7 +4091,7 @@ l_1953:
 	jra	l_1960                             	| [$1953: jr   $1960]
 l_1955:
 	move.b	d0,d1                           	| [$1955: ld   b,a]
-	move.b	l_8820(a6),d0                   	| [$1956: ld   a,($8820)]
+	move.b	difficulty_8820(a6),d0                   	| [$1956: ld   a,($8820)]
 	add.b	d1,d0                            	| [$1959: add  a,b]
 	cmp.b	#0x20,d0                         	| [$195a: cp   $20]
 	jcs	l_1960                             	| [$195c: jr   c,$1960]
@@ -4595,7 +4597,7 @@ l_1c98:
 	rts                                    	| [$1c9b: ret]
 l_1c9c:
 	lea	round_text_address_855f(a6),a0                      	| [$1c9c: ld   hl,$855F]
-	move.w    #0xFFE0,d3                          	| [$1c9f: ld   de,$FFE0]
+	move.w    #-0x20,d3                          	| [$1c9f: ld   de,$FFE0]
 	move.b	#0x08,d1                        	| [$1ca2: ld   b,$08]
 l_1ca4:
 	move.b	#0x10,d0                        	| [$1ca4: ld   a,$10]
@@ -4604,7 +4606,7 @@ l_1ca4:
 	subq.b	#1,d1                           	| [...]
 	jne	l_1ca4                             	| [$1ca8: djnz $1CA4]
 	lea	l_82BC(a6),a0                      	| [$1caa: ld   hl,$82BC]
-	move.w    #0xFFE0,d3                          	| [$1cad: ld   de,$FFE0]
+	move.w    #-0x20,d3                          	| [$1cad: ld   de,$FFE0]
 	move.w	#0x0A00,d1                          	| [$1cb0: ld   bc,$0A00]
 	LOAD_D1D2_FROM_D1_16
 l_1cb3:
@@ -4638,13 +4640,13 @@ l_1cb3:
 	move.b	#0x3F,d1                        	| [$1cdd: ld   b,$3F]
 	jbsr	fill_area_0010                            	| [$1cdf: rst  $10]
 	addq.b	#1,d0                           	| [$1ce0: inc  a]
-	move.b	d0,cabinet_upright_881F(a6)                   	| [$1ce1: ld   ($881F),a]
+	move.b	d0,screen_flipped_881F(a6)                   	| [$1ce1: ld   ($881F),a]
 	jbsr	l_02e3                            	| [$1ce4: call $02E3]
 l_1ce7:
 	lea	l_84E0(a6),a0                      	| [$1ce7: ld   hl,$84E0]
 	move.b	#0x02,(a0)                      	| [$1cea: ld   (hl),$02]
 l_1cec:
-	move.w    #0xFFE0,d3                          	| [$1cec: ld   de,$FFE0]
+	move.w    #-0x20,d3                          	| [$1cec: ld   de,$FFE0]
 	add.w	d3,a0                            	| [$1cef: add  hl,de]
 	move.b	#0x25,(a0)                      	| [$1cf0: ld   (hl),$25]
 	add.w	d3,a0                            	| [$1cf2: add  hl,de]
@@ -4690,7 +4692,7 @@ l_1d15:
 	move.b	d0,l_8806(a6)                   	| [$1d2d: ld   ($8806),a]
 	move.b	d0,in_game_sub_state_880A(a6)   	| [$1d30: ld   (in_game_sub_state_880A),a]
 	addq.b	#1,d0                           	| [$1d33: inc  a]
-	move.b	d0,cabinet_upright_881F(a6)                   	| [$1d34: ld   ($881F),a]
+	move.b	d0,screen_flipped_881F(a6)                   	| [$1d34: ld   ($881F),a]
 	addq.b	#1,d0                           	| [$1d37: inc  a]
 	move.b	d0,game_state_8805(a6)          	| [$1d38: ld   (game_state_8805),a]
 	rts                                    	| [$1d3b: ret]
@@ -4704,7 +4706,7 @@ l_1d3c:
 	move.b	d0,title_sub_state_8E51(a6)     	| [$1d49: ld   (title_sub_state_8E51),a]
 	addq.b	#1,d0                           	| [$1d4c: inc  a]
 	move.b	d0,game_state_8805(a6)          	| [$1d4d: ld   (game_state_8805),a]
-	move.b	d0,cabinet_upright_881F(a6)                   	| [$1d50: ld   ($881F),a]
+	move.b	d0,screen_flipped_881F(a6)                   	| [$1d50: ld   ($881F),a]
 	move.b	d0,l_8F3F(a6)                   	| [$1d53: ld   ($8F3F),a]
 	jbsr	l_02b9                            	| [$1d56: call $02B9]
 	jbsr	l_0ecf                            	| [$1d59: call $0ECF]
@@ -5930,7 +5932,7 @@ l_25fe:
 	jeq	l_266b                             	| [$2606: jr   z,$266B]
 	lea	l_8F09(a6),a0                      	| [$2608: ld   hl,$8F09]
 	move.b	#0x1C,(a0)                      	| [$260b: ld   (hl),$1C]
-	move.w	#0xFFE0,d3                          	| [$260d: ld   de,$FFE0]
+	move.w	#-0x20,d3                          	| [$260d: ld   de,$FFE0]
 	LOAD_RAM_POINTER	ram_pointer_8932(a6),a2             	| [$2610: ld   ix,($8932)]
 	add.w	d3,a2                            	| [$2614: add  ix,de]
 	STORE_RAM_POINTER	a2,ram_pointer_8932(a6)            	| [$2616: ld   ($8932),ix]
@@ -7103,7 +7105,7 @@ wolf_retreating_on_ladder_2f2f:
 	move.b	#0x03,d0                        	| [$2f44: ld   a,$03]
 l_2f46:
 	move.b	d0,d1                           	| [$2f46: ld   b,a]
-	move.b	l_8820(a6),d0                   	| [$2f47: ld   a,($8820)]
+	move.b	difficulty_8820(a6),d0                   	| [$2f47: ld   a,($8820)]
 	and.b	#0x04,d0                         	| [$2f4a: and  $04]
 	ror.b	#1,d0                            	| [$2f4c: rrca]
 	add.b	d1,d0                            	| [$2f4d: add  a,b]
@@ -8105,7 +8107,7 @@ l_36de:
 	move.b	#0x0E,d0                        	| [$36e5: ld   a,$0E]
 l_36e7:
 	move.b	d0,d1                           	| [$36e7: ld   b,a]
-	move.b	l_8820(a6),d0                   	| [$36e8: ld   a,($8820)]
+	move.b	difficulty_8820(a6),d0                   	| [$36e8: ld   a,($8820)]
 	add.b	d0,d0                            	| [$36eb: add  a,a]
 	add.b	d1,d0                            	| [$36ec: add  a,b]
 	LOAD_ROM	0x3737,a0                          	| [$36ed: ld   hl,$3737]
@@ -8202,7 +8204,7 @@ copy_wolf_coords_in_balloon_379d:
 	addq.b	#0x01,d0                        	| [$37ca: add  a,$01]
 	move.b	d0,(x_pos_06,a3)                    	| [$37cc: ld   (iy+$06),a]
 	LOAD_ROM	0x38A5,a0                          	| [$37cf: ld   hl,$38A5]
-	move.b	l_8820(a6),d0                   	| [$37d2: ld   a,($8820)]
+	move.b	difficulty_8820(a6),d0                   	| [$37d2: ld   a,($8820)]
 	cmp.b	#0x07,d0                         	| [$37d5: cp   $07]
 	jne	l_37dc                             	| [$37d7: jr   nz,$37DC]
 	LOAD_ROM	0x38AD,a0                          	| [$37d9: ld   hl,$38AD]
@@ -8355,7 +8357,7 @@ l_39e0:
 	cmp.b	#0x08,d0                         	| [$39f7: cp   $08]
 	jcc	l_3a08                             	| [$39f9: jr   nc,$3A08]
 l_39fb:
-	move.b	l_8820(a6),d0                   	| [$39fb: ld   a,($8820)]
+	move.b	difficulty_8820(a6),d0                   	| [$39fb: ld   a,($8820)]
 	cmp.b	#0x07,d0                         	| [$39fe: cp   $07]
 	jeq	l_3a08                             	| [$3a00: jr   z,$3A08]
 	move.b	(x_pos_06,a2),d0                    	| [$3a02: ld   a,(ix+$06)]
@@ -8382,7 +8384,7 @@ l_3a08:
 l_3a1d:
 	move.b	l_8842(a6),d0                   	| [$3a1d: ld   a,($8842)]
 	move.b	d0,d2                           	| [$3a20: ld   c,a]
-	move.b	cabinet_upright_881F(a6),d0                   	| [$3a21: ld   a,($881F)]
+	move.b	screen_flipped_881F(a6),d0                   	| [$3a21: ld   a,($881F)]
 	move.b	d0,d1                           	| [$3a24: ld   b,a]
 	                               	| [$3a25: and  a]
 	move.b	d2,d0                           	| [$3a26: ld   a,c]
@@ -9954,7 +9956,7 @@ l_54c5:
 	cmp.b	#0x04,d0                         	| [$54c8: cp   $04]
 	jcc	l_54db                             	| [$54ca: jr   nc,$54DB]
 	move.b	d0,d7
-	move.b	l_8820(a6),d0                   	| [$54ce: ld   a,($8820)]
+	move.b	difficulty_8820(a6),d0                   	| [$54ce: ld   a,($8820)]
 	cmp.b	#0x02,d7                         	| [$54cc: cp   $02]
 	jcs	l_54d8                             	| [$54d1: jr   c,$54D8]
 	cmp.b	#0x02,d0                         	| [$54d3: cp   $02]
@@ -10005,7 +10007,7 @@ l_5519:
 	move.b	round_number_8907(a6),d0                   	| [$5519: ld   a,($8907)]
 	cmp.b	#0x02,d0                         	| [$551c: cp   $02]
 	jcc	l_5526                             	| [$551e: jr   nc,$5526]
-	move.b	l_8820(a6),d0                   	| [$5520: ld   a,($8820)]
+	move.b	difficulty_8820(a6),d0                   	| [$5520: ld   a,($8820)]
 	cmp.b	#0x02,d0                         	| [$5523: cp   $02]
 	bcc.b	0f                               	| [...]
 	rts                                    	| [$5525: ret  c] [...]
@@ -10062,7 +10064,7 @@ l_5564:
 	move.b	round_number_8907(a6),d0                   	| [$5580: ld   a,($8907)]
 	cmp.b	#0x04,d0                         	| [$5583: cp   $04]
 	jcc	l_5592                             	| [$5585: jr   nc,$5592]
-	move.b	l_8820(a6),d0                   	| [$5587: ld   a,($8820)]
+	move.b	difficulty_8820(a6),d0                   	| [$5587: ld   a,($8820)]
 	                               	| [$558a: and  a]
 	bne.b	0f                               	| [...]
 	rts                                    	| [$558b: ret  z] [...]
@@ -10215,7 +10217,7 @@ l_5733:
 	jne	l_5760                             	| [$575b: jr   nz,$5760]
 	LOAD_ROM	0x5902,a0                          	| [$575d: ld   hl,$5902]
 l_5760:
-	move.b	l_8820(a6),d0                   	| [$5760: ld   a,($8820)]
+	move.b	difficulty_8820(a6),d0                   	| [$5760: ld   a,($8820)]
 	cmp.b	#0x03,d0                         	| [$5763: cp   $03]
 	jcs	l_5769                             	| [$5765: jr   c,$5769]
 	move.b	#0x03,d0                        	| [$5767: ld   a,$03]
@@ -10768,7 +10770,7 @@ l_5bbe:
 	btst.b	#1,(0x00,a3)                    	| [$5bc5: bit  1,(iy+$00)]
 	jne	l_5c46                             	| [$5bc9: jr   nz,$5C46]
 	move.b	#0x10,d4                        	| [$5bcb: ld   e,$10]
-	move.b	cabinet_upright_881F(a6),d0                   	| [$5bcd: ld   a,($881F)]
+	move.b	screen_flipped_881F(a6),d0                   	| [$5bcd: ld   a,($881F)]
 	                               	| [$5bd0: and  a]
 	jne	l_5bd5                             	| [$5bd1: jr   nz,$5BD5]
 	move.b	#0x08,d4                        	| [$5bd3: ld   e,$08]
@@ -10938,7 +10940,7 @@ l_5d68:
 0:
 	move.b	#0xFC,d4                        	| [$5d6e: ld   e,$FC]
 	clr.b	d3                               	| [$5d70: ld   d,$00]
-	move.b	cabinet_upright_881F(a6),d0                   	| [$5d72: ld   a,($881F)]
+	move.b	screen_flipped_881F(a6),d0                   	| [$5d72: ld   a,($881F)]
 	                               	| [$5d75: and  a]
 	jne	l_5d7c                             	| [$5d76: jr   nz,$5D7C]
 	move.b	#0x05,d4                        	| [$5d78: ld   e,$05]
@@ -11027,7 +11029,7 @@ l_5e1f:
 l_5e25:
 	move.b	#0x09,d4                        	| [$5e25: ld   e,$09]
 	clr.b	d3                               	| [$5e27: ld   d,$00]
-	move.b	cabinet_upright_881F(a6),d0                   	| [$5e29: ld   a,($881F)]
+	move.b	screen_flipped_881F(a6),d0                   	| [$5e29: ld   a,($881F)]
 	                               	| [$5e2c: and  a]
 	jne	l_5e33                             	| [$5e2d: jr   nz,$5E33]
 	move.b	#0xF7,d4                        	| [$5e2f: ld   e,$F7]
@@ -11215,7 +11217,7 @@ l_5f47:
 	rts                                    	| [$5f52: ret]
 l_5f53:
 	move.b	#0x06,d4                        	| [$5f53: ld   e,$06]
-	move.b	cabinet_upright_881F(a6),d0                   	| [$5f55: ld   a,($881F)]
+	move.b	screen_flipped_881F(a6),d0                   	| [$5f55: ld   a,($881F)]
 	                               	| [$5f58: and  a]
 	jne	l_5f5d                             	| [$5f59: jr   nz,$5F5D]
 	move.b	#0xFE,d4                        	| [$5f5b: ld   e,$FE]
@@ -11270,7 +11272,7 @@ l_5fa2:
 	cmp.b	#0x05,d0                         	| [$5fab: cp   $05]
 	jne	l_6018                             	| [$5fad: jr   nz,$6018]
 	move.b	#0x06,d4                        	| [$5faf: ld   e,$06]
-	move.b	cabinet_upright_881F(a6),d0                   	| [$5fb1: ld   a,($881F)]
+	move.b	screen_flipped_881F(a6),d0                   	| [$5fb1: ld   a,($881F)]
 	                               	| [$5fb4: and  a]
 	jne	l_5fb9                             	| [$5fb5: jr   nz,$5FB9]
 	move.b	#0xFB,d4                        	| [$5fb7: ld   e,$FB]
@@ -11402,7 +11404,7 @@ l_6069:
 	jne	l_61b4                             	| [$607d: jp   nz,$61B4]
 l_6080:
 	move.b	#0x06,d4                        	| [$6080: ld   e,$06]
-	move.b	cabinet_upright_881F(a6),d0                   	| [$6082: ld   a,($881F)]
+	move.b	screen_flipped_881F(a6),d0                   	| [$6082: ld   a,($881F)]
 	                               	| [$6085: and  a]
 	jne	l_608a                             	| [$6086: jr   nz,$608A]
 	move.b	#0xFE,d4                        	| [$6088: ld   e,$FE]
@@ -11613,7 +11615,7 @@ l_61d7:
 	jeq	l_6287                             	| [$61f9: jp   z,$6287]
 l_61fc:
 	move.b	#0x06,d4                        	| [$61fc: ld   e,$06]
-	move.b	cabinet_upright_881F(a6),d0                   	| [$61fe: ld   a,($881F)]
+	move.b	screen_flipped_881F(a6),d0                   	| [$61fe: ld   a,($881F)]
 	                               	| [$6201: and  a]
 	jne	l_6206                             	| [$6202: jr   nz,$6206]
 	move.b	#0xFE,d4                        	| [$6204: ld   e,$FE]
@@ -11693,7 +11695,7 @@ l_627e:
 l_6287:
 	move.b	d0,d2                           	| [$6287: ld   c,a]
 	move.b	#0x06,d4                        	| [$6288: ld   e,$06]
-	move.b	cabinet_upright_881F(a6),d0                   	| [$628a: ld   a,($881F)]
+	move.b	screen_flipped_881F(a6),d0                   	| [$628a: ld   a,($881F)]
 	                               	| [$628d: and  a]
 	jne	l_6292                             	| [$628e: jr   nz,$6292]
 	move.b	#0xFE,d4                        	| [$6290: ld   e,$FE]
@@ -11763,7 +11765,7 @@ l_62f0:
 	jra	l_6274                             	| [$630c: jp   $6274]
 l_630f:
 	move.b	#0x06,d4                        	| [$630f: ld   e,$06]
-	move.b	cabinet_upright_881F(a6),d0                   	| [$6311: ld   a,($881F)]
+	move.b	screen_flipped_881F(a6),d0                   	| [$6311: ld   a,($881F)]
 	                               	| [$6314: and  a]
 	jne	l_6319                             	| [$6315: jr   nz,$6319]
 	move.b	#0xFE,d4                        	| [$6317: ld   e,$FE]
@@ -11817,7 +11819,7 @@ l_638a:
 	                               	| [$638b: and  a]
 	jeq	l_63ef                             	| [$638c: jr   z,$63EF]
 	move.b	#0x05,d4                        	| [$638e: ld   e,$05]
-	move.b	cabinet_upright_881F(a6),d0                   	| [$6390: ld   a,($881F)]
+	move.b	screen_flipped_881F(a6),d0                   	| [$6390: ld   a,($881F)]
 	                               	| [$6393: and  a]
 	jne	l_6398                             	| [$6394: jr   nz,$6398]
 	move.b	#0xFE,d4                        	| [$6396: ld   e,$FE]
@@ -11924,7 +11926,7 @@ l_644b:
 	                               	| [$644c: and  a]
 	jeq	l_6429                             	| [$644d: jr   z,$6429]
 	move.b	#0x05,d4                        	| [$644f: ld   e,$05]
-	move.b	cabinet_upright_881F(a6),d0                   	| [$6451: ld   a,($881F)]
+	move.b	screen_flipped_881F(a6),d0                   	| [$6451: ld   a,($881F)]
 	                               	| [$6454: and  a]
 	jne	l_6459                             	| [$6455: jr   nz,$6459]
 	move.b	#0xFE,d4                        	| [$6457: ld   e,$FE]
@@ -12436,7 +12438,7 @@ l_67d2:
 	rts                                    	| [$67de: ret]
 game_intro_sequence_end_67df:
 	lea	l_82BC(a6),a0                      	| [$67df: ld   hl,$82BC]
-	move.w    #0xFFE0,d3                          	| [$67e2: ld   de,$FFE0]
+	move.w    #-0x20,d3                          	| [$67e2: ld   de,$FFE0]
 	move.w	#0x0A00,d1                          	| [$67e5: ld   bc,$0A00]
 	LOAD_D1D2_FROM_D1_16
 l_67e8:
@@ -12694,7 +12696,7 @@ l_698f:
 	and.b	#0xF0,d0                         	| [$6995: and  $F0]
 	ror.b	#4,d0                            	| [$6997: rrca] * 4
 	jbsr	osd_w_videoram                         	| [$699b: ld   (hl),a]
-	move.w	#0xFFE0,d1                          	| [$699c: ld   bc,$FFE0]
+	move.w	#-0x20,d1                          	| [$699c: ld   bc,$FFE0]
 	add.w	d1,a0                            	| [$699f: add  hl,bc]
 	move.b	d4,d0                           	| [$69a0: ld   a,e]
 	and.b	#0x0F,d0                         	| [$69a1: and  $0F]
@@ -13430,7 +13432,7 @@ l_6e02:
 	
 	LOAD_RXM_POINTER	ram_or_rom_pointer_8e56(a6),a0             	| [$6e14: ld   hl,($8E56)]
 	move.b	d0,(a0)                         	| [$6e17: ld   (hl),a]
-	move.w	#0xFFE0,d3                          	| [$6e18: ld   de,$FFE0]
+	move.w	#-0x20,d3                          	| [$6e18: ld   de,$FFE0]
 	add.w	d3,a0                            	| [$6e1b: add  hl,de]
 	STORE_RXM_POINTER	a0,ram_or_rom_pointer_8e56(a6)            	| [$6e1c: ld   ($8E56),hl]
 	
@@ -13702,7 +13704,7 @@ l_6fa6:
 	subq.b	#1,d1                           	| [...]
 	jne	l_6fa6                             	| [$6fa8: djnz $6FA6]
 	move.b	d0,l_8F47(a6)                   	| [$6faa: ld   ($8F47),a]
-	move.w    #0xFFE0,d3                          	| [$6fad: ld   de,$FFE0]
+	move.w    #-0x20,d3                          	| [$6fad: ld   de,$FFE0]
 	move.b	#0x03,d1                        	| [$6fb0: ld   b,$03]
 l_6fb2:
 	add.w	d3,a0                            	| [$6fb2: add  hl,de]
@@ -13735,7 +13737,7 @@ l_6fb2:
 	rts                                    	| [$6fe1: ret]
 l_6fe2:
 	clr.b	d0                               	| [$6fe2: xor  a]
-	lea	l_8800(a6),a0                      	| [$6fe3: ld   hl,$8800]
+	lea	bonus_life_30k_70k_8800(a6),a0                      	| [$6fe3: ld   hl,$8800]
 	lea	l_8801(a6),a1                      	| [$6fe6: ld   de,$8801]
 	move.b	d0,(a0)                         	| [$6fe9: ld   (hl),a]
 	jbsr	ldir                              	| [$6fea: ldir]
@@ -13845,7 +13847,7 @@ l_705f:
 	rts                                    	| [$7070: ret]
 l_7071:
 	lea	l_82BC(a6),a0                      	| [$7071: ld   hl,$82BC]
-	move.w    #0xFFE0,d3                          	| [$7074: ld   de,$FFE0]
+	move.w    #-0x20,d3                          	| [$7074: ld   de,$FFE0]
 	move.b	#0x0A,d1                        	| [$7077: ld   b,$0A]
 l_7079:
 	move.b	(a0),d0                         	| [$7079: ld   a,(hl)]
@@ -14008,7 +14010,7 @@ l_722a:
 	addq.b	#1,d0                           	| [$7244: inc  a]
 	move.b	d0,d1                           	| [$7245: ld   b,a]
 	lea	l_87E0(a6),a0                      	| [$7246: ld   hl,$87E0]
-	move.w    #0xFFE0,d3                          	| [$7249: ld   de,$FFE0]
+	move.w    #-0x20,d3                          	| [$7249: ld   de,$FFE0]
 l_724c:
 	add.w	d3,a0                            	| [$724c: add  hl,de]
 	subq.b	#1,d1                           	| [...]
@@ -15490,7 +15492,7 @@ l_7ece:
 	jne	l_7ece                             	| [$7ed0: djnz $7ECE]
 	STORE_RAM_POINTER	a2,ram_pointer_8e1f(a6)            	| [$7ed2: ld   ($8E1F),ix]
 	
-	move.b	l_880F(a6),d0                   	| [$7ed6: ld   a,($880F)]
+	move.b	cabinet_upright_880F(a6),d0                   	| [$7ed6: ld   a,($880F)]
 	                               	| [$7ed9: and  a]
 	jne	l_7ee2                             	| [$7eda: jr   nz,$7EE2]
 	move.b	current_player_is_p2_880D(a6),d0                   	| [$7edc: ld   a,($880D)]

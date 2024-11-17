@@ -78,7 +78,7 @@ l_87E0 = 0x07e0
 
 * non-video game memory starts here
 
-l_8800 = 0x0800
+bonus_life_30k_70k_8800 = 0x0800
 l_8801 = 0x0801
 nb_credits_8802 = 0x0802
 game_state_8805 = 0x0805
@@ -90,7 +90,7 @@ in_game_sub_state_880A = 0x080a
 video_ram_pointer_880b = 0x080b
 current_player_is_p2_880D = 0x080d
 two_player_mode_880E = 0x080e
-l_880F = 0x080f
+cabinet_upright_880F = 0x080f
 copy_of_inputs_8810 = 0x0810
 copy_of_control_inputs_8811 = 0x0811
 l_8812 = 0x0812
@@ -99,9 +99,9 @@ l_8815 = 0x0815
 l_8816 = 0x0816
 l_8819 = 0x0819
 checksum_failed_881E = 0x081e
-cabinet_upright_881F = 0x081f
-l_8820 = 0x0820
-l_8821 = 0x0821
+screen_flipped_881F = 0x081f
+difficulty_8820 = 0x0820
+demo_sounds_on_8821 = 0x0821
 l_8824 = 0x0824
 l_8825 = 0x0825
 l_8826 = 0x0826

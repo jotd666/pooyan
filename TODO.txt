@@ -1,3 +1,4 @@
+figure out DSW 8807 882F
 
 break on all jump table entrypoints, figure them all out
 
