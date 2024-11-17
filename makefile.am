@@ -50,7 +50,7 @@ $(PROGNAME)_ram.o: $(PROGNAME)_ram.68k
 	$(ASM) $(PROGNAME)_ram.68k -o $(PROGNAME)_ram.o
 $(PROGNAME)_rom.o: $(PROGNAME)_rom.68k
 	$(ASM) $(PROGNAME)_rom.68k -o $(PROGNAME)_rom.o
-$(PROGNAME).o: $(PROGNAME).68k $(PROGNAME).inc data.inc
+$(PROGNAME).o: $(PROGNAME).68k $(PROGNAME).inc data.inc sounds.inc
 	$(ASM) $(PROGNAME).68k -o $(PROGNAME).o
 amiga.o: $(AMIGASRC)/amiga.68k $(PROGNAME).inc $(AMIGASRC)/ReadJoyPad.i $(AMIGASRC)/palette.68k
 	$(ASM) -Iamiga $(AMIGASRC)/amiga.68k -o amiga.o
