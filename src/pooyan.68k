@@ -363,6 +363,7 @@ read_iyl_in_d0:
 
 
 	.include "pooyan.inc"
+	.include "sounds.inc"
 	.include "data.inc"
 
 	
@@ -650,7 +651,7 @@ l_0186:
 	                	| [$01a4: ld   (watchdog_a000),a]
 	jbsr	fill_video_ram_and_sprites_01ea                            	| [$01a7: call $01EA]
 	clr.b	d0                               	| [$01aa: xor  a]
-	jbsr	audio_shit_0E8F                   	| [$01ab: call audio_shit_0E8F]
+	jbsr	play_sound_0E8F                   	| [$01ab: call play_sound_0E8F]
 	move.b	#0x01,d0                        	| [$01ae: ld   a,$01]
 	jbsr	osd_interrupt_control               	| [$01b0: ld   (mainlatch_a180),a]
 	lea	l_8A00(a6),a0                      	| [$01b3: ld   hl,$8A00]
@@ -2572,7 +2573,7 @@ l_0e64:
 	jeq	l_0e81                             	| [$0e7b: jr   z,$0E81]
 l_0e7d:
 	move.b	d1,d0                           	| [$0e7d: ld   a,b]
-	jbsr	audio_shit_0E8F                   	| [$0e7e: call audio_shit_0E8F]
+	jbsr	play_sound_0E8F                   	| [$0e7e: call play_sound_0E8F]
 l_0e81:
 	move.b	#0xFF,(a0)                      	| [$0e81: ld   (hl),$FF]
 	LOAD_D5D6_FROM_A0_RAM
@@ -2587,7 +2588,8 @@ l_0e8b:
 	move.b	d0,(a1)                         	| [$0e8d: ld   (de),a]
 	rts                                    	| [$0e8e: ret]
 
-audio_shit_0E8F:
+play_sound_0E8F:
+	jbsr	osd_sound_start
 	               	| [$0e8f: ld   (audio_a100),a]
 	               	| [$0e92: ld   a,$01]
 	               	| [$0e94: ld   ($A181),a]
@@ -2601,7 +2603,7 @@ audio_shit_0E8F:
 											| [$0e9d: dec  a]
 											| [$0e9e: ld   ($A181),a]
 	rts                                    	| [$0ea1: ret]
-
+	
 l_0ea2:
 	move.b	d0,l_8D20(a6)                   	| [$0ea2: ld   ($8D20),a]
 	move.b	l_8806(a6),d0                   	| [$0ea5: ld   a,($8806)]
@@ -2615,9 +2617,8 @@ l_0ea2:
 l_0eb0:
 	move.b	l_8D20(a6),d0                   	| [$0eb0: ld   a,($8D20)]
 l_0eb3:
-	movem.w	d1/d2,-(sp)                    	| [$0eb3: push bc]
-	move.l	a4,-(sp)                        	| [$0eb3: push bc]
-	movem.w	d3/d4,-(sp)                    	| [$0eb4: push de]
+	                    	| [$0eb3: push bc]
+	movem.w	d1/d3/d4,-(sp)                    	| [$0eb4: push de]
 	move.l	a1,-(sp)                        	| [$0eb4: push de]
 	move.l	a0,-(sp)                        	| [$0eb5: push hl]
 	move.b	d0,d1                           	| [$0eb6: ld   b,a]
@@ -2639,12 +2640,10 @@ l_0ec8:
 l_0ecb:
 	move.l	(sp)+,a0                        	| [$0ecb: pop  hl]
 	move.l	(sp)+,a1                        	| [$0ecc: pop  de]
-	movem.w	(sp)+,D3/D4                    	| [$0ecc: pop  de]
-	move.l	(sp)+,a4                        	| [$0ecd: pop  bc]
-	movem.w	(sp)+,d1/d2                    	| [$0ecd: pop  bc]
+	movem.w	(sp)+,d1/D3/D4                    	| [$0ecc: pop  de]
+	                    	| [$0ecd: pop  bc]
 	rts                                    	| [$0ece: ret]
 l_0ecf:
-	CLEAR_XC_FLAGS                         	| [$0ecf: xor  a]
 	clr.b	d0                               	| [$0ecf: xor  a]
 	jra	l_0eb3                             	| [$0ed0: jr   $0EB3]
 l_0ed2:
@@ -2689,9 +2688,9 @@ l_0f01:
 l_0f05:
 	move.b	#0x0A,d0                        	| [$0f05: ld   a,$0A]
 	jra	l_0ea2                             	| [$0f07: jr   $0EA2]
-l_0f09:
-	move.b	#0x0B,d0                        	| [$0f09: ld   a,$0B]
-	jra	audio_shit_0E8F                    	| [$0f0b: jr   audio_shit_0E8F]
+play_credit_sound_0f09:
+	move.b	#CREDIT_SND,d0                        	| [$0f09: ld   a,$0B]
+	jra	play_sound_0E8F                    	| [$0f0b: jr   play_sound_0E8F]
 l_0f0d:
 	move.b	#0x0B,d0                        	| [$0f0d: ld   a,$0B]
 	jra	l_0ea2                             	| [$0f0f: jr   $0EA2]
@@ -10452,7 +10451,7 @@ l_5a06:
 	beq.b	0f                               	| [...]
 	rts                                    	| [$5a16: ret  nz] [...]
 0:
-	jbsr	l_0f09                            	| [$5a17: call $0F09]
+	jbsr	play_credit_sound_0f09                            	| [$5a17: call $0F09]
 	move.b	#0x01,d0                        	| [$5a1a: ld   a,$01]
 	jra	l_5a8c                             	| [$5a1c: jp   $5A8C]
 l_5a1f:
@@ -10470,7 +10469,7 @@ l_5a1f:
 	rts                                    	| [$5a2e: ret  nz] [...]
 0:
 	exg	a1,a0                              	| [$5a2f: ex   de,hl]
-	jbsr	l_0f09                            	| [$5a30: call $0F09]
+	jbsr	play_credit_sound_0f09                            	| [$5a30: call $0F09]
 	lea	l_8826(a6),a0                      	| [$5a33: ld   hl,$8826]
 	addq.b	#1,(a0)                         	| [$5a36: inc  (hl)]
 	exg	a1,a0                              	| [$5a37: ex   de,hl]
@@ -10513,7 +10512,7 @@ l_5a56:
 	rts                                    	| [$5a64: ret  nz] [...]
 0:
 	exg	a1,a0                              	| [$5a65: ex   de,hl]
-	jbsr	l_0f09                            	| [$5a66: call $0F09]
+	jbsr	play_credit_sound_0f09                            	| [$5a66: call $0F09]
 	lea	l_8824(a6),a0                      	| [$5a69: ld   hl,$8824]
 	addq.b	#1,(a0)                         	| [$5a6c: inc  (hl)]
 	exg	a1,a0                              	| [$5a6d: ex   de,hl]

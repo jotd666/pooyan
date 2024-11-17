@@ -13,6 +13,7 @@
 	
 .include "dos_lvos.i"
 .include "pooyan.inc"
+.include "sounds.inc"
 
 SCORE_FILE_SIZE = 3
 
