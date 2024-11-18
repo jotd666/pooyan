@@ -43,7 +43,7 @@ def convert():
         for k,v in sorted(sound_dict.items(),key = lambda x:x[1]["index"]):
             f.write(f"\t.equ\t{k},  0x{v['index']:x}\n")
 
-    max_sound = 0x20  # max(x["index"] for x in sound_dict.values())+1
+    max_sound = 0x40  # max(x["index"] for x in sound_dict.values())+1
     sound_table = [""]*max_sound
     sound_table_set_1 = ["\t.long\t0,0"]*max_sound
 

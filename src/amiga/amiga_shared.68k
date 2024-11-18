@@ -146,9 +146,11 @@ force_sound_stop:
 	rts
 	
 osd_sound_start:
+	rts
+	
 	movem.l	d0/d1/a0/a6,-(a7)
 	lea		_custom,a6
-	and.w	#0xFF,d0
+	and.w	#0x3F,d0
 	jeq	7f		| should stop the sound
 0:
 	lsl.w	#3,d0
@@ -179,6 +181,7 @@ osd_sound_start:
 
 	* music
 4:
+	jbsr	osd_break
 	* don't play if already playing
 	* (music_tick value is not important for looped tunes
 	* as long as it's not zero)
