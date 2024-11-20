@@ -270,6 +270,33 @@
 	.endm
 
 	.ifndef	RELEASE
+	
+	* to trace at some virtual PCs, insert this macro
+	
+	.macro	LOG_REGS	z80pc
+	move.w	sr,-(a7)
+	move.l	a6,-(a7)
+	move.l	log_ptr,a6
+	move.w	#0x\z80pc,(a6)+
+	move.b	d0,(a6)+
+	move.b	d1,(a6)+
+	move.b	d2,(a6)+
+	move.b	d3,(a6)+
+	move.b	d4,(a6)+
+	move.b	d5,(a6)+
+	move.b	d6,(a6)+
+	move.b	d7,(a6)+
+	move.w	a0,(a6)+
+	move.w	a1,(a6)+
+	move.w	a2,(a6)+
+	move.w	a3,(a6)+
+	move.w	#0xDEAD,(a6)+
+	move.l	a6,log_ptr
+	move.l	(a7)+,a6
+	move.w	(a7)+,sr
+	.endm
+
+	
 load_d3d4_from_a1_rom_fail_msg:
 	.asciz	"load d3d4 from a1 ROM failed"
 load_d3d4_from_a1_ram_fail_msg:
@@ -7906,7 +7933,6 @@ wolf_shot_exploding_3536:
 	cmp.b	#0x03,d0                         	| [$3549: cp   $03]
 	jcs	l_3553                             	| [$354b: jr   c,$3553]
 	subq.w	#1,a0                           	| [$354d: dec  l]
-	CLEAR_XC_FLAGS                         	| [$354e: xor  a]
 	clr.b	d0                               	| [$354e: xor  a]
 	move.b	d0,(a0)                         	| [$354f: ld   (hl),a]
 	move.b	d0,l_8F20(a6)                   	| [$3550: ld   ($8F20),a]
@@ -8767,7 +8793,6 @@ wolf_balloon_exploding_3d5c:
 	beq.b	0f                               	| [...]
 	rts                                    	| [$3d62: ret  nz] [...]
 0:
-	jbsr	osd_break
 	move.b	(pointer_lsb_16,a2),d0                    	| [$3d63: ld   a,(ix+$16)]
 	cmp.b	#0x07,d0                         	| [$3d66: cp   $07]
 	jeq	l_3d99                             	| [$3d68: jp   z,$3D99]
@@ -8792,7 +8817,6 @@ l_3d88:
 	move.b	d2,(0x13,a2)                    	| [$3d89: ld   (ix+$13),c]
 	addq.b	#1,(character_state_02,a2)                    	| [$3d8c: inc  (ix+$02)]
 wolf_shot_by_arrow_falls_3d8f:
-	jbsr	osd_break
 	jbsr	auto_animate_sprite_ix_4006                            	| [$3d8f: call $4006]
 	subq.b	#1,(character_timer_11,a2)                    	| [$3d92: dec  (ix+$11)]
 	beq.b	0f                               	| [...]
