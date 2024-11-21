@@ -616,7 +616,7 @@ bootup_0092:
 	                	| [$012c: ld   (watchdog_a000),a]
 	move.b	#0x01,d0                        	| [$012f: ld   a,$01]
 	*move.b	d0,l_A187                       	| [$0131: ld   ($A187),a]
-	move.b	d0,screen_flipped_881F(a6)                   	| [$0134: ld   ($881F),a]
+	move.b	d0,screen_straight_881F(a6)                   	| [$0134: ld   ($881F),a]
 	move.w	#0xC0C0,d5                          	| [$0137: ld   hl,$C0C0]
 	STORE_WORD	d5,l_88A0(a6)            	| [$013a: ld   ($88A0),hl]
 	
@@ -912,7 +912,7 @@ update_sprite_shadows_02EF:
 	move.w	#0x0018,d3                      	| [$02f6: ld   de,$0018] 24
 	move.b	#0x02,d1                        	| [$02f9: ld   b,$02]
 	jbsr	update_sprite_shadow_0321         	| [$02fb: call update_sprite_shadow_0321]
-	lea	l_8C90(a6),a2                      	| [$02fe: ld   ix,$8C90]
+	lea	arrow_structure_array_8C90(a6),a2                      	| [$02fe: ld   ix,$8C90]
 	move.b	#0x02,d1                        	| [$0302: ld   b,$02]
 	jbsr	update_sprite_shadow_0321         	| [$0304: call update_sprite_shadow_0321]
 	lea	wolf_structure_array_8AE0(a6),a2        | [$0307: ld   ix,$8AE0]
@@ -1604,7 +1604,7 @@ jump_table_06FF:
 	.long	l_0e53
 
 continue_06FA:
-	move.b	screen_flipped_881F(a6),d0                   	| [$06fa: ld   a,($881F)]
+	move.b	screen_straight_881F(a6),d0                   	| [$06fa: ld   a,($881F)]
 	*move.b	d0,l_A187                       	| [$06fd: ld   ($A187),a]
 	move.l	(sp)+,a3                        	| [$0700: pop  iy]
 	move.l	(sp)+,a2                        	| [$0702: pop  ix]
@@ -2486,7 +2486,7 @@ l_0dab:
 	move.b	d0,game_state_8805(a6)          	| [$0db7: ld   (game_state_8805),a]
 	move.b	#0x01,d0                        	| [$0dba: ld   a,$01]
 	move.b	d0,l_8806(a6)                   	| [$0dbc: ld   ($8806),a]
-	move.b	d0,screen_flipped_881F(a6)                   	| [$0dbf: ld   ($881F),a]
+	move.b	d0,screen_straight_881F(a6)                   	| [$0dbf: ld   ($881F),a]
 	move.w	#0x0604,d3                          	| [$0dc2: ld   de,$0604]
 	jbsr	update_88A0_0038                            	| [$0dc5: rst  $38]
 	jbsr	init_play_0E00                    	| [$0dc6: call init_play_0E00]
@@ -2891,7 +2891,7 @@ l_1042:
 	move.b	#0x01,d0                        	| [$1042: ld   a,$01]
 	move.b	d0,l_8F3F(a6)                   	| [$1044: ld   ($8F3F),a]
 	lea	player_bow_structure_8A80(a6),a2      	| [$1047: ld   ix,player_bow_structure_8A80]
-	lea	l_8C90(a6),a3                      	| [$104b: ld   iy,$8C90]
+	lea	arrow_structure_array_8C90(a6),a3                      	| [$104b: ld   iy,$8C90]
 	move.b	(character_state_02,a2),d0                    	| [$104f: ld   a,(ix+$02)]
 	                               	| [$1052: and  a]
 	jne	l_1078                             	| [$1053: jr   nz,$1078]
@@ -3662,7 +3662,7 @@ clear_character_intro_screen_1601:
 	tst.b	cabinet_upright_880F(a6)                   	| [$1633: ld   a,($880F)]
 	jne	l_1642                             	| [$163a: jr   nz,$1642]
 	subq.b	#1,d0                           	| [$163c: dec  a]
-	move.b	d0,screen_flipped_881F(a6)                   	| [$163d: ld   ($881F),a]
+	move.b	d0,screen_straight_881F(a6)                   	| [$163d: ld   ($881F),a]
 	jra	l_1643                             	| [$1640: jr   $1643]
 l_1642:
 	subq.b	#1,d0                           	| [$1642: dec  a]
@@ -3919,7 +3919,7 @@ l_17e6:
 	subq.b	#1,d1                           	| [...]
 	jne	l_17e6                             	| [$17f6: djnz $17E6]
 	lea	player_bow_structure_8A80(a6),a2      	| [$17f8: ld   ix,player_bow_structure_8A80]
-	move.b	screen_flipped_881F(a6),d0                   	| [$17fc: ld   a,($881F)]
+	move.b	screen_straight_881F(a6),d0                   	| [$17fc: ld   a,($881F)]
 	                               	| [$17ff: and  a]
 	jne	l_1808                             	| [$1800: jr   nz,$1808]
 	subq.b	#2,(x_pos_06,a2)                    	| [$1802: dec  (ix+$06)] * 2
@@ -4666,7 +4666,7 @@ l_1cb3:
 	move.b	#0x3F,d1                        	| [$1cdd: ld   b,$3F]
 	jbsr	fill_area_0010                            	| [$1cdf: rst  $10]
 	addq.b	#1,d0                           	| [$1ce0: inc  a]
-	move.b	d0,screen_flipped_881F(a6)                   	| [$1ce1: ld   ($881F),a]
+	move.b	d0,screen_straight_881F(a6)                   	| [$1ce1: ld   ($881F),a]
 	jbsr	l_02e3                            	| [$1ce4: call $02E3]
 l_1ce7:
 	lea	l_84E0(a6),a0                      	| [$1ce7: ld   hl,$84E0]
@@ -4715,7 +4715,7 @@ l_1d15:
 	move.b	d0,l_8806(a6)                   	| [$1d2d: ld   ($8806),a]
 	move.b	d0,in_game_sub_state_880A(a6)   	| [$1d30: ld   (in_game_sub_state_880A),a]
 	addq.b	#1,d0                           	| [$1d33: inc  a]
-	move.b	d0,screen_flipped_881F(a6)                   	| [$1d34: ld   ($881F),a]
+	move.b	d0,screen_straight_881F(a6)                   	| [$1d34: ld   ($881F),a]
 	addq.b	#1,d0                           	| [$1d37: inc  a]
 	move.b	d0,game_state_8805(a6)          	| [$1d38: ld   (game_state_8805),a]
 	rts                                    	| [$1d3b: ret]
@@ -4728,7 +4728,7 @@ l_1d3c:
 	move.b	d0,title_sub_state_8E51(a6)     	| [$1d49: ld   (title_sub_state_8E51),a]
 	addq.b	#1,d0                           	| [$1d4c: inc  a]
 	move.b	d0,game_state_8805(a6)          	| [$1d4d: ld   (game_state_8805),a]
-	move.b	d0,screen_flipped_881F(a6)                   	| [$1d50: ld   ($881F),a]
+	move.b	d0,screen_straight_881F(a6)                   	| [$1d50: ld   ($881F),a]
 	move.b	d0,l_8F3F(a6)                   	| [$1d53: ld   ($8F3F),a]
 	jbsr	l_02b9                            	| [$1d56: call $02B9]
 	jbsr	l_0ecf                            	| [$1d59: call $0ECF]
@@ -4883,7 +4883,7 @@ l_1e55:
 	bne.b	0f                               	| [...]
 	rts                                    	| [$1e6a: ret  z] [...]
 0:
-	lea	l_8C90(a6),a3                      	| [$1e6b: ld   iy,$8C90]
+	lea	arrow_structure_array_8C90(a6),a3                      	| [$1e6b: ld   iy,$8C90]
 	move.b	(0x02,a2),d0                    	| [$1e6f: ld   a,(ix+$02)]
 	                               	| [$1e72: and  a]
 	jne	l_1ea2                             	| [$1e73: jr   nz,$1EA2]
@@ -5193,11 +5193,11 @@ l_20ea:
 	rts                                    	| [$2100: ret]
 l_2101:
 	jbsr	pickup_meat_management_2778                            	| [$2101: call $2778]
-	jbsr	l_210b                            	| [$2104: call $210B]
+	jbsr	arrow_shot_management_210b                            	| [$2104: call $210B]
 	jbsr	l_2157                            	| [$2107: call $2157]
 	rts                                    	| [$210a: ret]
 
-l_210b:
+arrow_shot_management_210b:
 	lea	player_bow_structure_8A80(a6),a2      	| [$210b: ld   ix,player_bow_structure_8A80]
 	btst.b	#4,(0x07,a2)                    	| [$210f: bit  4,(ix+$07)]
 	bne.b	0f                               	| [...]
@@ -5205,14 +5205,15 @@ l_210b:
 	rts                                    	| [$2117: ret  z] [...]
 0:
 	clr.b	(0x07,a2)                        	| [$2113: ld   (ix+$07),$00]
-	lea	l_8F02(a6),a0                      	| [$2118: ld   hl,$8F02]
+	lea	arrow_flying_8F02(a6),a0                      	| [$2118: ld   hl,$8F02]
 	move.b	(a0),d0                         	| [$211b: ld   a,(hl)]
 	                               	| [$211c: and  a]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$211d: ret  nz] [...]
 0:
+	* arrow not already shot, mark it
 	addq.b	#1,(a0)                         	| [$211e: inc  (hl)]
-	lea	l_8C90(a6),a3                      	| [$211f: ld   iy,$8C90]
+	lea	arrow_structure_array_8C90(a6),a3                      	| [$211f: ld   iy,$8C90]
 	move.b	l_8F30(a6),d0                   	| [$2123: ld   a,($8F30)]
 	cmp.b	#0x02,d0                         	| [$2126: cp   $02]
 	jcs	l_213f                             	| [$2128: jr   c,$213F]
@@ -5243,7 +5244,7 @@ l_2144:
 	jne	l_2157                             	| [$2154: jr   nz,$2157]
 	rts                                    	| [$2156: ret]
 l_2157:
-	lea	l_8C90(a6),a3                      	| [$2157: ld   iy,$8C90]
+	lea	arrow_structure_array_8C90(a6),a3                      	| [$2157: ld   iy,$8C90]
 	move.b	#0x02,d0                        	| [$215b: ld   a,$02]
 l_215d:
 	move.b	d0,l_8F15(a6)                   	| [$215d: ld   ($8F15),a]
@@ -5262,7 +5263,7 @@ l_215d:
 	sub.b	#0xC9,d0                            	| [$217b: sub  e]
 	jne	l_22b1                             	| [$217c: jp   nz,$22B1]
 	clr.b	d0                               	| [$217f: xor  a]
-	move.b	d0,l_8F02(a6)                   	| [$2180: ld   ($8F02),a]
+	move.b	d0,arrow_flying_8F02(a6)                   	| [$2180: ld   ($8F02),a]
 	rts                                    	| [$2183: ret]
 l_2184:
 	bset.b	#0,(0x00,a3)                    	| [$2184: set  0,(iy+$00)]
@@ -5273,16 +5274,16 @@ l_2184:
 	addq.b	#0x04,d0                        	| [$2193: add  a,$04]
 	move.b	d0,(0x06,a3)                    	| [$2195: ld   (iy+$06),a]
 	btst.b	#1,(0x00,a3)                    	| [$2198: bit  1,(iy+$00)]
-	jne	l_21a8                             	| [$219c: jr   nz,$21A8]
+	jne	shoot_meat_21a8                             	| [$219c: jr   nz,$21A8]
+	* shoot arrow
 	move.b	#0x14,(sprite_code_0f,a3)                 	| [$219e: ld   (iy+$0f),$14]
 	move.b	#0x40,(0x10,a3)                 	| [$21a2: ld   (iy+$10),$40]
 	jra	l_21bc                             	| [$21a6: jr   $21BC]
-l_21a8:
+shoot_meat_21a8:
 	move.b	#0x10,(sprite_code_0f,a3)                 	| [$21a8: ld   (iy+$0f),$10]
 	move.b	#0x40,(0x10,a3)                 	| [$21ac: ld   (iy+$10),$40]
 	move.b	#0x01,d0                        	| [$21b0: ld   a,$01]
 	move.b	d0,l_8D77(a6)                   	| [$21b2: ld   ($8D77),a]
-	CLEAR_XC_FLAGS                         	| [$21b5: xor  a]
 	clr.b	d0                               	| [$21b5: xor  a]
 	lea	l_8A98(a6),a0                      	| [$21b6: ld   hl,$8A98]
 	move.b	#0x18,d1                        	| [$21b9: ld   b,$18]
@@ -5302,6 +5303,7 @@ l_21c8:
 	addq.w	#2,a0                           	| [$21c9: inc  hl] * 2
 	move.b	d0,(a0)                         	| [$21cb: ld   (hl),a]
 	jra	l_22b1                             	| [$21cc: jp   $22B1]
+	
 l_21cf:
 	btst.b	#0,(0x07,a3)                    	| [$21cf: bit  0,(iy+$07)]
 	jne	l_2204                             	| [$21d3: jr   nz,$2204]
@@ -5314,21 +5316,22 @@ l_21e1:
 	btst.b	#1,(0x00,a3)                    	| [$21e1: bit  1,(iy+$00)]
 	jne	l_2226                             	| [$21e5: jr   nz,$2226]
 	jbsr	read_iyl_in_d0                         	| [$21e7: ld   a,iyl]
-	btst.b	#3,d0                           	| [$21e9: bit  3,a]
 	lea	l_8D1B(a6),a0                      	| [$21eb: ld   hl,$8D1B]
+	btst.b	#3,d0                           	| [$21e9: bit  3,a]
 	jeq	l_21f1                             	| [$21ee: jr   z,$21F1]
 	addq.w	#1,a0                           	| [$21f0: inc  hl]
 l_21f1:
 	move.b	(a0),d0                         	| [$21f1: ld   a,(hl)]
 	                               	| [$21f2: and  a]
 	jeq	l_21f9                             	| [$21f3: jr   z,$21F9]
+	* arrow successfully shot wolf (shield not hit)
 	clr.b	(a0)                             	| [$21f5: ld   (hl),$00]
-	jra	l_221e                             	| [$21f7: jr   $221E]
+	jra	kill_arrow_221e                             	| [$21f7: jr   $221E]
 l_21f9:
-	move.b	(0x06,a3),d0                    	| [$21f9: ld   a,(iy+$06)]
+	move.b	(x_pos_06,a3),d0                    	| [$21f9: ld   a,(iy+$06)]
 	subq.b	#0x04,d0                        	| [$21fc: sub  $04] arrow speed
-	jcs	l_221e                             	| [$21fe: jr   c,$221E]
-	move.b	d0,(0x06,a3)                    	| [$2200: ld   (iy+$06),a]
+	jcs	kill_arrow_221e                 | [$21fe: jr   c,$221E]  out of screen
+	move.b	d0,(x_pos_06,a3)                    	| [$2200: ld   (iy+$06),a]
 	rts                                    	| [$2203: ret]
 l_2204:
 	move.b	(0x01,a3),d0                    	| [$2204: ld   a,(iy+$01)]
@@ -5337,22 +5340,22 @@ l_2204:
 	rts                                    	| [$2209: ret  c] [...]
 0:
 	jne	l_2213                             	| [$220a: jr   nz,$2213]
+	* arrow bounces on wolf shield, set arrow down sprite
 	move.b	#0x1B,(sprite_code_0f,a3)                 	| [$220c: ld   (iy+$0f),$1B]
 	addq.b	#1,(0x01,a3)                    	| [$2210: inc  (iy+$01)]
 l_2213:
-	move.b	(0x04,a3),d0                    	| [$2213: ld   a,(iy+$04)]
+	move.b	(y_pos_04,a3),d0                    	| [$2213: ld   a,(iy+$04)]
 	addq.b	#0x04,d0                        	| [$2216: add  a,$04] arrow speed
-	move.b	d0,(0x04,a3)                    	| [$2218: ld   (iy+$04),a]
+	move.b	d0,(y_pos_04,a3)                    	| [$2218: ld   (iy+$04),a]
 	cmp.b	#0xE8,d0                         	| [$221b: cp   $E8]
 	bcc.b	0f                               	| [...]
 	rts                                    	| [$221d: ret  c] [...]
 0:
-l_221e:
+kill_arrow_221e:
 
 	move.l	a3,a0                        	| [$221e: push iy]
 	                        	| [$2220: pop  hl]
 	move.b	#0x18,d1                        	| [$2221: ld   b,$18]
-	CLEAR_XC_FLAGS                         	| [$2223: xor  a]
 	clr.b	d0                               	| [$2223: xor  a]
 	jbsr	fill_area_0010                            	| [$2224: rst  $10]
 	rts                                    	| [$2225: ret]
@@ -5405,8 +5408,8 @@ l_226c:
 	move.b	d0,l_8D45(a6)                   	| [$2276: ld   ($8D45),a]
 	move.b	d0,l_8D77(a6)                   	| [$2279: ld   ($8D77),a]
 	move.b	d0,l_8F3F(a6)                   	| [$227c: ld   ($8F3F),a]
-	jra	l_221e                             	| [$227f: jr   $221E]
-	rts                                    	| [$2281: ret]
+	jra	kill_arrow_221e                             	| [$227f: jr   $221E]
+	                                    	| [$2281: ret]
 l_2282:
 	move.b	meat_speed_8F0F(a6),d0          	| [$2282: ld   a,(meat_speed_8F0F)]
 	LOAD_ROM	0x2712,a0                          	| [$2285: ld   hl,$2712]
@@ -5447,11 +5450,12 @@ l_22b1:
 	add.w	d3,a2                            	| [$22ca: add  ix,de]
 	jbsr	animate_object_22e6                            	| [$22cc: call $22E6]
 	rts                                    	| [$22cf: ret]
-l_22d0:
-	lea	l_8C90(a6),a3                      	| [$22d0: ld   iy,$8C90]
+	
+* this makes no sense: d0 is always 0, routine achieves nothing
+nothing_useful_22d0:
+	lea	arrow_structure_array_8C90(a6),a3                      	| [$22d0: ld   iy,$8C90]
 	move.w	#0x0018,d3                      	| [$22d4: ld   de,$0018] 24
 	move.b	#0x02,d1                        	| [$22d7: ld   b,$02]
-	CLEAR_XC_FLAGS                         	| [$22d9: xor  a]
 	clr.b	d0                               	| [$22d9: xor  a]
 l_22da:
 	btst.b	#0,(0x00,a3)                    	| [$22da: bit  0,(iy+$00)]
@@ -5487,9 +5491,11 @@ l_22f0:
 	rts                                    	| [$2309: ret]
 
 l_230a:
-	jbsr	l_22d0                            	| [$230a: call $22D0]
+	jbsr	nothing_useful_22d0                            	| [$230a: call $22D0]
 	cmp.b	#0x03,d0                         	| [$230d: cp   $03]
 	jne	move_player_if_needed_2319                             	| [$230f: jr   nz,$2319]
+	* this is never reached as D0 always returned as 0
+	ILLEGAL
 	LOAD_ROM	0x26E7,a0                          	| [$2311: ld   hl,$26E7]
 	STORE_ROM_POINTER	a0,rom_pointer_8f00(a6)            	| [$2314: ld   ($8F00),hl]
 	
@@ -5842,7 +5848,7 @@ l_2541:
 	move.b	#0x03,d1                        	| [$254f: ld   b,$03]
 	jbsr	fill_area_0010                            	| [$2551: rst  $10]
 	move.b	d0,l_8A82(a6)                   	| [$2552: ld   ($8A82),a]
-	move.b	d0,l_8C90(a6)                   	| [$2555: ld   ($8C90),a]
+	move.b	d0,arrow_structure_array_8C90(a6)                   	| [$2555: ld   ($8C90),a]
 	move.b	d0,l_8CA8(a6)                   	| [$2558: ld   ($8CA8),a]
 	move.b	d0,l_8F52(a6)                   	| [$255b: ld   ($8F52),a]
 	move.b	d0,l_8F63(a6)                   	| [$255e: ld   ($8F63),a]
@@ -6096,7 +6102,7 @@ l_27b2:
 	bcc.b	0f                               	| [...]
 	rts                                    	| [$27b7: ret  c] [...]
 0:
-	move.b	l_8C90(a6),d0                   	| [$27b8: ld   a,($8C90)]
+	move.b	arrow_structure_array_8C90(a6),d0                   	| [$27b8: ld   a,($8C90)]
 	btst.b	#1,d0                           	| [$27bb: bit  1,a]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$27bd: ret  nz] [...]
@@ -6149,7 +6155,7 @@ l_2810:
 	lea	l_84A7(a6),a0                      	| [$2805: ld   hl,$84A7]
 	jra	write_4x4_tile_block_3325          	| [$2810: jp   write_4x4_tile_block_3325]
 l_2813:
-	lea	l_8C90(a6),a0                      	| [$2813: ld   hl,$8C90]
+	lea	arrow_structure_array_8C90(a6),a0                      	| [$2813: ld   hl,$8C90]
 	move.w	#0x0018,d3                      	| [$2816: ld   de,$0018] 24
 	move.b	#0x02,d1                        	| [$2819: ld   b,$02]
 l_281b:
@@ -8412,7 +8418,7 @@ l_3a08:
 l_3a1d:
 	move.b	l_8842(a6),d0                   	| [$3a1d: ld   a,($8842)]
 	move.b	d0,d2                           	| [$3a20: ld   c,a]
-	move.b	screen_flipped_881F(a6),d0                   	| [$3a21: ld   a,($881F)]
+	move.b	screen_straight_881F(a6),d0                   	| [$3a21: ld   a,($881F)]
 	move.b	d0,d1                           	| [$3a24: ld   b,a]
 	                               	| [$3a25: and  a]
 	move.b	d2,d0                           	| [$3a26: ld   a,c]
@@ -10791,7 +10797,7 @@ l_5ba5:
 	rts                                    	| [$5bb4: ret  nz] [...]
 0:
 	lea	l_8848(a6),a0                      	| [$5bb5: ld   hl,$8848]
-	lea	l_8C90(a6),a3                      	| [$5bb8: ld   iy,$8C90]
+	lea	arrow_structure_array_8C90(a6),a3                      	| [$5bb8: ld   iy,$8C90]
 	move.b	#0x02,d1                        	| [$5bbc: ld   b,$02]
 l_5bbe:
 	btst.b	#0,(0x00,a3)                    	| [$5bbe: bit  0,(iy+$00)]
@@ -10799,7 +10805,7 @@ l_5bbe:
 	btst.b	#1,(0x00,a3)                    	| [$5bc5: bit  1,(iy+$00)]
 	jne	l_5c46                             	| [$5bc9: jr   nz,$5C46]
 	move.b	#0x10,d4                        	| [$5bcb: ld   e,$10]
-	move.b	screen_flipped_881F(a6),d0                   	| [$5bcd: ld   a,($881F)]
+	move.b	screen_straight_881F(a6),d0                   	| [$5bcd: ld   a,($881F)]
 	                               	| [$5bd0: and  a]
 	jne	l_5bd5                             	| [$5bd1: jr   nz,$5BD5]
 	move.b	#0x08,d4                        	| [$5bd3: ld   e,$08]
@@ -10969,7 +10975,7 @@ l_5d68:
 0:
 	move.b	#0xFC,d4                        	| [$5d6e: ld   e,$FC]
 	clr.b	d3                               	| [$5d70: ld   d,$00]
-	move.b	screen_flipped_881F(a6),d0                   	| [$5d72: ld   a,($881F)]
+	move.b	screen_straight_881F(a6),d0                   	| [$5d72: ld   a,($881F)]
 	                               	| [$5d75: and  a]
 	jne	l_5d7c                             	| [$5d76: jr   nz,$5D7C]
 	move.b	#0x05,d4                        	| [$5d78: ld   e,$05]
@@ -11058,7 +11064,7 @@ l_5e1f:
 l_5e25:
 	move.b	#0x09,d4                        	| [$5e25: ld   e,$09]
 	clr.b	d3                               	| [$5e27: ld   d,$00]
-	move.b	screen_flipped_881F(a6),d0                   	| [$5e29: ld   a,($881F)]
+	move.b	screen_straight_881F(a6),d0                   	| [$5e29: ld   a,($881F)]
 	                               	| [$5e2c: and  a]
 	jne	l_5e33                             	| [$5e2d: jr   nz,$5E33]
 	move.b	#0xF7,d4                        	| [$5e2f: ld   e,$F7]
@@ -11139,7 +11145,7 @@ l_5e8a:
 	rts                                    	| [$5e97: ret]
 l_5e98:
 	move.b	i_reg,d0                           	| [$5e98: ld   a,i]
-	lea	l_8C90(a6),a2                      	| [$5e9a: ld   ix,$8C90]
+	lea	arrow_structure_array_8C90(a6),a2                      	| [$5e9a: ld   ix,$8C90]
 	tst.b	d0                               	| [$5e9e: and  a]
 	jeq	l_5ea5                             	| [$5e9f: jr   z,$5EA5]
 	lea	l_8CA8(a6),a2                      	| [$5ea1: ld   ix,$8CA8]
@@ -11250,7 +11256,7 @@ l_5f47:
 	rts                                    	| [$5f52: ret]
 l_5f53:
 	move.b	#0x06,d4                        	| [$5f53: ld   e,$06]
-	move.b	screen_flipped_881F(a6),d0                   	| [$5f55: ld   a,($881F)]
+	move.b	screen_straight_881F(a6),d0                   	| [$5f55: ld   a,($881F)]
 	                               	| [$5f58: and  a]
 	jne	l_5f5d                             	| [$5f59: jr   nz,$5F5D]
 	move.b	#0xFE,d4                        	| [$5f5b: ld   e,$FE]
@@ -11279,7 +11285,7 @@ l_5f76:
 	jne	l_5f76                             	| [$5f80: djnz $5F76]
 	rts                                    	| [$5f82: ret]
 l_5f83:
-	lea	l_8C90(a6),a2                      	| [$5f83: ld   ix,$8C90]
+	lea	arrow_structure_array_8C90(a6),a2                      	| [$5f83: ld   ix,$8C90]
 	move.b	i_reg,d0                           	| [$5f87: ld   a,i]
 	                               	| [$5f89: and  a]
 	jeq	l_5f90                             	| [$5f8a: jr   z,$5F90]
@@ -11305,7 +11311,7 @@ l_5fa2:
 	cmp.b	#0x05,d0                         	| [$5fab: cp   $05]
 	jne	l_6018                             	| [$5fad: jr   nz,$6018]
 	move.b	#0x06,d4                        	| [$5faf: ld   e,$06]
-	move.b	screen_flipped_881F(a6),d0                   	| [$5fb1: ld   a,($881F)]
+	move.b	screen_straight_881F(a6),d0                   	| [$5fb1: ld   a,($881F)]
 	                               	| [$5fb4: and  a]
 	jne	l_5fb9                             	| [$5fb5: jr   nz,$5FB9]
 	move.b	#0xFB,d4                        	| [$5fb7: ld   e,$FB]
@@ -11404,7 +11410,7 @@ l_603b:
 	jne	l_603b                             	| [$6045: djnz $603B]
 	rts                                    	| [$6047: ret]
 l_6048:
-	lea	l_8C90(a6),a2                      	| [$6048: ld   ix,$8C90]
+	lea	arrow_structure_array_8C90(a6),a2                      	| [$6048: ld   ix,$8C90]
 	move.b	i_reg,d0                           	| [$604c: ld   a,i]
 	                               	| [$604e: and  a]
 	jeq	l_6055                             	| [$604f: jr   z,$6055]
@@ -11437,7 +11443,7 @@ l_6069:
 	jne	l_61b4                             	| [$607d: jp   nz,$61B4]
 l_6080:
 	move.b	#0x06,d4                        	| [$6080: ld   e,$06]
-	move.b	screen_flipped_881F(a6),d0                   	| [$6082: ld   a,($881F)]
+	move.b	screen_straight_881F(a6),d0                   	| [$6082: ld   a,($881F)]
 	                               	| [$6085: and  a]
 	jne	l_608a                             	| [$6086: jr   nz,$608A]
 	move.b	#0xFE,d4                        	| [$6088: ld   e,$FE]
@@ -11493,9 +11499,9 @@ l_60d9:
 	jne	l_60e3                             	| [$60df: jr   nz,$60E3]
 	subq.w	#1,a3                           	| [$60e1: dec  iy]
 l_60e3:
-	move.b	#0x01,(0x00,a3)                 	| [$60e3: ld   (iy+$00),$01]
-	move.w	#0x04,d3                          	| [$60e7: ld   de,$0404]
-	move.w	#0x04,d4                          	| [$60e7: ld   de,$0404]
+	move.b	#0x01,(0x00,a3)                 	| [$60e3: ld   (iy+$00),$01] mark arrow bursts balloon (not just shrinks it!)
+	move.b	#0x04,d3                          	| [$60e7: ld   de,$0404]
+	move.b	#0x04,d4                          	| [$60e7: ld   de,$0404]
 	jbsr	l_619f                            	| [$60ea: call $619F]
 	move.w    #0xFFFD,d3                          	| [$60ed: ld   de,$FFFD]
 	jra	l_611f                             	| [$60f0: jr   $611F]
@@ -11598,7 +11604,7 @@ l_619f:
 	move.w	#0x0010,d1                      	| [$61a7: ld   bc,$0010] 16
 	add.w	d1,a0                            	| [$61aa: add  hl,bc]
 	st.b	(a0)                      	| [$61ab: ld   (hl),$FF]
-	move.b	#0x04,d2                        	| [$61ad: ld   c,$04]
+	move.b	#0x04,d1                        	| [$61ad: ld   c,$04]
 	add.w	d1,a0                            	| [$61af: add  hl,bc]
 	move.b	d4,(a0)+                         	| [$61b0: ld   (hl),e]
 	                           	| [$61b1: inc  hl]
@@ -11651,7 +11657,7 @@ l_61d7:
 	jeq	l_6287                             	| [$61f9: jp   z,$6287]
 l_61fc:
 	move.b	#0x06,d4                        	| [$61fc: ld   e,$06]
-	move.b	screen_flipped_881F(a6),d0                   	| [$61fe: ld   a,($881F)]
+	move.b	screen_straight_881F(a6),d0                   	| [$61fe: ld   a,($881F)]
 	                               	| [$6201: and  a]
 	jne	l_6206                             	| [$6202: jr   nz,$6206]
 	move.b	#0xFE,d4                        	| [$6204: ld   e,$FE]
@@ -11715,9 +11721,10 @@ l_625e:
 	add.b	d0,(0x0a,a3)                    	| [$626d: ld   (iy+$0a),a]
 	bset.b	#4,(0x16,a3)                    	| [$6270: set  4,(iy+$16)]
 l_6274:
+	* reaches here on rounds 2 (balloon shrinks, doesn't explode)
 	sne	d7				| capture Z flag
-	lea	l_8C90(a6),a0                      	| [$6274: ld   hl,$8C90]
-	move.b	i_reg,d0                           	| [$6277: ld   a,i]
+	lea	arrow_structure_array_8C90(a6),a0                      	| [$6274: ld   hl,$8C90]
+	*move.b	i_reg,d0                           	| [$6277: ld   a,i] makes no sense, d0 reset at 6280
 	tst.b	d7
 	jeq	l_627e                             	| [$6279: jr   z,$627E]
 	lea	l_8CA8(a6),a0                      	| [$627b: ld   hl,$8CA8]
@@ -11731,7 +11738,7 @@ l_627e:
 l_6287:
 	move.b	d0,d2                           	| [$6287: ld   c,a]
 	move.b	#0x06,d4                        	| [$6288: ld   e,$06]
-	move.b	screen_flipped_881F(a6),d0                   	| [$628a: ld   a,($881F)]
+	move.b	screen_straight_881F(a6),d0                   	| [$628a: ld   a,($881F)]
 	                               	| [$628d: and  a]
 	jne	l_6292                             	| [$628e: jr   nz,$6292]
 	move.b	#0xFE,d4                        	| [$6290: ld   e,$FE]
@@ -11767,6 +11774,7 @@ l_62b4:
 	jbsr	store_de_in_struct_381e                            	| [$62c5: call $381E]
 	LOAD_ROM	0x6360,a0                          	| [$62c8: ld   hl,$6360]
 	move.b	round_number_8907(a6),d0                   	| [$62cb: ld   a,($8907)]
+	CLEAR_XC_FLAGS
 	and.b	#0x07,d0                         	| [$62ce: and  $07]
 	roxr.b	#1,d0                           	| [$62d0: rra]
 	jbsr	read_byte_a0_plus_d0_0020                            	| [$62d1: rst  $20]
@@ -11801,7 +11809,7 @@ l_62f0:
 	jra	l_6274                             	| [$630c: jp   $6274]
 l_630f:
 	move.b	#0x06,d4                        	| [$630f: ld   e,$06]
-	move.b	screen_flipped_881F(a6),d0                   	| [$6311: ld   a,($881F)]
+	move.b	screen_straight_881F(a6),d0                   	| [$6311: ld   a,($881F)]
 	                               	| [$6314: and  a]
 	jne	l_6319                             	| [$6315: jr   nz,$6319]
 	move.b	#0xFE,d4                        	| [$6317: ld   e,$FE]
@@ -11833,7 +11841,6 @@ l_6368:
 	lea	l_8848(a6),a3                      	| [$6368: ld   iy,$8848]
 	move.b	#0x02,d1                        	| [$636c: ld   b,$02]
 	move.w	#0x0004,d3                      	| [$636e: ld   de,$0004] 4
-	CLEAR_XC_FLAGS                         	| [$6371: xor  a]
 	clr.b	d0                               	| [$6371: xor  a]
 	move.b	d0,i_reg                              	| [$6372: ld   i,a]
 l_6374:
@@ -11855,7 +11862,7 @@ l_638a:
 	                               	| [$638b: and  a]
 	jeq	l_63ef                             	| [$638c: jr   z,$63EF]
 	move.b	#0x05,d4                        	| [$638e: ld   e,$05]
-	move.b	screen_flipped_881F(a6),d0                   	| [$6390: ld   a,($881F)]
+	move.b	screen_straight_881F(a6),d0                   	| [$6390: ld   a,($881F)]
 	                               	| [$6393: and  a]
 	jne	l_6398                             	| [$6394: jr   nz,$6398]
 	move.b	#0xFE,d4                        	| [$6396: ld   e,$FE]
@@ -11962,7 +11969,7 @@ l_644b:
 	                               	| [$644c: and  a]
 	jeq	l_6429                             	| [$644d: jr   z,$6429]
 	move.b	#0x05,d4                        	| [$644f: ld   e,$05]
-	move.b	screen_flipped_881F(a6),d0                   	| [$6451: ld   a,($881F)]
+	move.b	screen_straight_881F(a6),d0                   	| [$6451: ld   a,($881F)]
 	                               	| [$6454: and  a]
 	jne	l_6459                             	| [$6455: jr   nz,$6459]
 	move.b	#0xFE,d4                        	| [$6457: ld   e,$FE]
@@ -13649,7 +13656,7 @@ l_6f1f:
 	jbsr	update_88A0_0038                            	| [$6f24: rst  $38]
 	CLEAR_XC_FLAGS                         	| [$6f25: xor  a]
 	clr.b	d0                               	| [$6f25: xor  a]
-	lea	l_8C90(a6),a0                      	| [$6f26: ld   hl,$8C90]
+	lea	arrow_structure_array_8C90(a6),a0                      	| [$6f26: ld   hl,$8C90]
 	move.b	#0x30,d1                        	| [$6f29: ld   b,$30]
 	jbsr	fill_area_0010                            	| [$6f2b: rst  $10]
 	rts                                    	| [$6f2c: ret]
@@ -13990,7 +13997,7 @@ l_71ce:
 	rts                                    	| [$71d6: ret]
 l_71d7:
 	lea	l_8A99(a6),a0                      	| [$71d7: ld   hl,$8A99]
-	move.b	l_8C90(a6),d0                   	| [$71da: ld   a,($8C90)]
+	move.b	arrow_structure_array_8C90(a6),d0                   	| [$71da: ld   a,($8C90)]
 	or.b	(a0),d0                           	| [$71dd: or   (hl)]
 	lea	l_8A87(a6),a0                      	| [$71de: ld   hl,$8A87]
 	jne	l_71fd                             	| [$71e1: jr   nz,$71FD]
@@ -14155,7 +14162,7 @@ jump_table_72DB:
 	.long	l_73ce
 
 l_72e1:
-	move.b	l_8C90(a6),d0                   	| [$72e1: ld   a,($8C90)]
+	move.b	arrow_structure_array_8C90(a6),d0                   	| [$72e1: ld   a,($8C90)]
 	                               	| [$72e4: and  a]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$72e5: ret  nz] [...]
