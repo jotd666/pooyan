@@ -2503,7 +2503,6 @@ l_0dab:
 0:
 	addq.w	#1,d3                           	| [$0dda: inc  e]
 	jbsr	update_88A0_0038                            	| [$0ddb: rst  $38]
-	CLEAR_XC_FLAGS                         	| [$0ddc: xor  a]
 	clr.b	d0                               	| [$0ddc: xor  a]
 	lea	ram_pointer_8e1f(a6),a0                      	| [$0ddd: ld   hl,$8E1F]
 	move.b	#0x0C,d1                        	| [$0de0: ld   b,$0C]
@@ -2559,16 +2558,16 @@ init_play_0E00:
 	move.b	d0,l_8F0E(a6)                   	| [$0e3f: ld   ($8F0E),a]
 	move.b	d0,meat_speed_8F0F(a6)          	| [$0e42: ld   (meat_speed_8F0F),a]
 	rts                                    	| [$0e45: ret]
-	move.w	#0x0004,d3                      	| [$0e46: ld   de,$0004] 4
-	move.b	#0x06,d1                        	| [$0e49: ld   b,$06]
-l_0e4b:
-	move.b	#0xFB,d0                        	| [$0e4b: ld   a,$FB]
-	and.b	(a0),d0                          	| [$0e4d: and  (hl)]
-	move.b	d0,(a0)                         	| [$0e4e: ld   (hl),a]
-	add.w	d3,a0                            	| [$0e4f: add  hl,de]
-	subq.b	#1,d1                           	| [...]
-	jne	l_0e4b                             	| [$0e50: djnz $0E4B]
-	rts                                    	| [$0e52: ret]
+	* unreached!										| [$0e46: ld   de,$0004] 4
+											| [$0e49: ld   b,$06]
+									
+											| [$0e4b: ld   a,$FB]
+											| [$0e4d: and  (hl)]
+											| [$0e4e: ld   (hl),a]
+											| [$0e4f: add  hl,de]
+											| [...]
+											| [$0e50: djnz $0E4B]
+											| [$0e52: ret]
 
 l_0e53:
 	rts                                    	| [$0e53: ret]
@@ -2638,7 +2637,7 @@ l_0ea2:
 	move.b	l_8806(a6),d0                   	| [$0ea5: ld   a,($8806)]
 	                               	| [$0ea8: and  a]
 	jne	l_0eb0                             	| [$0ea9: jr   nz,$0EB0]
-	move.b	is_bonus_stage_8F50(a6),d0                   	| [$0eab: ld   a,($8F50)]
+	tst.b	is_bonus_stage_8F50(a6)                   	| [$0eab: ld   a,($8F50)]
 	                               	| [$0eae: and  a]
 	bne.b	0f                               	| [...]
 	rts                                    	| [$0eaf: ret  z] [...]
@@ -2876,15 +2875,15 @@ l_1016:
 	jbsr	l_20d4                            	| [$101f: call $20D4]
 	jbsr	l_511b                            	| [$1022: call $511B]
 	jbsr	update_wolves_1219                            	| [$1025: call $1219]
-	jbsr	l_40bd                            	| [$1028: call $40BD]
+	jbsr	handle_lonely_balloons_40bd                            	| [$1028: call $40BD]
 	jbsr	update_sprite_shadows_02EF        	| [$102b: call update_sprite_shadows_02EF]
 	jbsr	l_5ae4                            	| [$102e: call $5AE4]
 	jbsr	l_0e64                            	| [$1031: call $0E64]
 	rts                                    	| [$1034: ret]
 l_1035:
-	jbsr	l_2157                            	| [$1035: call $2157]
+	jbsr	move_arrow_and_animate_bow_2157                            	| [$1035: call $2157]
 	jbsr	update_wolves_1219                            	| [$1038: call $1219]
-	jbsr	l_40bd                            	| [$103b: call $40BD]
+	jbsr	handle_lonely_balloons_40bd                            	| [$103b: call $40BD]
 	jbsr	update_sprite_shadows_02EF        	| [$103e: call update_sprite_shadows_02EF]
 	rts                                    	| [$1041: ret]
 l_1042:
@@ -3927,7 +3926,7 @@ l_1808:
 	LOAD_ROM	0x26C9,a0                          	| [$1808: ld   hl,$26C9]
 	STORE_ROM_POINTER	a0,rom_pointer_8f00(a6)            	| [$180b: ld   ($8F00),hl]
 	
-	jbsr	l_22b1                            	| [$180e: call $22B1]
+	jbsr	animate_bow_22b1                            	| [$180e: call $22B1]
 	move.b	is_bonus_stage_8F50(a6),d0                   	| [$1811: ld   a,($8F50)]
 	                               	| [$1814: and  a]
 	jne	l_1848                             	| [$1815: jr   nz,$1848]
@@ -4021,7 +4020,7 @@ main_game_sequence_18af:
 	jbsr	l_20d4                            	| [$18b5: call $20D4]
 	jbsr	l_511b                            	| [$18b8: call $511B]
 	jbsr	update_wolves_3377                            	| [$18bb: call $3377]
-	jbsr	l_40bd                            	| [$18be: call $40BD]
+	jbsr	handle_lonely_balloons_40bd                            	| [$18be: call $40BD]
 	jbsr	update_sprite_shadows_02EF        	| [$18c1: call update_sprite_shadows_02EF]
 	jbsr	handle_extra_life_award_18da                            	| [$18c4: call $18DA]
 	jbsr	l_191c                            	| [$18c7: call $191C]
@@ -4224,7 +4223,7 @@ level_completed_19ee:
 	jbsr	l_308b                            	| [$19ee: call $308B]
 	jbsr	l_25a6                            	| [$19f1: call $25A6]
 	jbsr	update_wolves_3377                            	| [$19f4: call $3377]
-	jbsr	l_40bd                            	| [$19f7: call $40BD]
+	jbsr	handle_lonely_balloons_40bd                            	| [$19f7: call $40BD]
 	jbsr	l_28c6                            	| [$19fa: call $28C6]
 	jbsr	update_sprite_shadows_02EF        	| [$19fd: call update_sprite_shadows_02EF]
 	rts                                    	| [$1a00: ret]
@@ -5194,7 +5193,7 @@ l_20ea:
 l_2101:
 	jbsr	pickup_meat_management_2778                            	| [$2101: call $2778]
 	jbsr	arrow_shot_management_210b                            	| [$2104: call $210B]
-	jbsr	l_2157                            	| [$2107: call $2157]
+	jbsr	move_arrow_and_animate_bow_2157                            	| [$2107: call $2157]
 	rts                                    	| [$210a: ret]
 
 arrow_shot_management_210b:
@@ -5205,7 +5204,7 @@ arrow_shot_management_210b:
 	rts                                    	| [$2117: ret  z] [...]
 0:
 	clr.b	(0x07,a2)                        	| [$2113: ld   (ix+$07),$00]
-	lea	arrow_flying_8F02(a6),a0                      	| [$2118: ld   hl,$8F02]
+	lea	bow_animated_8F02(a6),a0                      	| [$2118: ld   hl,$8F02]
 	move.b	(a0),d0                         	| [$211b: ld   a,(hl)]
 	                               	| [$211c: and  a]
 	beq.b	0f                               	| [...]
@@ -5241,30 +5240,33 @@ l_2144:
 	LOAD_A1_FROM_D3D4
 	move.b	(a1),d0                         	| [$2152: ld   a,(de)]
 	                               	| [$2153: and  a]
-	jne	l_2157                             	| [$2154: jr   nz,$2157]
+	jne	move_arrow_and_animate_bow_2157                             	| [$2154: jr   nz,$2157]
 	rts                                    	| [$2156: ret]
-l_2157:
+
+move_arrow_and_animate_bow_2157:
 	lea	arrow_structure_array_8C90(a6),a3                      	| [$2157: ld   iy,$8C90]
 	move.b	#0x02,d0                        	| [$215b: ld   a,$02]
 l_215d:
-	move.b	d0,l_8F15(a6)                   	| [$215d: ld   ($8F15),a]
+	move.b	d0,local_arrow_counter_8F15(a6)                   	| [$215d: ld   ($8F15),a]
 	btst.b	#0,(0x00,a3)                    	| [$2160: bit  0,(iy+$00)]
 	beq.b	0f                               	| [...]
-	jbsr	l_21cf                            	| [$2164: call nz,$21CF]
+	* does the moving of the arrow
+	jbsr	move_arrow_21cf                            	| [$2164: call nz,$21CF]
 0:
 	move.w	#0x0018,d3                      	| [$2167: ld   de,$0018] 24
 	add.w	d3,a3                            	| [$216a: add  iy,de]
-	move.b	l_8F15(a6),d0                   	| [$216c: ld   a,($8F15)]
+	move.b	local_arrow_counter_8F15(a6),d0                   	| [$216c: ld   a,($8F15)]
 	subq.b	#0x01,d0                        	| [$216f: sub  $01]
 	jne	l_215d                             	| [$2171: jr   nz,$215D]
 	move.b	rom_pointer_8f00(a6),d0                   	| [$2173: ld   a,($8F00)]
-	LOAD_ROM	0x26C9,a1                          	| [$2176: ld   de,$26C9]
-	sub.b	#0x0C,d0                         	| [$2179: sub  $0C]
-	sub.b	#0xC9,d0                            	| [$217b: sub  e]
-	jne	l_22b1                             	| [$217c: jp   nz,$22B1]
+	                          	| [$2176: ld   de,$26C9]
+	sub.b	#0x0C+0xC9,d0                         	| [$2179: sub  $0C]
+	                            	| [$217b: sub  e]
+	jne	animate_bow_22b1                             	| [$217c: jp   nz,$22B1] jumps if bow shoots arrow
 	clr.b	d0                               	| [$217f: xor  a]
-	move.b	d0,arrow_flying_8F02(a6)                   	| [$2180: ld   ($8F02),a]
+	move.b	d0,bow_animated_8F02(a6)                   	| [$2180: ld   ($8F02),a]
 	rts                                    	| [$2183: ret]
+
 l_2184:
 	bset.b	#0,(0x00,a3)                    	| [$2184: set  0,(iy+$00)]
 	move.b	(y_pos_04,a2),d0                    	| [$2188: ld   a,(ix+$04)]
@@ -5302,9 +5304,9 @@ l_21c8:
 	move.b	d0,(a0)                         	| [$21c8: ld   (hl),a]
 	addq.w	#2,a0                           	| [$21c9: inc  hl] * 2
 	move.b	d0,(a0)                         	| [$21cb: ld   (hl),a]
-	jra	l_22b1                             	| [$21cc: jp   $22B1]
+	jra	animate_bow_22b1                             	| [$21cc: jp   $22B1]
 	
-l_21cf:
+move_arrow_21cf:
 	btst.b	#0,(0x07,a3)                    	| [$21cf: bit  0,(iy+$07)]
 	jne	l_2204                             	| [$21d3: jr   nz,$2204]
 	move.b	(0x12,a3),d0                    	| [$21d5: ld   a,(iy+$12)]
@@ -5434,7 +5436,7 @@ l_2282:
 0:
 	move.b	#0x08,(a0)                      	| [$22ae: ld   (hl),$08]
 	rts                                    	| [$22b0: ret]
-l_22b1:
+animate_bow_22b1:
 	move.b	player_killed_flag_8D32(a6),d0                   	| [$22b1: ld   a,($8D32)]
 	                               	| [$22b4: and  a]
 	beq.b	0f                               	| [...]
@@ -7072,7 +7074,7 @@ l_2ed8:
 	rol.b	#1,d0                            	| [$2ed8: rlca]
 	add.b	#0x18,d0                         	| [$2ed9: add  a,$18]
 	move.b	d0,(a0)                         	| [$2edb: ld   (hl),a]
-	lea	l_8C30(a6),a3                      	| [$2edc: ld   iy,$8C30]
+	lea	lonely_balloons_struct_array_8C30(a6),a3                      	| [$2edc: ld   iy,$8C30]
 	move.w	#0x0018,d3                      	| [$2ee0: ld   de,$0018] 24
 	addq.w	#1,a0                           	| [$2ee3: inc  hl]
 	move.b	(a0),d1                         	| [$2ee4: ld   b,(hl)]
@@ -7096,7 +7098,7 @@ wolf_attacking_on_ladder_2f01:
 	rts                                    	| [$2f07: ret  nz] [...]
 0:
 	move.b	#0x0C,(a0)                      	| [$2f08: ld   (hl),$0C]
-	lea	l_8C30(a6),a3                      	| [$2f0a: ld   iy,$8C30]
+	lea	lonely_balloons_struct_array_8C30(a6),a3                      	| [$2f0a: ld   iy,$8C30]
 	move.w	#0x0018,d3                      	| [$2f0e: ld   de,$0018] 24
 	addq.w	#1,a0                           	| [$2f11: inc  hl]
 	move.b	(a0),d1                         	| [$2f12: ld   b,(hl)]
@@ -7167,7 +7169,7 @@ l_2f73:
 	move.w	#0x0018,d3                      	| [$2f75: ld   de,$0018] 24
 	                           	| [$2f78: inc  hl]
 	move.b	(a0),d1                         	| [$2f79: ld   b,(hl)]
-	lea	l_8C30(a6),a0                      	| [$2f7a: ld   hl,$8C30]
+	lea	lonely_balloons_struct_array_8C30(a6),a0                      	| [$2f7a: ld   hl,$8C30]
 	addq.b	#1,d1                           	| [$2f7d: inc  b]
 l_2f7e:
 	add.w	d3,a0                            	| [$2f7e: add  hl,de]
@@ -8702,7 +8704,7 @@ l_3c92:
 	beq.b	0f                               	| [...]
 	rts                                    	| [$3c98: ret  nz] [...]
 0:
-	lea	l_8C30(a6),a3                      	| [$3c99: ld   iy,$8C30]
+	lea	lonely_balloons_struct_array_8C30(a6),a3                      	| [$3c99: ld   iy,$8C30]
 	move.w	#0x0018,d3                      	| [$3c9d: ld   de,$0018] 24
 	move.b	#0x04,d1                        	| [$3ca0: ld   b,$04]
 l_3ca2:
@@ -9156,8 +9158,10 @@ l_4066:
 	move.b	d0,(animation_rom_pointer_msb_0d,a3)                    	| [$406d: ld   (iy+$0d),a]
 	jra	l_4046                             	| [$4070: jr   $4046]
 	
-l_40bd:
-	lea	l_8C30(a6),a2                      	| [$40bd: ld   ix,$8C30]
+* only really active on even levels
+
+handle_lonely_balloons_40bd:
+	lea	lonely_balloons_struct_array_8C30(a6),a2                      	| [$40bd: ld   ix,$8C30]
 	move.w	#0x0018,d3                      	| [$40c1: ld   de,$0018] 24
 	move.b	#0x04,d1                        	| [$40c4: ld   b,$04]
 l_40c6:
@@ -9169,8 +9173,8 @@ l_40c6:
 	jne	l_40c6                             	| [$40cd: djnz $40C6]
 	rts                                    	| [$40cf: ret]
 l_40d0:
-	move.b	(wolf_flying_00,a2),d0                    	| [$40d0: ld   a,(ix+$00)]
-	or.b	(wolf_walking_01,a2),d0                      	| [$40d3: or   (ix+$01)]
+	move.b	(0,a2),d0                    	| [$40d0: ld   a,(ix+$00)]
+	or.b	(1,a2),d0                      	| [$40d3: or   (ix+$01)]
 	ror.b	#1,d0                            	| [$40d6: rrca]
 	bcs.b	0f                               	| [...]
 	rts                                    	| [$40d7: ret  nc] [...]
@@ -9182,18 +9186,17 @@ l_40d0:
 	rts                                    	| [$40df: ret  nc] [...]
 0:
 	jbsr	jump_from_table_below_0028                            	| [$40e0: rst  $28]
-jump_table_40E1:
 	.long	l_4103
 	.long	l_4137
 	.long	balloon_reaches_top_explodes_416f
-	.long	l_4179
-	.long	l_4179
-	.long	l_4179
-	.long	l_4179
-	.long	l_4179
-	.long	l_417a
+	.long	do_nothing_4179
+	.long	do_nothing_4179
+	.long	do_nothing_4179
+	.long	do_nothing_4179
+	.long	do_nothing_4179
+	.long	pop_lonely_balloon_417a
 	.long	l_418d
-	.long	l_4179
+	.long	do_nothing_4179
 	.long	l_4221
 	.long	l_4350
 	.long	l_4364
@@ -9280,9 +9283,10 @@ balloon_reaches_top_explodes_416f:
 	rts                                    	| [$4175: ret  nz] [...]
 0:
 	jra	l_3553                             	| [$4176: jp   $3553]
-l_4179:
+do_nothing_4179:
 	rts                                    	| [$4179: ret]
-l_417a:
+	* only on even levels
+pop_lonely_balloon_417a:
 	move.b	(pointer_msb_17,a2),d0                    	| [$417a: ld   a,(ix+$17)]
 	LOAD_ROM	0x41B1,a0                          	| [$417d: ld   hl,$41B1]
 	jbsr	load_16bit_rom_pointer_0c45                            	| [$4180: call $0C45]
@@ -9862,7 +9866,7 @@ l_53b0:
 0:
 	addq.b	#1,d0                           	| [$53bc: inc  a]
 	move.b	d0,l_8D59(a6)                   	| [$53bd: ld   ($8D59),a]
-	lea	l_8C30(a6),a2                      	| [$53c0: ld   ix,$8C30]
+	lea	lonely_balloons_struct_array_8C30(a6),a2                      	| [$53c0: ld   ix,$8C30]
 	LOAD_ROM	0x5902,a0                          	| [$53c4: ld   hl,$5902]
 	jbsr	read_byte_a0_plus_d0_0020                            	| [$53c7: rst  $20]
 	move.b	d0,(character_speed_09,a2)                    	| [$53c8: ld   (ix+$09),a]
@@ -9908,7 +9912,7 @@ l_540d:
 	lea	l_8D11(a6),a0                      	| [$541a: ld   hl,$8D11]
 	move.b	#0x06,d1                        	| [$541d: ld   b,$06]
 	jbsr	fill_area_0010                            	| [$541f: rst  $10]
-	lea	l_8C30(a6),a2                      	| [$5420: ld   ix,$8C30]
+	lea	lonely_balloons_struct_array_8C30(a6),a2                      	| [$5420: ld   ix,$8C30]
 	move.w	#0x0018,d3                      	| [$5424: ld   de,$0018] 24
 	move.b	#0x03,d1                        	| [$5427: ld   b,$03]
 l_5429:
@@ -10017,7 +10021,7 @@ l_54db:
 	move.b	d0,l_8D04(a6)                   	| [$54e9: ld   ($8D04),a]
 	lea	l_8D12(a6),a0                      	| [$54ec: ld   hl,$8D12]
 	addq.b	#1,(a0)                         	| [$54ef: inc  (hl)]
-	lea	l_8C30(a6),a2                      	| [$54f0: ld   ix,$8C30]
+	lea	lonely_balloons_struct_array_8C30(a6),a2                      	| [$54f0: ld   ix,$8C30]
 	move.w	#0x0018,d3                      	| [$54f4: ld   de,$0018] 24
 	move.b	#0x01,d1                        	| [$54f7: ld   b,$01]
 l_54f9:
@@ -11159,7 +11163,7 @@ l_5ea5:
 	btst.b	#1,(0x00,a2)                    	| [$5eae: bit  1,(ix+$00)]
 	lea	sprite_shadow_ram_8840+0x48(a6),a2     	| [$5eb2: ld   ix,sprite_shadow_ram_8840+$48]
 	move.b	#0x04,d1                        	| [$5eb6: ld   b,$04]
-	lea	l_8C30(a6),a0                      	| [$5eb8: ld   hl,$8C30]
+	lea	lonely_balloons_struct_array_8C30(a6),a0                      	| [$5eb8: ld   hl,$8C30]
 	jne	l_5f11                             	| [$5ebb: jr   nz,$5F11]
 l_5ebd:
 	move.b	(a0),d0                         	| [$5ebd: ld   a,(hl)]
@@ -11443,11 +11447,11 @@ l_6069:
 	jne	l_61b4                             	| [$607d: jp   nz,$61B4]
 l_6080:
 	move.b	#0x06,d4                        	| [$6080: ld   e,$06]
-	move.b	screen_straight_881F(a6),d0                   	| [$6082: ld   a,($881F)]
-	                               	| [$6085: and  a]
-	jne	l_608a                             	| [$6086: jr   nz,$608A]
-	move.b	#0xFE,d4                        	| [$6088: ld   e,$FE]
-l_608a:
+*	move.b	screen_straight_881F(a6),d0                   	| [$6082: ld   a,($881F)]
+*	                               	| [$6085: and  a]
+*	jne	l_608a                             	| [$6086: jr   nz,$608A]
+*	move.b	#0xFE,d4                        	| [$6088: ld   e,$FE]
+*l_608a:
 	move.b	(0x00,a2),d0                    	| [$608a: ld   a,(ix+$00)]
 	add.b	d4,d0                            	| [$608d: add  a,e]
 	move.b	d0,d4                           	| [$608e: ld   e,a]
@@ -11610,6 +11614,7 @@ l_619f:
 	                           	| [$61b1: inc  hl]
 	move.b	d3,(a0)                         	| [$61b2: ld   (hl),d]
 	rts                                    	| [$61b3: ret]
+
 l_61b4:
 
 	move.l	a0,-(sp)                        	| [$61b4: push hl]
@@ -11738,11 +11743,11 @@ l_627e:
 l_6287:
 	move.b	d0,d2                           	| [$6287: ld   c,a]
 	move.b	#0x06,d4                        	| [$6288: ld   e,$06]
-	move.b	screen_straight_881F(a6),d0                   	| [$628a: ld   a,($881F)]
-	                               	| [$628d: and  a]
-	jne	l_6292                             	| [$628e: jr   nz,$6292]
-	move.b	#0xFE,d4                        	| [$6290: ld   e,$FE]
-l_6292:
+*	move.b	screen_straight_881F(a6),d0                   	| [$628a: ld   a,($881F)]
+*	                               	| [$628d: and  a]
+*	jne	l_6292                             	| [$628e: jr   nz,$6292]
+*	move.b	#0xFE,d4                        	| [$6290: ld   e,$FE]
+*l_6292:
 	move.b	(0x00,a2),d0                    	| [$6292: ld   a,(ix+$00)]
 	add.b	d4,d0                            	| [$6295: add  a,e]
 	move.b	d0,d4                           	| [$6296: ld   e,a]
@@ -12703,17 +12708,17 @@ l_6931:
 	move.b	d0,(fine_x_pos_05,a2)                    	| [$693d: ld   (ix+$05),a]
 	addq.b	#1,d0                           	| [$6940: inc  a]
 	move.b	d0,(wolf_flying_00,a2)                    	| [$6941: ld   (ix+$00),a]
-	move.b	d0,(0x00,a3)                    	| [$6944: ld   (iy+$00),a]
+	move.b	d0,(wolf_flying_00,a3)                    	| [$6944: ld   (iy+$00),a]
 	move.b	#0x15,(y_pos_04,a2)                 	| [$6947: ld   (ix+$04),$15]
 	move.b	#0x1E,(x_pos_06,a2)                 	| [$694b: ld   (ix+$06),$1E]
-	move.b	#0x80,(0x03,a3)                 	| [$694f: ld   (iy+$03),$80]
-	move.b	#0xA0,(0x05,a3)                 	| [$6953: ld   (iy+$05),$A0]
-	move.b	#0x14,(0x04,a3)                 	| [$6957: ld   (iy+$04),$14]
-	move.b	#0x1E,(0x06,a3)                 	| [$695b: ld   (iy+$06),$1E]
+	move.b	#0x80,(fine_y_pos_03,a3)                 	| [$694f: ld   (iy+$03),$80]
+	move.b	#0xA0,(fine_x_pos_05,a3)                 	| [$6953: ld   (iy+$05),$A0]
+	move.b	#0x14,(y_pos_04,a3)                 	| [$6957: ld   (iy+$04),$14]
+	move.b	#0x1E,(x_pos_06,a3)                 	| [$695b: ld   (iy+$06),$1E]
 	move.b	#0x03,(sprite_code_0f,a3)                 	| [$695f: ld   (iy+$0f),$03]
-	move.b	#0x40,(0x10,a3)                 	| [$6963: ld   (iy+$10),$40]
+	move.b	#0x40,(sprite_attributes_10,a3)                 	| [$6963: ld   (iy+$10),$40]
 	move.b	#0x24,(character_speed_09,a2)                 	| [$6967: ld   (ix+$09),$24]
-	move.b	#0x24,(0x09,a3)                 	| [$696b: ld   (iy+$09),$24]
+	move.b	#0x24,(character_speed_09,a3)                 	| [$696b: ld   (iy+$09),$24]
 	LOAD_ROM	0x3838,a1                          	| [$696f: ld   de,$3838]
 	jbsr	store_de_in_struct_381e                            	| [$6972: call $381E]
 	move.b	#0x10,d0                        	| [$6975: ld   a,$10]
