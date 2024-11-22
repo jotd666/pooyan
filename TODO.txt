@@ -2,7 +2,8 @@ figure out DSW 8807 882F
 
 break on all jump table entrypoints, figure them all out
 
-- balloon shot with arrow: first time wolf goes down: collision not working
+- balloon shot with arrow: first time wolf goes down: balloon/collision not working
+  and when balloon is burst by arrow, the arrow continues!
   => debugging with 1 wolf at a time on MAME
 - reverse all wolf_structure_array_8AE0 loops
 - level 2: wolves don't pick the balloons to go up

@@ -1,3 +1,28 @@
+*
+* Pooyan disassembly by JOTD
+*
+*	map(0x0000, 0x7fff).rom();
+*	map(0x8000, 0x83ff).ram().w(FUNC(pooyan_state::colorram_w)).share(m_colorram);
+*	map(0x8400, 0x87ff).ram().w(FUNC(pooyan_state::videoram_w)).share(m_videoram);
+*	map(0x8800, 0x8fff).ram();  2k of ram
+*	map(0x9000, 0x90ff).mirror(0x0b00).ram().share(m_spriteram[0]);
+*	map(0x9400, 0x94ff).mirror(0x0b00).ram().share(m_spriteram[1]);
+*	map(0xa000, 0xa000).mirror(0x5e7f).portr("DSW1");
+*	map(0xa080, 0xa080).mirror(0x5e1f).portr("IN0");
+*	map(0xa0a0, 0xa0a0).mirror(0x5e1f).portr("IN1");
+*	map(0xa0c0, 0xa0c0).mirror(0x5e1f).portr("IN2");
+*	map(0xa0e0, 0xa0e0).mirror(0x5e1f).portr("DSW0");
+*	map(0xa000, 0xa000).mirror(0x5e7f).w("watchdog", FUNC(watchdog_timer_device::reset_w));
+*	map(0xa100, 0xa100).mirror(0x5e7f).w("timeplt_audio", FUNC(timeplt_audio_device::sound_data_w));
+*	map(0xa180, 0xa187).mirror(0x5e78).w("mainlatch", FUNC(ls259_device::write_d0));
+*
+* note: the collision system is pretty complex
+* collision arrow/wolves: don't kill wolves, just deflect arrows
+* collision arrow/balloons: burst the balloons, and if a wolf was hanging from it, wolf falls down
+* deflected arrows move vertically and can burst balloons below too
+* meat collides more widely and it's way easier to kill wolves. Plus it's not canceled on the first
+* wolf hit but continues
+
 	.macro CLEAR_XC_FLAGS
 	move.w	d7,-(a7)
 	moveq	#0,d7
@@ -370,23 +395,6 @@ read_iyl_in_d0:
 	.global	pooyan_reset
 	.global	pooyan_irq
 	
-*
-* Pooyan disassembly by JOTD
-*
-*	map(0x0000, 0x7fff).rom();
-*	map(0x8000, 0x83ff).ram().w(FUNC(pooyan_state::colorram_w)).share(m_colorram);
-*	map(0x8400, 0x87ff).ram().w(FUNC(pooyan_state::videoram_w)).share(m_videoram);
-*	map(0x8800, 0x8fff).ram();  2k of ram
-*	map(0x9000, 0x90ff).mirror(0x0b00).ram().share(m_spriteram[0]);
-*	map(0x9400, 0x94ff).mirror(0x0b00).ram().share(m_spriteram[1]);
-*	map(0xa000, 0xa000).mirror(0x5e7f).portr("DSW1");
-*	map(0xa080, 0xa080).mirror(0x5e1f).portr("IN0");
-*	map(0xa0a0, 0xa0a0).mirror(0x5e1f).portr("IN1");
-*	map(0xa0c0, 0xa0c0).mirror(0x5e1f).portr("IN2");
-*	map(0xa0e0, 0xa0e0).mirror(0x5e1f).portr("DSW0");
-*	map(0xa000, 0xa000).mirror(0x5e7f).w("watchdog", FUNC(watchdog_timer_device::reset_w));
-*	map(0xa100, 0xa100).mirror(0x5e7f).w("timeplt_audio", FUNC(timeplt_audio_device::sound_data_w));
-*	map(0xa180, 0xa187).mirror(0x5e78).w("mainlatch", FUNC(ls259_device::write_d0));
 
 
 	.include "pooyan.inc"
@@ -424,6 +432,10 @@ pointer_lsb_16 = 0x16
 pointer_msb_17 = 0x17
 
 GAME_IN_PLAY_03 = 3
+
+PROJECTILE_MEAT = 3
+PROJECTILE_NONE = 0
+PROJECTILE_ARROW = 1
 
 pooyan_reset:
 	clr.b	d0                               	| [$0000: xor  a]
@@ -5318,7 +5330,7 @@ l_21e1:
 	btst.b	#1,(0x00,a3)                    	| [$21e1: bit  1,(iy+$00)]
 	jne	l_2226                             	| [$21e5: jr   nz,$2226]
 	jbsr	read_iyl_in_d0                         	| [$21e7: ld   a,iyl]
-	lea	l_8D1B(a6),a0                      	| [$21eb: ld   hl,$8D1B]
+	lea	balloon_burst_8D1B(a6),a0                      	| [$21eb: ld   hl,$8D1B]
 	btst.b	#3,d0                           	| [$21e9: bit  3,a]
 	jeq	l_21f1                             	| [$21ee: jr   z,$21F1]
 	addq.w	#1,a0                           	| [$21f0: inc  hl]
@@ -8407,15 +8419,15 @@ l_3a08:
 	beq.b	0f                               	| [...]
 	rts                                    	| [$3a0c: ret  nz] [...]
 0:
-	move.b	(0x08,a2),d0                    	| [$3a0d: ld   a,(ix+$08)]
+	move.b	(unknown_08,a2),d0                    	| [$3a0d: ld   a,(ix+$08)]
 	and.b	#0xF0,d0                         	| [$3a10: and  $F0]
 	bne.b	0f                               	| [...]
 	rts                                    	| [$3a12: ret  z] [...]
 0:
-	move.b	(0x15,a2),d0                    	| [$3a13: ld   a,(ix+$15)]
+	move.b	(unknown_15,a2),d0                    	| [$3a13: ld   a,(ix+$15)]
 	                               	| [$3a16: and  a]
 	jeq	l_3a1d                             	| [$3a17: jr   z,$3A1D]
-	subq.b	#1,(0x15,a2)                    	| [$3a19: dec  (ix+$15)]
+	subq.b	#1,(unknown_15,a2)                    	| [$3a19: dec  (ix+$15)]
 	rts                                    	| [$3a1c: ret]
 l_3a1d:
 	move.b	l_8842(a6),d0                   	| [$3a1d: ld   a,($8842)]
@@ -10662,7 +10674,7 @@ l_5ae4:
 	jbsr	l_5df7                            	| [$5af0: call $5DF7]
 	*jbsr	rom_checksum_5b06                            	| [$5af3: call $5B06]
 	jbsr	l_5d4d                            	| [$5af6: call $5D4D]
-	jbsr	l_5b86                            	| [$5af9: call $5B86]
+	jbsr	check_wolves_just_avoiding_arrow_5b86                            	| [$5af9: call $5B86]
 	jbsr	l_6404                            	| [$5afc: call $6404]
 	*jbsr	rom_checksum_5d0b                            	| [$5aff: call $5D0B]
 	jbsr	l_5b2c                            	| [$5b02: call $5B2C]
@@ -10764,25 +10776,30 @@ l_5b71:
 0:
 	jbsr	l_3a6c                            	| [$5b82: call $3A6C]
 	rts                                    	| [$5b85: ret]
-l_5b86:
-	lea	wolf_structure_array_8AE0(a6),a2                      	| [$5b86: ld   ix,$8AE0]
+	
+* this seems to be the routine that makes wolves make funny/mocking faces
+* when arrow is deflected by shield but with a close call
+check_wolves_just_avoiding_arrow_5b86:
+	lea	wolf_structure_array_8AE0(a6),a2        | [$5b86: ld   ix,$8AE0]
 	move.w	#0x0018,d3                      	| [$5b8a: ld   de,$0018] 24
 	move.b	#0x06,d1                        	| [$5b8d: ld   b,$06]
 l_5b8f:
 	jbsr	exx                               	| [$5b8f: exx]
-	jbsr	l_5b99                            	| [$5b90: call $5B99]
+	jbsr	wolf_arrow_almost_collision_detection_5b99                            	| [$5b90: call $5B99]
 	jbsr	exx                               	| [$5b93: exx]
 	add.w	d3,a2                            	| [$5b94: add  ix,de]
 	subq.b	#1,d1                           	| [...]
 	jne	l_5b8f                             	| [$5b96: djnz $5B8F]
 	rts                                    	| [$5b98: ret]
 
-l_5b99:
+* < A2: wolf/balloon structure
+wolf_arrow_almost_collision_detection_5b99:
 	btst.b	#0,(0x0b,a2)                    	| [$5b99: bit  0,(ix+$0b)]
 	jne	l_5ba5                             	| [$5b9d: jr   nz,$5BA5]
 	move.b	round_number_8907(a6),d0                   	| [$5b9f: ld   a,($8907)]
 	btst.b	#0,d0                           	| [$5ba2: bit  0,a]
 	beq.b	0f                               	| [...]
+	* don't do anything if round 2 (ascending wolves) and some other condition
 	rts                                    	| [$5ba4: ret  nz] [...]
 0:
 l_5ba5:
@@ -10800,20 +10817,22 @@ l_5ba5:
 	beq.b	0f                               	| [...]
 	rts                                    	| [$5bb4: ret  nz] [...]
 0:
+	* wolf is airborne
 	lea	l_8848(a6),a0                      	| [$5bb5: ld   hl,$8848]
 	lea	arrow_structure_array_8C90(a6),a3                      	| [$5bb8: ld   iy,$8C90]
 	move.b	#0x02,d1                        	| [$5bbc: ld   b,$02]
 l_5bbe:
 	btst.b	#0,(0x00,a3)                    	| [$5bbe: bit  0,(iy+$00)]
-	jeq	l_5c46                             	| [$5bc2: jp   z,$5C46]
+	jeq	next_arrow_5c46                             	| [$5bc2: jp   z,$5C46]
 	btst.b	#1,(0x00,a3)                    	| [$5bc5: bit  1,(iy+$00)]
-	jne	l_5c46                             	| [$5bc9: jr   nz,$5C46]
+	jne	next_arrow_5c46                             	| [$5bc9: jr   nz,$5C46]
+	* reached when wolves are airborne and an arrow is moving
 	move.b	#0x10,d4                        	| [$5bcb: ld   e,$10]
-	move.b	screen_straight_881F(a6),d0                   	| [$5bcd: ld   a,($881F)]
-	                               	| [$5bd0: and  a]
-	jne	l_5bd5                             	| [$5bd1: jr   nz,$5BD5]
-	move.b	#0x08,d4                        	| [$5bd3: ld   e,$08]
-l_5bd5:
+												| [$5bcd: ld   a,($881F)]
+									| [$5bd0: and  a]
+									| [$5bd1: jr   nz,$5BD5]
+									| [$5bd3: ld   e,$08]
+							
 	move.b	(x_pos_06,a2),d0                    	| [$5bd5: ld   a,(ix+$06)]
 	move.b	(fine_x_pos_05,a2),d2                    	| [$5bd8: ld   c,(ix+$05)]
 	rol.b	#1,d2                            	| [$5bdb: rlc  c]
@@ -10826,13 +10845,13 @@ l_5bd5:
 	SET_X_FROM_C
 	roxl.b	#1,d0                           	| [$5be3: rla]
 	add.b	d4,d0                            	| [$5be4: add  a,e]
-	sub.b	(0x06,a3),d0                     	| [$5be5: sub  (iy+$06)]
+	sub.b	(x_pos_06,a3),d0                     	| [$5be5: sub  (iy+$06)]
 	jcc	l_5bec                             	| [$5be8: jr   nc,$5BEC]
 	neg.b	d0                               	| [$5bea: neg]
 l_5bec:
 	cmp.b	#0x10,d0                         	| [$5bec: cp   $10]
-	jcc	l_5c46                             	| [$5bee: jr   nc,$5C46]
-	addq.w	#2,a0                           	| [$5bf0: inc  l]
+	jcc	next_arrow_5c46                             	| [$5bee: jr   nc,$5C46]
+	addq.w	#2,a0                           	| [$5bf0: inc  l] * 2
 	move.b	#0x16,d4                        	| [$5bf2: ld   e,$16]
 	move.b	round_number_8907(a6),d0                   	| [$5bf4: ld   a,($8907)]
 	btst.b	#0,d0                           	| [$5bf7: bit  0,a]
@@ -10857,27 +10876,28 @@ l_5bfd:
 l_5c14:
 	cmp.b	#0x09,d0                         	| [$5c14: cp   $09]
 	jcc	l_5c48                             	| [$5c16: jr   nc,$5C48]
+	* edge case: wolf avoids arrow but still makes a funny face
 	LOAD_ROM	0x5C80,a1                          	| [$5c18: ld   de,$5C80]
-	btst.b	#1,(0x07,a2)                    	| [$5c1b: bit  1,(ix+$07)]
+	btst.b	#1,(unknown_07,a2)                    	| [$5c1b: bit  1,(ix+$07)]
 	jeq	l_5c24                             	| [$5c1f: jr   z,$5C24]
 	LOAD_ROM	0x5C89,a1                          	| [$5c21: ld   de,$5C89]
 l_5c24:
 	jbsr	store_de_in_struct_381e                            	| [$5c24: call $381E]
-	move.b	#0x10,(0x12,a2)                 	| [$5c27: ld   (ix+$12),$10]
+	move.b	#0x10,(unknown_12,a2)                 	| [$5c27: ld   (ix+$12),$10]
 	move.b	#0x02,(pointer_lsb_16,a2)                 	| [$5c2b: ld   (ix+$16),$02]
 	lea	balloon_structures_8B70(a6),a3                      	| [$5c2f: ld   iy,$8B70]
 	move.w	#0x0018,d3                      	| [$5c33: ld   de,$0018] 24
 	move.b	#0x05,d1                        	| [$5c36: ld   b,$05]
 l_5c38:
-	move.b	(0x14,a2),d0                    	| [$5c38: ld   a,(ix+$14)]
-	cmp.b	(0x14,a3),d0                     	| [$5c3b: cp   (iy+$14)]
+	move.b	(unknown_14,a2),d0                    	| [$5c38: ld   a,(ix+$14)]
+	cmp.b	(unknown_14,a3),d0                     	| [$5c3b: cp   (iy+$14)]
 	jeq	l_5c54                             	| [$5c3e: jr   z,$5C54]
 	add.w	d3,a3                            	| [$5c40: add  iy,de]
 	subq.b	#1,d1                           	| [...]
 	jne	l_5c38                             	| [$5c42: djnz $5C38]
 	addq	#4,a7                        	| [$5c44: pop  af]
 	rts                                    	| [$5c45: ret]
-l_5c46:
+next_arrow_5c46:
 	addq.w	#2,a0                           	| [$5c46: inc  l]
 	                           	| [$5c47: inc  l]
 l_5c48:
@@ -11152,6 +11172,7 @@ l_5e98:
 	lea	arrow_structure_array_8C90(a6),a2                      	| [$5e9a: ld   ix,$8C90]
 	tst.b	d0                               	| [$5e9e: and  a]
 	jeq	l_5ea5                             	| [$5e9f: jr   z,$5EA5]
+	jbsr	osd_break
 	lea	l_8CA8(a6),a2                      	| [$5ea1: ld   ix,$8CA8]
 l_5ea5:
 	btst.b	#0,(0x00,a2)                    	| [$5ea5: bit  0,(ix+$00)]
@@ -11160,9 +11181,9 @@ l_5ea5:
 0:
 	STORE_RAM_POINTER	a2,ram_pointer_8D65(a6)            	| [$5eaa: ld   ($8D65),ix]
 	
+	move.b	#0x04,d1                        	| [$5eb6: ld   b,$04]
 	btst.b	#1,(0x00,a2)                    	| [$5eae: bit  1,(ix+$00)]
 	lea	sprite_shadow_ram_8840+0x48(a6),a2     	| [$5eb2: ld   ix,sprite_shadow_ram_8840+$48]
-	move.b	#0x04,d1                        	| [$5eb6: ld   b,$04]
 	lea	lonely_balloons_struct_array_8C30(a6),a0                      	| [$5eb8: ld   hl,$8C30]
 	jne	l_5f11                             	| [$5ebb: jr   nz,$5F11]
 l_5ebd:
@@ -11192,7 +11213,6 @@ l_5ed8:
 l_5ee6:
 	cmp.b	#0x09,d0                         	| [$5ee6: cp   $09]
 	jcc	l_5f06                             	| [$5ee8: jr   nc,$5F06]
-	CLEAR_XC_FLAGS                         	| [$5eea: xor  a]
 	clr.b	d0                               	| [$5eea: xor  a]
 	move.b	d0,(a0)+                         	| [$5eeb: ld   (hl),a]
 	                           	| [$5eec: inc  hl]
@@ -11260,10 +11280,10 @@ l_5f47:
 	rts                                    	| [$5f52: ret]
 l_5f53:
 	move.b	#0x06,d4                        	| [$5f53: ld   e,$06]
-	move.b	screen_straight_881F(a6),d0                   	| [$5f55: ld   a,($881F)]
-	                               	| [$5f58: and  a]
-	jne	l_5f5d                             	| [$5f59: jr   nz,$5F5D]
-	move.b	#0xFE,d4                        	| [$5f5b: ld   e,$FE]
+												| [$5f55: ld   a,($881F)]
+										| [$5f58: and  a]
+								| [$5f59: jr   nz,$5F5D]
+									| [$5f5b: ld   e,$FE]
 l_5f5d:
 	move.b	(0x00,a2),d0                    	| [$5f5d: ld   a,(ix+$00)]
 	add.b	d4,d0                            	| [$5f60: add  a,e]
@@ -11300,7 +11320,7 @@ l_5f90:
 	bne.b	0f                               	| [...]
 	rts                                    	| [$5f94: ret  z] [...]
 0:
-	move.b	d0,l_8D44(a6)                   	| [$5f95: ld   ($8D44),a]
+	move.b	d0,flying_projectile_type_8D44(a6)                   	| [$5f95: ld   ($8D44),a]
 	move.b	d0,d2                           	| [$5f98: ld   c,a]
 	lea	sprite_shadow_ram_8840+0x10(a6),a2     	| [$5f99: ld   ix,sprite_shadow_ram_8840+$10]
 	move.b	#0x06,d1                        	| [$5f9d: ld   b,$06]
@@ -11315,15 +11335,15 @@ l_5fa2:
 	cmp.b	#0x05,d0                         	| [$5fab: cp   $05]
 	jne	l_6018                             	| [$5fad: jr   nz,$6018]
 	move.b	#0x06,d4                        	| [$5faf: ld   e,$06]
-	move.b	screen_straight_881F(a6),d0                   	| [$5fb1: ld   a,($881F)]
-	                               	| [$5fb4: and  a]
-	jne	l_5fb9                             	| [$5fb5: jr   nz,$5FB9]
-	move.b	#0xFB,d4                        	| [$5fb7: ld   e,$FB]
+											| [$5fb1: ld   a,($881F)]
+								| [$5fb4: and  a]
+							| [$5fb5: jr   nz,$5FB9]
+								| [$5fb7: ld   e,$FB]
 l_5fb9:
-	move.b	(wolf_flying_00,a2),d0                    	| [$5fb9: ld   a,(ix+$00)]
+	move.b	(0x0,a2),d0                    	| [$5fb9: ld   a,(ix+$00)]
 	add.b	d4,d0                            	| [$5fbc: add  a,e]
 	move.b	d0,d4                           	| [$5fbd: ld   e,a]
-	move.b	(character_state_02,a2),d0                    	| [$5fbe: ld   a,(ix+$02)]
+	move.b	(0x2,a2),d0                    	| [$5fbe: ld   a,(ix+$02)]
 	add.b	#0x08,d0                         	| [$5fc1: add  a,$08]
 	move.b	d0,d3                           	| [$5fc3: ld   d,a]
 	move.b	(0x00,a3),d0                    	| [$5fc4: ld   a,(iy+$00)]
@@ -11425,11 +11445,11 @@ l_6055:
 	bne.b	0f                               	| [...]
 	rts                                    	| [$6059: ret  z] [...]
 0:
-	cmp.b	#0x03,d0                         	| [$605a: cp   $03]
+	cmp.b	#PROJECTILE_MEAT,d0                         	| [$605a: cp   $03]
 	bne.b	0f                               	| [...]
 	rts                                    	| [$605c: ret  z] [...]
 0:
-	move.b	d0,l_8D44(a6)                   	| [$605d: ld   ($8D44),a]
+	move.b	d0,flying_projectile_type_8D44(a6)                   	| [$605d: ld   ($8D44),a]
 	lea	l_8868(a6),a2                      	| [$6060: ld   ix,$8868]
 	move.b	#0x05,d1                        	| [$6064: ld   b,$05]
 	lea	balloon_structures_8B70(a6),a0                      	| [$6066: ld   hl,$8B70]
@@ -11447,10 +11467,10 @@ l_6069:
 	jne	l_61b4                             	| [$607d: jp   nz,$61B4]
 l_6080:
 	move.b	#0x06,d4                        	| [$6080: ld   e,$06]
-*	move.b	screen_straight_881F(a6),d0                   	| [$6082: ld   a,($881F)]
-*	                               	| [$6085: and  a]
-*	jne	l_608a                             	| [$6086: jr   nz,$608A]
-*	move.b	#0xFE,d4                        	| [$6088: ld   e,$FE]
+                   	| [$6082: ld   a,($881F)]
+   	| [$6085: and  a]
+    	| [$6086: jr   nz,$608A]
+     	| [$6088: ld   e,$FE]
 *l_608a:
 	move.b	(0x00,a2),d0                    	| [$608a: ld   a,(ix+$00)]
 	add.b	d4,d0                            	| [$608d: add  a,e]
@@ -11489,24 +11509,27 @@ l_60bc:
 l_60c8:
 	btst.b	#1,(0x16,a3)                    	| [$60c8: bit  1,(iy+$16)]
 	jeq	l_60d5                             	| [$60cc: jr   z,$60D5]
-	move.b	l_8D44(a6),d0                   	| [$60ce: ld   a,($8D44)]
-	cmp.b	#0x03,d0                         	| [$60d1: cp   $03]
+	move.b	flying_projectile_type_8D44(a6),d0                   	| [$60ce: ld   a,($8D44)]
+	cmp.b	#PROJECTILE_MEAT,d0                         	| [$60d1: cp   $03]
 	jne	l_60ff                             	| [$60d3: jr   nz,$60FF]
 l_60d5:
+	sne	d7		| capture Z flag
 	move.w  #0xFFEC,d3                          	| [$60d5: ld   de,$FFEC]
 	add.w	d3,a0                            	| [$60d8: add  hl,de]
+	jra		0f									| 16 bit add preserves Z!
 l_60d9:
-	sne	d7		| capture Z flag (not Z above, but possible when jumped to l_60d9)
-	lea	l_8D1C(a6),a3                      	| [$60d9: ld   iy,$8D1C]
+	sne	d7		| capture Z flag when jumped to
+0:
+	lea	balloon_burst_8D1B+1(a6),a3                      	| [$60d9: ld   iy,$8D1C]
 	move.b	i_reg,d0                           	| [$60dd: ld   a,i]
 	tst.b	d7
 	jne	l_60e3                             	| [$60df: jr   nz,$60E3]
-	subq.w	#1,a3                           	| [$60e1: dec  iy]
+	subq.w	#1,a3                           	| [$60e1: dec  iy] balloon_burst_8D1B
 l_60e3:
-	move.b	#0x01,(0x00,a3)                 	| [$60e3: ld   (iy+$00),$01] mark arrow bursts balloon (not just shrinks it!)
+	move.b	#0x01,(a3)                 	| [$60e3: ld   (iy+$00),$01] mark arrow bursts balloon (not just shrinks it!)
 	move.b	#0x04,d3                          	| [$60e7: ld   de,$0404]
 	move.b	#0x04,d4                          	| [$60e7: ld   de,$0404]
-	jbsr	l_619f                            	| [$60ea: call $619F]
+	jbsr	related_to_burst_balloon_619f      | [$60ea: call $619F]
 	move.w    #0xFFFD,d3                          	| [$60ed: ld   de,$FFFD]
 	jra	l_611f                             	| [$60f0: jr   $611F]
 l_60f2:
@@ -11518,7 +11541,7 @@ l_60f2:
 	jne	l_6069                             	| [$60fb: jp   nz,$6069]
 	rts                                    	| [$60fe: ret]
 l_60ff:
-								| [$60ff: ld   ix,$8C90]
+	*lea	arrow_structure_array_8C90(a6),a2	| [$60ff: ld   ix,$8C90]
 	move.b	i_reg,d0                           	| [$6103: ld   a,i]
 	* can't happen, 60ff is called with Z flag unset   | [$6105: jr   z,$610B]
 	lea	l_8CA8(a6),a2                      	| [$6107: ld   ix,$8CA8]
@@ -11545,9 +11568,10 @@ l_612a:
 	add.w	d3,a3                            	| [$612f: add  iy,de]
 	subq.b	#1,d1                           	| [...]
 	jne	l_612a                             	| [$6131: djnz $612A]
-	move.b	l_8D44(a6),d0                   	| [$6133: ld   a,($8D44)]
-	cmp.b	#0x03,d0                         	| [$6136: cp   $03]
+	move.b	flying_projectile_type_8D44(a6),d0                   	| [$6133: ld   a,($8D44)]
+	cmp.b	#PROJECTILE_MEAT,d0                         	| [$6136: cp   $03]
 	bne.b	0f                               	| [...]
+	* meat: return
 	rts                                    	| [$6138: ret  z] [...]
 0:
 	jbsr	l_0ef1                            	| [$6139: call $0EF1]
@@ -11559,9 +11583,10 @@ l_613d:
 	move.b	round_number_8907(a6),d0                   	| [$6143: ld   a,($8907)]
 	and.b	#0x01,d0                         	| [$6146: and  $01]
 	jne	l_6166                             	| [$6148: jr   nz,$6166]	round 2: skip!
-	move.b	l_8D44(a6),d0                   	| [$614a: ld   a,($8D44)]
-	cmp.b	#0x03,d0                         	| [$614d: cp   $03]
+	move.b	flying_projectile_type_8D44(a6),d0                   	| [$614a: ld   a,($8D44)]
+	cmp.b	#PROJECTILE_MEAT,d0                         	| [$614d: cp   $03]
 	jne	l_6166                             	| [$614f: jr   nz,$6166]
+	* meat
 	move.b	(unknown_14,a3),d0                    	| [$6151: ld   a,(iy+$14)]
 	lea	balloon_structures_8B70(a6),a2           | [$6154: ld   ix,$8B70]
 	move.w	#0x0018,d3                      	| [$6158: ld   de,$0018] 24
@@ -11581,13 +11606,13 @@ l_6166:
 	move.b	#0x05,(pointer_msb_17,a3)                 	| [$6176: ld   (iy+$17),$05]
 	move.b	d0,(unknown_14,a3)                    	| [$617a: ld   (iy+$14),a]
 	move.b	d0,(unknown_13,a3)                    	| [$617d: ld   (iy+$13),a]
-	move.b	l_8D44(a6),d0                   	| [$6180: ld   a,($8D44)]
-	cmp.b	#0x03,d0                         	| [$6183: cp   $03]
+	move.b	flying_projectile_type_8D44(a6),d0                   	| [$6180: ld   a,($8D44)]
+	cmp.b	#PROJECTILE_MEAT,d0                         	| [$6183: cp   $03]
 	jne	l_619a                             	| [$6185: jr   nz,$619A]
 	jbsr	l_0efd                            	| [$6187: call $0EFD]
 l_618a:
 	clr.b	d0                               	| [$618a: xor  a]
-	move.b	d0,l_8D44(a6)                   	| [$618b: ld   ($8D44),a]
+	move.b	d0,flying_projectile_type_8D44(a6)                   	| [$618b: ld   ($8D44),a]
 	addq	#4,a7                        	| [$618e: pop  af] skip caller
 	rts                                    	| [$618f: ret]
 	
@@ -11599,7 +11624,7 @@ l_619a:
 	jbsr	l_0ef1                            	| [$619a: call $0EF1]
 	jra	l_618a                             	| [$619d: jr   $618A]
 	
-l_619f:
+related_to_burst_balloon_619f:
 	clr.b	(a0)+                             	| [$619f: ld   (hl),$00]
 	                           	| [$61a1: inc  hl]
 	move.b	#0x01,(a0)+                      	| [$61a2: ld   (hl),$01]
@@ -11724,14 +11749,15 @@ l_625e:
 												| [$6269: ld   a,(iy+$0a)]
 													| [$626c: add  a,l]
 	add.b	d0,(0x0a,a3)                    	| [$626d: ld   (iy+$0a),a]
-	bset.b	#4,(0x16,a3)                    	| [$6270: set  4,(iy+$16)]
-l_6274:
-	* reaches here on rounds 2 (balloon shrinks, doesn't explode)
 	sne	d7				| capture Z flag
+	bset.b	#4,(0x16,a3)                    	| [$6270: set  4,(iy+$16)]
+	* reaches here on rounds 2 (balloon shrinks, doesn't explode)
+l_6274:
 	lea	arrow_structure_array_8C90(a6),a0                      	| [$6274: ld   hl,$8C90]
 	*move.b	i_reg,d0                           	| [$6277: ld   a,i] makes no sense, d0 reset at 6280
 	tst.b	d7
 	jeq	l_627e                             	| [$6279: jr   z,$627E]
+	jbsr	osd_break
 	lea	l_8CA8(a6),a0                      	| [$627b: ld   hl,$8CA8]
 l_627e:
 	move.b	#0x18,d1                        	| [$627e: ld   b,$18]
@@ -11808,15 +11834,16 @@ l_62f0:
 												| [$62fb: ld   a,(iy+$0a)]
 													| [$62fe: add  a,l]
 	add.b	d0,(0x0a,a3)                    	| [$62ff: ld   (iy+$0a),a]
+	sne		d7   | capture Z flag for later!
 	bset.b	#5,(0x16,a3)                    	| [$6302: set  5,(iy+$16)]
 	LOAD_ROM	0x634F,a1                          	| [$6306: ld   de,$634F]
 	jbsr	store_animation_sequence_in_object_5c75                            	| [$6309: call $5C75]
 	jra	l_6274                             	| [$630c: jp   $6274]
 l_630f:
 	move.b	#0x06,d4                        	| [$630f: ld   e,$06]
-	move.b	screen_straight_881F(a6),d0                   	| [$6311: ld   a,($881F)]
-	                               	| [$6314: and  a]
-	jne	l_6319                             	| [$6315: jr   nz,$6319]
+																| [$6311: ld   a,($881F)]
+												| [$6314: and  a]
+												| [$6315: jr   nz,$6319]
 	move.b	#0xFE,d4                        	| [$6317: ld   e,$FE]
 l_6319:
 	move.b	(0x00,a2),d0                    	| [$6319: ld   a,(ix+$00)]
@@ -11901,7 +11928,7 @@ l_63b9:
 	move.b	#0x02,(character_state_02,a2)                 	| [$63c8: ld   (ix+$02),$02]
 	move.b	#0x28,(character_timer_11,a2)                 	| [$63cc: ld   (ix+$11),$28]
 	move.w	#0x000F,d3                      	| [$63d0: ld   de,$000F] 15
-	lea	l_8D1B(a6),a0                      	| [$63d3: ld   hl,$8D1B]
+	lea	balloon_burst_8D1B(a6),a0                      	| [$63d3: ld   hl,$8D1B]
 	move.b	i_reg,d0                           	| [$63d6: ld   a,i]
 	                               	| [$63d8: and  a]
 	jeq	l_63de                             	| [$63d9: jr   z,$63DE]
@@ -12008,7 +12035,7 @@ l_647a:
 	move.b	#0x02,(character_state_02,a2)                 	| [$6489: ld   (ix+$02),$02]
 	move.b	#0x20,(character_timer_11,a2)                 	| [$648d: ld   (ix+$11),$20]
 	move.w	#0x000F,d3                      	| [$6491: ld   de,$000F] 15
-	lea	l_8D1B(a6),a0                      	| [$6494: ld   hl,$8D1B]
+	lea	balloon_burst_8D1B(a6),a0                      	| [$6494: ld   hl,$8D1B]
 	move.b	i_reg,d0                           	| [$6497: ld   a,i]
 	                               	| [$6499: and  a]
 	jeq	l_649f                             	| [$649a: jr   z,$649F]
