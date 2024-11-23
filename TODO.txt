@@ -2,23 +2,18 @@ figure out DSW 8807 882F
 
 break on all jump table entrypoints, figure them all out
 
-- balloon shot with arrow: first time wolf goes down: balloon/collision not working
-  and then randomly works or does not work (but first time NEVER works)
-  and when balloon is burst by arrow, the arrow continues!
-  => debugging with 1 wolf at a time on MAME
 - reverse all wolf_structure_array_8AE0 loops
 - double buffering: coded but not working! seems that background restore makes
   sprites disappear???
 - osd_w_videoram with low address 8000-83FF doesn't trigger error
-- after a while wolves not descending (after a wolf descended on hard left)
-- same after life resumes (leave one wolf to kill or cheat key to die)
+- end of level 2: boss stays on the ground
 - nb wolfs flag color should be cyan at start, not red: 8324 should be 8B
 - rip sounds & music
 - capture screenshot memory dumps to filter out unused tiles/cluts
   to save A LOT OF memory
 - still 4 wolves when skipping intro: diff memory with and without intro when game starts
 - demo: wrong timing/data
-- cheat no wolves on ladder/stone not advancing
+
 
 converter: lf address >= 0xFC00 consider as negative data
 converter: postproc: 	move.b	d0,(ax) and addq.w #1,ax => (ax)+
