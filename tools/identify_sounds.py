@@ -39,6 +39,12 @@ cond = "&&".join(f"A!=${k:x}" for k in known_sounds)
       # f.write("bpset ${:04x},A==${:02x},{g}\n".format(,k))
 print("bpset ${:04x},{} && A<$80".format(0x0E8F,cond))
 
+print("remove tunes")
 musics = [k for k,v in known_sounds.items() if "TUNE" in v]
 cond = "||".join(f"A==${k:x}" for k in musics)
+print("bpset ${:04x},{},{{PC=$001f;g}}".format(0x0E8F,cond))
+
+blank = [k for k,v in known_sounds.items() if not v]
+print("only tunes")
+cond = "&&".join(f"A!=${k:x}" for k in musics+blank)
 print("bpset ${:04x},{},{{PC=$001f;g}}".format(0x0E8F,cond))

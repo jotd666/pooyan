@@ -5863,7 +5863,7 @@ l_2541:
 	jbsr	fill_area_0010                            	| [$2551: rst  $10]
 	move.b	d0,l_8A82(a6)                   	| [$2552: ld   ($8A82),a]
 	move.b	d0,arrow_structure_array_8C90(a6)                   	| [$2555: ld   ($8C90),a]
-	move.b	d0,l_8CA8(a6)                   	| [$2558: ld   ($8CA8),a]
+	move.b	d0,deflating_balloons_structure_array_8CA8(a6)                   	| [$2558: ld   ($8CA8),a]
 	move.b	d0,l_8F52(a6)                   	| [$255b: ld   ($8F52),a]
 	move.b	d0,l_8F63(a6)                   	| [$255e: ld   ($8F63),a]
 	rts                                    	| [$2561: ret]
@@ -6121,7 +6121,7 @@ l_27b2:
 	beq.b	0f                               	| [...]
 	rts                                    	| [$27bd: ret  nz] [...]
 0:
-	move.b	l_8CA8(a6),d0                   	| [$27be: ld   a,($8CA8)]
+	move.b	deflating_balloons_structure_array_8CA8(a6),d0                   	| [$27be: ld   a,($8CA8)]
 	btst.b	#1,d0                           	| [$27c1: bit  1,a]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$27c3: ret  nz] [...]
@@ -11172,8 +11172,7 @@ l_5e98:
 	lea	arrow_structure_array_8C90(a6),a2                      	| [$5e9a: ld   ix,$8C90]
 	tst.b	d0                               	| [$5e9e: and  a]
 	jeq	l_5ea5                             	| [$5e9f: jr   z,$5EA5]
-	jbsr	osd_break
-	lea	l_8CA8(a6),a2                      	| [$5ea1: ld   ix,$8CA8]
+	lea	deflating_balloons_structure_array_8CA8(a6),a2                      	| [$5ea1: ld   ix,$8CA8]
 l_5ea5:
 	btst.b	#0,(0x00,a2)                    	| [$5ea5: bit  0,(ix+$00)]
 	bne.b	0f                               	| [...]
@@ -11313,7 +11312,7 @@ l_5f83:
 	move.b	i_reg,d0                           	| [$5f87: ld   a,i]
 	                               	| [$5f89: and  a]
 	jeq	l_5f90                             	| [$5f8a: jr   z,$5F90]
-	lea	l_8CA8(a6),a2                      	| [$5f8c: ld   ix,$8CA8]
+	lea	deflating_balloons_structure_array_8CA8(a6),a2                      	| [$5f8c: ld   ix,$8CA8]
 l_5f90:
 	move.b	(0x00,a2),d0                    	| [$5f90: ld   a,(ix+$00)]
 	                               	| [$5f93: and  a]
@@ -11438,7 +11437,7 @@ l_6048:
 	move.b	i_reg,d0                           	| [$604c: ld   a,i]
 	                               	| [$604e: and  a]
 	jeq	l_6055                             	| [$604f: jr   z,$6055]
-	lea	l_8CA8(a6),a2                      	| [$6051: ld   ix,$8CA8]
+	lea	deflating_balloons_structure_array_8CA8(a6),a2                      	| [$6051: ld   ix,$8CA8]
 l_6055:
 	move.b	(0x00,a2),d0                    	| [$6055: ld   a,(ix+$00)]
 	                               	| [$6058: and  a]
@@ -11544,7 +11543,7 @@ l_60ff:
 	*lea	arrow_structure_array_8C90(a6),a2	| [$60ff: ld   ix,$8C90]
 	move.b	i_reg,d0                           	| [$6103: ld   a,i]
 	* can't happen, 60ff is called with Z flag unset   | [$6105: jr   z,$610B]
-	lea	l_8CA8(a6),a2                      	| [$6107: ld   ix,$8CA8]
+	lea	deflating_balloons_structure_array_8CA8(a6),a2                      	| [$6107: ld   ix,$8CA8]
 l_610b:
 	move.b	#0x01,(0x01,a2)                 	| [$610b: ld   (ix+$01),$01]
 	move.b	#0x01,(0x07,a2)                 	| [$610f: ld   (ix+$07),$01]
@@ -11757,8 +11756,8 @@ l_6274:
 	*move.b	i_reg,d0                           	| [$6277: ld   a,i] makes no sense, d0 reset at 6280
 	tst.b	d7
 	jeq	l_627e                             	| [$6279: jr   z,$627E]
-	jbsr	osd_break
-	lea	l_8CA8(a6),a0                      	| [$627b: ld   hl,$8CA8]
+	* level 2 (ascending wolves)
+	lea	deflating_balloons_structure_array_8CA8(a6),a0                      	| [$627b: ld   hl,$8CA8]
 l_627e:
 	move.b	#0x18,d1                        	| [$627e: ld   b,$18]
 	clr.b	d0                               	| [$6280: xor  a]
