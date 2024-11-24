@@ -3274,7 +3274,7 @@ l_12a6:
 	bcs.b	0f                               	| [...]
 	rts                                    	| [$12aa: ret  nc] [...]
 0:
-	move.b	d0,l_8743(a6)                   	| [$12ab: ld   ($8743),a]
+	move.b	d0,copy_of_nb_wolves_8743(a6)                   	| [$12ab: ld   ($8743),a]
 	rts                                    	| [$12ae: ret]
 move_wolf_horizontally_12af:
 	jbsr	auto_animate_sprite_ix_4006                            	| [$12af: call $4006]
@@ -4038,7 +4038,7 @@ main_game_sequence_18af:
 	jbsr	l_191c                            	| [$18c7: call $191C]
 	jbsr	l_5ae4                            	| [$18ca: call $5AE4]
 	jbsr	l_196e                            	| [$18cd: call $196E]
-	jbsr	l_1f2f                            	| [$18d0: call $1F2F]
+	jbsr	update_left_flag_color_1f2f                            	| [$18d0: call $1F2F]
 	jbsr	l_6b3b                            	| [$18d3: call $6B3B]
 	jbsr	l_19ca                            	| [$18d6: call $19CA]
 	rts                                    	| [$18d9: ret]
@@ -4333,7 +4333,7 @@ l_1aa3:
 	clr.b	d0                               	| [$1aa4: xor  a]
 	move.b	d0,l_89FC(a6)                   	| [$1aa5: ld   ($89FC),a]
 	move.b	d0,l_8931(a6)                   	| [$1aa8: ld   ($8931),a]
-	move.b	d0,ram_pointer_8932(a6)                   	| [$1aab: ld   ($8932),a]
+	move.b	d0,rock_tile_video_ram_pointer_8932(a6)                   	| [$1aab: ld   ($8932),a]
 	jbsr	l_1ab2                            	| [$1aae: call $1AB2]
 	rts                                    	| [$1ab1: ret]
 l_1ab2:
@@ -4974,18 +4974,20 @@ l_1ee2:
 	LOAD_ROM	0x200D,a0                          	| [$1ef5: ld   hl,$200D]
 	jbsr	load_16bit_rom_pointer_0c45                            	| [$1ef8: call $0C45]
 	lea	l_8462(a6),a0                      	| [$1efb: ld   hl,$8462]
-	jbsr	update_right_flag_3307                            	| [$1efe: call $3307]
+	jbsr	update_4x4_block_3307           | [$1efe: call $3307]  update right flag
 	lea	l_8722(a6),a0                      	| [$1f01: ld   hl,$8722]
 	jbsr	update_left_flag_1F8C                  	| [$1f04: call update_left_flag_1F8C]
 	move.w	(sp)+,d0                        	| [$1f07: pop  af]
 	move.b	d0,d1                           	| [$1f08: ld   b,a]
 	and.b	#0x0F,d0                         	| [$1f09: and  $0F]
-	move.b	d0,l_8483(a6)                   	| [$1f0b: ld   ($8483),a]
-	jbsr	l_1ffb                            	| [$1f0e: call $1FFB]
-	jbsr	l_1f18                            	| [$1f11: call $1F18]
-	jbsr	l_34c9                            	| [$1f14: call $34C9]
+	lea		l_8483(a6),a0
+	jbsr	osd_w_videoram                   	| [$1f0b: ld   ($8483),a]
+	jbsr	update_right_flag_color_1ffb                            	| [$1f0e: call $1FFB]
+	jbsr	update_left_flag_color_1f18                            	| [$1f11: call $1F18]
+	jbsr	write_number_of_remaining_wolves_34c9                            	| [$1f14: call $34C9]
 	rts                                    	| [$1f17: ret]
-l_1f18:
+	
+update_left_flag_color_1f18:
 													| [$1f18: ld   hl,$checksum_failed_89e7]
 									| [$1f1b: ld   b,$07]
 								
@@ -4998,14 +5000,16 @@ l_1f18:
 									| [...]
 									| [$1f21: djnz $1F1D]
 	clr.b	d2                               	| [$1f23: ld   c,$00]
-	move.b	nb_wolves_8901(a6),d0                        	| [$1f25: ld   l,$01]
-	move.b	(a0),d0                         	| [$1f27: ld   a,(hl)]
+	move.b	nb_wolves_8901(a6),d0                | [$1f25: ld   l,$01]
+												| [$1f27: ld   a,(hl)]
+	* count tenths of wolves, D2 <= nb_wolves/10
 l_1f28:
 	sub.b	#0x0A,d0                         	| [$1f28: sub  $0A]
 	jcs	l_1f4e                             	| [$1f2a: jr   c,$1F4E]
 	addq.b	#1,d2                           	| [$1f2c: inc  c]
 	jra	l_1f28                             	| [$1f2d: jr   $1F28]
-l_1f2f:
+	
+update_left_flag_color_1f2f:
 	move.b	l_8D56(a6),d0                   	| [$1f2f: ld   a,($8D56)]
 	                               	| [$1f32: and  a]
 	beq.b	0f                               	| [...]
@@ -5015,7 +5019,7 @@ l_1f2f:
 	move.b	nb_wolves_8901(a6),d0           	| [$1f35: ld   a,(nb_wolves_8901)]
 	cmp.b	#0x0A,d0                         	| [$1f38: cp   $0A]
 	jcs	l_1f49                             	| [$1f3a: jr   c,$1F49]
-	lea	table_1F87,a0                      	| [$1f3c: ld   hl,table_1F87]
+	lea	limit_nb_wolves_for_flag_color_1F87,a0    | [$1f3c: ld   hl,limit_nb_wolves_for_flag_color_1F87]
 	move.b	#0x05,d1                        	| [$1f3f: ld   b,$05]
 l_1f41:
 	cmp.b	(a0),d0                          	| [$1f41: cp   (hl)]
@@ -5024,18 +5028,19 @@ l_1f41:
 	addq.w	#1,a0                           	| [$1f45: inc  hl]
 	subq.b	#1,d1                           	| [...]
 	jne	l_1f41                             	| [$1f46: djnz $1F41]
+	* not found: don't change color
 	rts                                    	| [$1f48: ret]
 l_1f49:
 	move.b	#0x01,d0                        	| [$1f49: ld   a,$01]
 	move.b	d0,l_8D56(a6)                   	| [$1f4b: ld   ($8D56),a]
 l_1f4e:
 	move.b	d2,d0                           	| [$1f4e: ld   a,c]
-	                               	| [$1f4f: and  a]
-	jne	l_1f7a                             	| [$1f50: jr   nz,$1F7A]
-
-	* DEBUG HERE! pb with D0 => 1FDA not loaded
+	                               	            | [$1f4f: and  a]
+	jne	l_1f7a                             	    | [$1f50: jr   nz,$1F7A]
+	
 	move.b	round_number_8907(a6),d0                   	| [$1f52: ld   a,($8907)]
 	addq.b	#0x01,d0                        	| [$1f55: add  a,$01]
+	moveq	#0,d1
 	move.b	d0,d1                           	| [$1f57: ld   b,a]
 	subq	#1,d1		| for dbf
 	CLEAR_XC_FLAGS                         	| [$1f58: xor  a]
@@ -5056,7 +5061,7 @@ l_1f68:
 	move.b	#0x03,d1                        	| [$1f70: ld   b,$03]
 	jbsr	fill_area_0010                            	| [$1f72: rst  $10]
 	move.b	nb_wolves_8901(a6),d0           	| [$1f73: ld   a,(nb_wolves_8901)]
-	move.b	d0,l_8743(a6)                   	| [$1f76: ld   ($8743),a]
+	move.b	d0,copy_of_nb_wolves_8743(a6)       | [$1f76: ld   ($8743),a]
 	clr.b	d0                               	| [$1f79: xor  a]
 l_1f7a:
 	LOAD_ROM	0x1FA3,a0                          	| [$1f7a: ld   hl,$1FA3]
@@ -5066,8 +5071,8 @@ l_1f7a:
 	jbsr	update_left_flag_1F8C                  	| [$1f83: call update_left_flag_1F8C]
 	rts                                    	| [$1f86: ret]
 
-table_1F87:
-  .byte	0x09,0x14,0x1E,0x28,0x30,0x3E,0x04,0xED,0x47
+limit_nb_wolves_for_flag_color_1F87:
+  .byte	0x09,0x14,0x1E,0x28,0x30,0x3E
 	.align	2
 * < A0: screen address (tile or color)
 * < A1: attribute/tiles to copy
@@ -5094,7 +5099,7 @@ l_1f92:
 	jra	l_1f90                             	| [$1fa1: jr   $1F90]
 
 
-l_1ffb:
+update_right_flag_color_1ffb:
 	move.b	d1,d0                           	| [$1ffb: ld   a,b]
 	LOAD_ROM	0x203B,a1                          	| [$1ffe: ld   de,$203B]
 	btst.b	#5,d0                           	| [$1ffc: bit  5,a]
@@ -5102,7 +5107,7 @@ l_1ffb:
 	LOAD_ROM	0x2050,a1                          	| [$2003: ld   de,$2050]
 l_2006:
 	lea	l_8062(a6),a0                      	| [$2006: ld   hl,$8062]
-	jbsr	update_right_flag_3307                            	| [$2009: call $3307]
+	jbsr	update_4x4_block_3307                            	| [$2009: call $3307]
 	rts                                    	| [$200c: ret]
 
 display_nb_lives_2065:		| exact code copy!
@@ -5944,14 +5949,14 @@ l_25a6:
 	addq.b	#1,d0                           	| [$25d0: inc  a]
 	move.b	d0,(a1)                         	| [$25d1: ld   (de),a]
 	lea	l_86E3(a6),a1                      	| [$25d2: ld   de,$86E3]
-	STORE_RAM_POINTER	a1,ram_pointer_8932(a6)            	| [$25d5: ld   ($8932),de]
+	STORE_RAM_POINTER	a1,rock_tile_video_ram_pointer_8932(a6)            	| [$25d5: ld   ($8932),de]
 	
 	jra	l_25eb                             	| [$25d9: jr   $25EB]
 l_25db:
 	move.b	(a1),d0                         	| [$25db: ld   a,(de)]
 	                               	| [$25dc: and  a]
 	jeq	l_25eb                             	| [$25dd: jr   z,$25EB]
-	move.b	ram_pointer_8932(a6),d0                   	| [$25df: ld   a,($8932)]
+	move.b	rock_tile_video_ram_pointer_8932(a6),d0                   	| [$25df: ld   a,($8932)]
 	cmp.b	#0xA3,d0                         	| [$25e2: cp   $A3]
 	jne	l_25eb                             	| [$25e4: jr   nz,$25EB]
 	clr.b	d0                               	| [$25e6: xor  a]
@@ -5961,7 +5966,7 @@ l_25eb:
 	move.b	(a0),d0                         	| [$25eb: ld   a,(hl)]
 	cmp.b	#0x07,d0                         	| [$25ec: cp   $07]
 	jcs	l_25fe                             	| [$25ee: jr   c,$25FE]
-	move.b	ram_pointer_8932(a6),d0                   	| [$25f0: ld   a,($8932)]
+	move.b	rock_tile_video_ram_pointer_8932(a6),d0                   	| [$25f0: ld   a,($8932)]
 	cmp.b	#0xC3,d0                         	| [$25f3: cp   $C3]
 	jne	l_25fc                             	| [$25f5: jr   nz,$25FC] drop boulder
 	move.b	#0x01,d0                        	| [$25f7: ld   a,$01]
@@ -5977,9 +5982,9 @@ l_25fe:
 	lea	l_8F09(a6),a0                      	| [$2608: ld   hl,$8F09]
 	move.b	#0x1C,(a0)                      	| [$260b: ld   (hl),$1C]
 	move.w	#-0x20,d3                          	| [$260d: ld   de,$FFE0]
-	LOAD_RAM_POINTER	ram_pointer_8932(a6),a2             	| [$2610: ld   ix,($8932)]
+	LOAD_RAM_POINTER	rock_tile_video_ram_pointer_8932(a6),a2             	| [$2610: ld   ix,($8932)]
 	add.w	d3,a2                            	| [$2614: add  ix,de]
-	STORE_RAM_POINTER	a2,ram_pointer_8932(a6)            	| [$2616: ld   ($8932),ix]
+	STORE_RAM_POINTER	a2,rock_tile_video_ram_pointer_8932(a6)            	| [$2616: ld   ($8932),ix]
 	
 	addq.w	#1,a0                           	| [$261a: inc  hl]
 	move.b	(a0),d7                         	| [$261b: bit  0,(hl)]
@@ -5988,8 +5993,13 @@ l_25fe:
 	jne	l_2625                             	| [$2620: jr   nz,$2625]
 	LOAD_ROM	0x2768,a0                          	| [$2622: ld   hl,$2768]
 l_2625:
-	move.b	#0x10,(0x40,a2)                 	| [$2625: ld   (ix+$40),$10]
-	move.b	#0x10,(0x41,a2)                 	| [$2629: ld   (ix+$41),$10]
+	* clear leftmost tiles as wolves are pushing the rock to the right
+	move.b	#0x10,d0
+	move.l	a0,-(a7)
+	lea		(0x40,a2),a0                 	| [$2625: ld   (ix+$40),$10]
+	jbsr	osd_w_videoram
+	lea		(0x41,a2),a0                 	| [$2629: ld   (ix+$41),$10]
+	jbsr	osd_w_videoram
 	jbsr	l_0f19                            	| [$262d: call $0F19]
 	jbsr	l_0f11                            	| [$2630: call $0F11]
 	jra	l_2678                             	| [$2633: jr   $2678]
@@ -6000,7 +6010,7 @@ l_2635:
 	jeq	l_2642                             	| [$263d: jr   z,$2642]
 	lea	table_2774,a0                      	| [$263f: ld   hl,table_2774]
 l_2642:
-	LOAD_RAM_POINTER	ram_pointer_8932(a6),a3             	| [$2642: ld   iy,($8932)]
+	LOAD_RAM_POINTER	rock_tile_video_ram_pointer_8932(a6),a3             	| [$2642: ld   iy,($8932)]
 	                         	| [$2646: ld   a,iyh]
 	subq.w	#0x04,a3                        	| [$2648: sub  $04]
 	                            	| [$264a: ld   iyh,a]
@@ -6026,24 +6036,29 @@ l_266b:
 	jeq	l_2678                             	| [$2673: jr   z,$2678]
 	LOAD_ROM	0x276C,a0                          	| [$2675: ld   hl,$276C]
 l_2678:
-	LOAD_RAM_POINTER	ram_pointer_8932(a6),a2             	| [$2678: ld   ix,($8932)]
+	LOAD_RAM_POINTER	rock_tile_video_ram_pointer_8932(a6),a2             	| [$2678: ld   ix,($8932)]
 	move.w	#0xFFC0,d3                          	| [$267c: ld   de,$FFC0]
 l_267f:
-
-	move.l	a0,-(sp)                        	| [$267f: push hl]
-	move.b	(a0)+,d0                         	| [$2680: ld   a,(hl)]
-	move.b	d0,(0x00,a2)                    	| [$2681: ld   (ix+$00),a]
+	* wolf pushing rock tiles
+	movem.l	a0/a1,-(sp)                        	| [$267f: push hl]
+	exg		a0,a1
+	move.l	a2,a0
+	move.b	(a1)+,d0                         	| [$2680: ld   a,(hl)]
+	jbsr	osd_w_videoram                    	| [$2681: ld   (ix+$00),a]
 	                           	| [$2684: inc  hl]
-	move.b	(a0)+,d0                         	| [$2685: ld   a,(hl)]
-	move.b	d0,(0x01,a2)                    	| [$2686: ld   (ix+$01),a]
+	move.b	(a1)+,d0                         	| [$2685: ld   a,(hl)]
+	lea		(0x01,a2),a0                    	| [$2686: ld   (ix+$01),a]
+	jbsr	osd_w_videoram
 	                           	| [$2689: inc  hl]
-	move.b	(a0)+,d0                         	| [$268a: ld   a,(hl)]
-	move.b	d0,(0x20,a2)                    	| [$268b: ld   (ix+$20),a]
+	move.b	(a1)+,d0                         	| [$268a: ld   a,(hl)]
+	lea		(0x20,a2),a0                    	| [$268b: ld   (ix+$20),a]
+	jbsr	osd_w_videoram
 	                           	| [$268e: inc  hl]
-	move.b	(a0),d0                         	| [$268f: ld   a,(hl)]
-	move.b	d0,(0x21,a2)                    	| [$2690: ld   (ix+$21),a]
+	move.b	(a1),d0                         	| [$268f: ld   a,(hl)]
+	lea		(0x21,a2),a0                    	| [$2690: ld   (ix+$21),a]
+	jbsr	osd_w_videoram
 	add.w	d3,a2                            	| [$2693: add  ix,de]
-	move.l	(sp)+,a0                        	| [$2695: pop  hl]
+	movem.l	(sp)+,a0/a1                        	| [$2695: pop  hl]
 	subq.b	#1,d1                           	| [...]
 	jne	l_267f                             	| [$2696: djnz $267F]
 	move.b	tile_or_color_mode_8920(a6),d0                   	| [$2698: ld   a,($8920)]
@@ -6060,8 +6075,9 @@ l_267f:
 	jeq	l_26b3                             	| [$26ae: jr   z,$26B3]
 	LOAD_ROM	0x275E,a1                          	| [$26b0: ld   de,$275E]
 l_26b3:
-	jbsr	update_right_flag_3307                            	| [$26b3: call $3307]
-	move.b	#0x10,(a0)                      	| [$26b6: ld   (hl),$10]
+	jbsr	update_4x4_block_3307                            	| [$26b3: call $3307]
+	move.b	#0x10,d0                      	| [$26b6: ld   (hl),$10]
+	jbsr	osd_w_videoram
 l_26b8:
 	lea	l_8F0A(a6),a0                      	| [$26b8: ld   hl,$8F0A]
 	addq.b	#1,(a0)                         	| [$26bb: inc  (hl)]
@@ -7613,7 +7629,7 @@ l_32f6:
 	addq.b	#1,(a0)                         	| [$3305: inc  (hl)]
 	rts                                    	| [$3306: ret]
 	
-update_right_flag_3307:
+update_4x4_block_3307:
 	move.w	#0x001D,d1                      	| [$3307: ld   bc,$001D] 29
 	movem.w	d1/d2,-(sp)                    	| [$330a: push bc]
 	move.b	#0x03,d1                        	| [$330b: ld   b,$03]
@@ -7626,13 +7642,13 @@ l_330d:
 	jne	l_330d                             	| [$3311: djnz $330D]
 	movem.w	(sp)+,d1/d2                    	| [$3313: pop  bc]
 	add.w	d1,a0                            	| [$3314: add  hl,bc]
-	move.b	l_8F0B(a6),d0                   	| [$3315: ld   a,($8F0B)]
+	move.b	nb_chars_written_8F0B(a6),d0                   	| [$3315: ld   a,($8F0B)]
 	addq.b	#1,d0                           	| [$3318: inc  a]
-	move.b	d0,l_8F0B(a6)                   	| [$3319: ld   ($8F0B),a]
+	move.b	d0,nb_chars_written_8F0B(a6)                   	| [$3319: ld   ($8F0B),a]
 	cmp.b	#0x03,d0                         	| [$331c: cp   $03]
-	jne	update_right_flag_3307                             	| [$331e: jr   nz,$3307]
+	jne	update_4x4_block_3307                             	| [$331e: jr   nz,$3307]
 	clr.b	d0                               	| [$3320: xor  a]
-	move.b	d0,l_8F0B(a6)                   	| [$3321: ld   ($8F0B),a]
+	move.b	d0,nb_chars_written_8F0B(a6)                   	| [$3321: ld   ($8F0B),a]
 	rts                                    	| [$3324: ret]
 
 * < DE: input char data
@@ -7858,14 +7874,13 @@ l_34b0:
 l_34c0:
 	move.b	in_game_sub_state_880A(a6),d0   	| [$34c0: ld   a,(in_game_sub_state_880A)]
 	cmp.b	#0x04,d0                         	| [$34c3: cp   $04]
-	jne	l_34c9                             	| [$34c5: jr   nz,$34C9]
+	jne	write_number_of_remaining_wolves_34c9                             	| [$34c5: jr   nz,$34C9]
 	addq.w	#1,a0                           	| [$34c7: inc  l]
 	addq.b	#1,(a0)                         	| [$34c8: inc  (hl)]
-l_34c9:
-	* write number of wolves in the flag up left
+write_number_of_remaining_wolves_34c9:
 	move.b	nb_wolves_8901(a6),d0           	| [$34c9: ld   a,(nb_wolves_8901)]
 	move.b	d0,d1                           	| [$34cc: ld   b,a]
-	lea	l_8743(a6),a0                      	| [$34cd: ld   hl,$8743]
+	lea	copy_of_nb_wolves_8743(a6),a0                      	| [$34cd: ld   hl,$8743]
 	move.w	#0x0020,d3                      	| [$34d0: ld   de,$0020] 32
 	cmp.b	#0x0A,d0                         	| [$34d3: cp   $0A]
 	jcs	l_34e3                             	| [$34d5: jr   c,$34E3]
@@ -9039,11 +9054,11 @@ wolf_falling_3f7c:
 	rts                                    	| [$3fac: ret  z] [...]
 0:
 	subq.b	#1,(a0)                         	| [$3fad: dec  (hl)]
-	jra	l_34c9                             	| [$3fae: jp   $34C9]
+	jra	write_number_of_remaining_wolves_34c9                             	| [$3fae: jp   $34C9]
 l_3fb1:
 	clr.b	(A0)                             	| [$3fb1: ld   (hl),$00]
 	move.b	#0x01,d0                        	| [$3fb3: ld   a,$01]
-	jbsr	l_34c9                            	| [$3fb5: call $34C9]
+	jbsr	write_number_of_remaining_wolves_34c9                            	| [$3fb5: call $34C9]
 												| [$3fb8: ld   bc,$428B]
 										| [$3fbb: ld   l,$00]
 										| [$3fbd: ld   h,l]
@@ -9587,16 +9602,16 @@ l_4a0b:
 	tst.b	d0                               	| [$4a1a: and  a]
 	jne	l_4a2c                             	| [$4a1b: jr   nz,$4A2C]
 	lea	l_86E3(a6),a0                      	| [$4a1d: ld   hl,$86E3]
-	STORE_RAM_POINTER	a0,ram_pointer_8932(a6)            	| [$4a20: ld   ($8932),hl]
+	STORE_RAM_POINTER	a0,rock_tile_video_ram_pointer_8932(a6)            	| [$4a20: ld   ($8932),hl]
 	
 	lea	l_8682(a6),a0                        	| [$4a23: ld   l,$82]
 	LOAD_ROM	0x2754,a1                          	| [$4a25: ld   de,$2754]
-	jbsr	update_right_flag_3307                            	| [$4a28: call $3307]
+	jbsr	update_4x4_block_3307                            	| [$4a28: call $3307]
 	rts                                    	| [$4a2b: ret]
 l_4a2c:
 	move.b	d0,d1                           	| [$4a2c: ld   b,a]
 	lea	l_86A3(a6),a0                      	| [$4a2d: ld   hl,$86A3]
-	STORE_RAM_POINTER	a0,ram_pointer_8932(a6)            	| [$4a30: ld   ($8932),hl]
+	STORE_RAM_POINTER	a0,rock_tile_video_ram_pointer_8932(a6)            	| [$4a30: ld   ($8932),hl]
 	
 	add.w	#0x20,a0                        	| [$4a33: ld   l,$C3]
 	move.w	#0xFFDF,d3                          	| [$4a35: ld   de,$FFDF]
@@ -9614,7 +9629,7 @@ l_4a38:
 	move.b	#0xBF,D3                        	| [$4a46: ld   e,$BF]
 	add.w	D3,a0                            	| [$4a48: add  hl,de]
 	LOAD_ROM	0x2754,a1                          	| [$4a49: ld   de,$2754]
-	jbsr	update_right_flag_3307                            	| [$4a4c: call $3307]
+	jbsr	update_4x4_block_3307                | [$4a4c: call $3307]
 	rts                                    	| [$4a4f: ret]
 
 
