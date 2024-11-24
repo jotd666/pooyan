@@ -760,11 +760,8 @@ osd_update_sprites:
 is_game_playing:
 	movem.l	d0/a6,-(a7)
 	GET_RAM_START_IN_A6
-	*tst.b	this_is_a_demo_game_823B(a6)
-	*jne		0f
-	
-	moveq	#0,d0
-1:
+	tst.b	game_in_play_8806(a6)
+
 	movem.l	(a7)+,d0/a6
 	rts
 	
@@ -2111,10 +2108,10 @@ handle_keyboard:
 	btst	#4,cheat_flags+3
 	jeq		10f
 	* cheat keys
-	cmp.b	#0x50,d0	| F1 key
+	cmp.b	#0x50,d0	| F1 key: only 1 wolf
 	bne.b	0f
 	move.w	#0x0FF,_custom+color
-	
+	move.b	#1,nb_wolves_8901(a6)
 	st.b	cheat_used
 	
 0:

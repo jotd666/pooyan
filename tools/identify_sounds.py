@@ -1,7 +1,7 @@
 import os,re
 
 known_sounds = {
-0x26: "PLAYER_FALLING",
+0x26: "PLAYER_FALLING",    # done
 0x1C: "GAME_INTRO_TUNE",
 0x1A: "LEVEL_1_TUNE",
 0x54: "",
@@ -13,9 +13,9 @@ known_sounds = {
 0x1B: "LEVEL_2_TUNE",
 0x1E: "LEVEL_1_COMPLETE",
 0x22: "LEVEL_2_COMPLETE",
-0xB: "CREDIT",
-0x11: "SHOT_BOUNCES",
-0x4:"INFLATING_BALLOON",
+0xB: "CREDIT",              # done
+0x11: "SHOT_BOUNCES",     # done
+0x4:"INFLATING_BALLOON",  # done
 0xD:"PLAYER_HIT",
 0xE:"WOLF_PUSHES_ROCK",
 0x5:"BURSTING_BALLOON",

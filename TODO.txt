@@ -1,19 +1,19 @@
-figure out DSW 8807 882F
 
 break on all jump table entrypoints, figure them all out
 
 - double buffering: coded but not working! seems that background restore makes
   sprites disappear???
-- rock-pushing wolves: leftmost wolf tile not cleared
-- sometimes wolf seem to be invincible blocking all attacks (level 1)
+- rock-pushing wolves: leftmost wolf tile not cleared: to test
+- sometimes wolf seem to be invincible blocking all attacks (level 1): check skill level
 - meat seems to miss wolves at times
 - end of level 2: boss stays on the ground
 - crash on game over HH and back-trace
-- rip sounds & music
-- cheat key one wolf
+- wolves should be HW sprites if possible
+- sound doesn't work properly beside credit play
+- continue to rip sounds & music
+- during tutorial, one character is off before "400"
 - still 4 wolves when skipping intro: diff memory with and without intro when game starts
 - demo: wrong timing/data
-- push fire=> adds credit even in-game
 - capture screenshot memory dumps to filter out unused tiles/cluts
   to save A LOT OF memory
 

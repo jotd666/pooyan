@@ -674,14 +674,14 @@ bootup_0092:
 l_0184:
 	st.b	d0                                	| [$0184: ld   a,$FF]
 l_0186:
-	move.b	d0,l_8807(a6)                   	| [$0186: ld   ($8807),a]
+	move.b	d0,start_nb_lives_8807(a6)                   	| [$0186: ld   ($8807),a]
 	jbsr	osd_read_dsw0                    	| [$0189: ld   a,(dsw0_a0e0)]
 	move.b	d0,d1                           	| [$018c: ld   b,a]
 	and.b	#0xF0,d0                         	| [$018d: and  $F0]
 	ror.b	#4,d0                            	| [$018f: rrca] * 4
 	LOAD_ROM	0x0053,a0                      	| [$0193: ld   hl,$0053] 83
 	jbsr	read_byte_a0_plus_d0_0020                            	| [$0196: rst  $20]
-	move.b	d0,l_882F(a6)                   	| [$0197: ld   ($882F),a]
+	move.b	d0,coinage_dsw_882F(a6)                   	| [$0197: ld   ($882F),a]
 	move.b	d1,d0                           	| [$019a: ld   a,b]
 	and.b	#0x0F,d0                         	| [$019b: and  $0F]
 	LOAD_ROM	0x0053,a0                      	| [$019d: ld   hl,$0053] 83
@@ -818,7 +818,7 @@ l_0254:
 	*jbsr	anti_hack_check_208C              	| [$025d: call anti_hack_check_208C]
 	rts                                    	| [$0260: ret]
 l_0261:
-	move.b	l_8806(a6),d0                   	| [$0261: ld   a,($8806)]
+	move.b	game_in_play_8806(a6),d0                   	| [$0261: ld   a,($8806)]
 	                               	| [$0264: and  a]
 	bne.b	0f                               	| [...]
 	rts                                    	| [$0265: ret  z] [...]
@@ -845,7 +845,7 @@ l_0289:
 	bne.b	0f                               	| [...]
 	rts                                    	| [$028b: ret  z] [...]
 0:
-	move.b	l_8806(a6),d0                   	| [$028c: ld   a,($8806)]
+	move.b	game_in_play_8806(a6),d0                   	| [$028c: ld   a,($8806)]
 	ror.b	#1,d0                            	| [$028f: rrca]
 	bcs.b	0f                               	| [...]
 	rts                                    	| [$0290: ret  nc] [...]
@@ -1034,7 +1034,7 @@ l_037d:
 	jne	l_037d                             	| [$0398: djnz $037D]
 	rts                                    	| [$039a: ret]
 l_039B:
-	move.b	l_8806(a6),d0                   	| [$039b: ld   a,($8806)]
+	move.b	game_in_play_8806(a6),d0                   	| [$039b: ld   a,($8806)]
 	                               	| [$039e: and  a]
 	bne.b	0f                               	| [...]
 	rts                                    	| [$039f: ret  z] [...]
@@ -1213,7 +1213,7 @@ l_048c:
 	rts                                    	| [$0495: ret]
 something_on_start_screen_0496:
 	move.b	d0,d2                           	| [$0496: ld   c,a]
-	move.b	l_8806(a6),d0                   	| [$0497: ld   a,($8806)]
+	move.b	game_in_play_8806(a6),d0                   	| [$0497: ld   a,($8806)]
 	ror.b	#1,d0                            	| [$049a: rrca]
 	bcs.b	0f                               	| [...]
 	rts                                    	| [$049b: ret  nc] [...]
@@ -1673,7 +1673,7 @@ title_erase_a_column_072d:
 	                  	| [$0733: ld   a,($8FFF)]
 											| [$0736: cp   $10]
 										| [$0738: jp   nz,$020F]
-	lea	l_8806(a6),a0                      	| [$073b: ld   hl,$8806]
+	lea	game_in_play_8806(a6),a0                      	| [$073b: ld   hl,$8806]
 	clr.b	(a0)                             	| [$073e: ld   (hl),$00]
 	subq.w	#1,a0                           	| [$0740: dec  hl]
 	move.b	#0x01,(a0)                      	| [$0741: ld   (hl),$01]
@@ -1761,7 +1761,7 @@ l_08b3:
 															| [$08db: ld   ($89FB),a]
 l_08de:
 	clr.b	d0                               	| [$08de: xor  a]
-	move.b	d0,l_8806(a6)                   	| [$08df: ld   ($8806),a]
+	move.b	d0,game_in_play_8806(a6)                   	| [$08df: ld   ($8806),a]
 	jbsr	l_02b9                            	| [$08e2: call $02B9]
 	jbsr	l_1d0d                            	| [$08e5: call $1D0D]
 	rts                                    	| [$08e8: ret]
@@ -2173,7 +2173,7 @@ l_0b4b:
 	jra	init_play_0E00                     	| [$0ba8: jp   init_play_0E00]
 
 l_0bb5:
-	move.b	l_8806(a6),d0                   	| [$0bb5: ld   a,($8806)]
+	move.b	game_in_play_8806(a6),d0                   	| [$0bb5: ld   a,($8806)]
 	                               	| [$0bb8: and  a]
 	jne	l_0bfc                             	| [$0bb9: jr   nz,$0BFC]
 	move.b	game_state_8805(a6),d0          	| [$0bbb: ld   a,(game_state_8805)]
@@ -2296,7 +2296,7 @@ init_clear_screen_as_first_credit_inserted_0c5c:
 	clr.b	d0                               	| [$0c5c: xor  a]
 	move.b	d0,l_8819(a6)                   	| [$0c5d: ld   ($8819),a]
 	                       	| [$0c60: ld   ($A028),a]
-	move.b	d0,l_8806(a6)                   	| [$0c63: ld   ($8806),a]
+	move.b	d0,game_in_play_8806(a6)                   	| [$0c63: ld   ($8806),a]
 	lea	l_8442(a6),a0                      	| [$0c66: ld   hl,$8442]
 	STORE_RAM_POINTER	a0,video_ram_pointer_880b(a6)            	| [$0c69: ld   ($880B),hl]
 	
@@ -2497,7 +2497,7 @@ l_0dab:
 	move.b	#0x03,d0                        	| [$0db5: ld   a,$03]
 	move.b	d0,game_state_8805(a6)          	| [$0db7: ld   (game_state_8805),a]
 	move.b	#0x01,d0                        	| [$0dba: ld   a,$01]
-	move.b	d0,l_8806(a6)                   	| [$0dbc: ld   ($8806),a]
+	move.b	d0,game_in_play_8806(a6)                   	| [$0dbc: ld   ($8806),a]
 	move.b	d0,screen_straight_881F(a6)                   	| [$0dbf: ld   ($881F),a]
 	move.w	#0x0604,d3                          	| [$0dc2: ld   de,$0604]
 	jbsr	update_88A0_0038                            	| [$0dc5: rst  $38]
@@ -2549,7 +2549,7 @@ init_play_0E00:
 * clear block 8900-BF
 	move.b	#0xBF,d1                        	| [$0e13: ld   b,$BF]
 	jbsr	fill_area_0010                            	| [$0e15: rst  $10]
-	move.b	l_8807(a6),d0                   	| [$0e16: ld   a,($8807)]
+	move.b	start_nb_lives_8807(a6),d0                   	| [$0e16: ld   a,($8807)]
 	move.b	d0,l_8948(a6)                   	| [$0e19: ld   ($8948),a]
 	move.b	d0,l_8988(a6)                   	| [$0e1c: ld   ($8988),a]
 	move.b	#0x20,d0                        	| [$0e1f: ld   a,$20]
@@ -2559,7 +2559,7 @@ init_play_0E00:
 	move.b	d0,l_8940(a6)                   	| [$0e2a: ld   ($8940),a]
 	move.b	d0,play_variables_player_2_8980(a6)                   	| [$0e2d: ld   ($8980),a]
 	jbsr	l_02e3                            	| [$0e30: call $02E3]
-	move.b	l_8806(a6),d0                   	| [$0e33: ld   a,($8806)]
+	move.b	game_in_play_8806(a6),d0                   	| [$0e33: ld   a,($8806)]
 	                               	| [$0e36: and  a]
 	bne.b	0f                               	| [...]
 	rts                                    	| [$0e37: ret  z] [...]
@@ -2594,7 +2594,7 @@ l_0e54:
 l_0e63:
 	rts                                    	| [$0e63: ret]
 l_0e64:
-	lea	l_8A41(a6),a1                      	| [$0e64: ld   de,$8A41]
+	lea	sound_slot_index_8A41(a6),a1                      	| [$0e64: ld   de,$8A41]
 	move.b	(a1),d0                         	| [$0e67: ld   a,(de)]
 	move.b	d0,d6                           	| [$0e68: ld   l,a]
 	move.b	#0x8A,d5                        	| [$0e69: ld   h,$8A]
@@ -2606,26 +2606,26 @@ l_0e64:
 0:
 	move.b	d0,d1                           	| [$0e6f: ld   b,a]
 	move.b	demo_sounds_on_8821(a6),d0                   	| [$0e70: ld   a,($8821)]
-	and.b	#0x01,d0                         	| [$0e73: and  $01]
+											| [$0e73: and  $01]
 	jne	l_0e7d                             	| [$0e75: jr   nz,$0E7D]
-	move.b	l_8806(a6),d0                   	| [$0e77: ld   a,($8806)]
+	move.b	game_in_play_8806(a6),d0                   	| [$0e77: ld   a,($8806)]
 	                               	| [$0e7a: and  a]
 	jeq	l_0e81                             	| [$0e7b: jr   z,$0E81]
 l_0e7d:
 	move.b	d1,d0                           	| [$0e7d: ld   a,b]
 	jbsr	play_sound_0E8F                   	| [$0e7e: call play_sound_0E8F]
 l_0e81:
-	move.b	#0xFF,(a0)                      	| [$0e81: ld   (hl),$FF]
+	st.b	(a0)                      	| [$0e81: ld   (hl),$FF]
 	LOAD_D5D6_FROM_A0_RAM
 	move.b	d6,d0                           	| [$0e83: ld   a,l]
-	cmp.b	#0x5E,d0                         	| [$0e84: cp   $5E]
-	jeq	l_0e8b                             	| [$0e86: jr   z,$0E8B]
+	cmp.b	#0x5E,d0                         	| [$0e84: cp   $5E] sound_slot_index_8A41
+	jeq	reset_sount_slot_0e8b                             	| [$0e86: jr   z,$0E8B]
 	addq.b	#1,d0                           	| [$0e88: inc  a]
 	move.b	d0,(a1)                         	| [$0e89: ld   (de),a]
 	rts                                    	| [$0e8a: ret]
-l_0e8b:
-	move.b	#0x43,d0                        	| [$0e8b: ld   a,$43]
-	move.b	d0,(a1)                         	| [$0e8d: ld   (de),a]
+reset_sount_slot_0e8b:
+	move.b	#0x43,d0                        	| [$0e8b: ld   a,$43] sound_slot_index_8A41
+	move.b	d0,(a1)                         	| [$0e8d: ld   (de),a] 
 	rts                                    	| [$0e8e: ret]
 
 play_sound_0E8F:
@@ -2646,7 +2646,7 @@ play_sound_0E8F:
 	
 l_0ea2:
 	move.b	d0,l_8D20(a6)                   	| [$0ea2: ld   ($8D20),a]
-	move.b	l_8806(a6),d0                   	| [$0ea5: ld   a,($8806)]
+	move.b	game_in_play_8806(a6),d0                   	| [$0ea5: ld   a,($8806)]
 	                               	| [$0ea8: and  a]
 	jne	l_0eb0                             	| [$0ea9: jr   nz,$0EB0]
 	tst.b	is_bonus_stage_8F50(a6)                   	| [$0eab: ld   a,($8F50)]
@@ -2656,7 +2656,7 @@ l_0ea2:
 0:
 l_0eb0:
 	move.b	l_8D20(a6),d0                   	| [$0eb0: ld   a,($8D20)]
-l_0eb3:
+queue_sound_0eb3:
 	                    	| [$0eb3: push bc]
 	movem.w	d1/d3/d4,-(sp)                    	| [$0eb4: push de]
 	move.l	a1,-(sp)                        	| [$0eb4: push de]
@@ -2685,18 +2685,18 @@ l_0ecb:
 	rts                                    	| [$0ece: ret]
 l_0ecf:
 	clr.b	d0                               	| [$0ecf: xor  a]
-	jra	l_0eb3                             	| [$0ed0: jr   $0EB3]
+	jra	queue_sound_0eb3                             	| [$0ed0: jr   $0EB3]
 l_0ed2:
 	move.b	#0x01,d0                        	| [$0ed2: ld   a,$01]
 	jra	l_0ea2                             	| [$0ed4: jr   $0EA2]
 l_0ed6:
 	move.b	#0x02,d0                        	| [$0ed6: ld   a,$02]
-	jra	l_0eb3                             	| [$0ed8: jr   $0EB3]
+	jra	queue_sound_0eb3                             	| [$0ed8: jr   $0EB3]
 l_0eda:
 	move.b	#0x82,d0                        	| [$0eda: ld   a,$82]
-	jbsr	l_0eb3                            	| [$0edc: call $0EB3]
+	jbsr	queue_sound_0eb3                            	| [$0edc: call $0EB3]
 	move.b	#0x03,d0                        	| [$0edf: ld   a,$03]
-	jra	l_0eb3                             	| [$0ee1: jr   $0EB3]
+	jra	queue_sound_0eb3                             	| [$0ee1: jr   $0EB3]
 l_0ee3:
 	move.b	l_8F24(a6),d0                   	| [$0ee3: ld   a,($8F24)]
 	                               	| [$0ee6: and  a]
@@ -2712,7 +2712,7 @@ l_0ee3:
 	jra	l_0ea2                             	| [$0eef: jr   $0EA2]
 l_0ef1:
 	move.b	#0x05,d0                        	| [$0ef1: ld   a,$05]
-	jra	l_0eb3                             	| [$0ef3: jr   $0EB3]
+	jra	queue_sound_0eb3                             	| [$0ef3: jr   $0EB3]
 l_0ef5:
 	move.b	#0x06,d0                        	| [$0ef5: ld   a,$06]
 	jra	l_0ea2                             	| [$0ef7: jr   $0EA2]
@@ -2724,7 +2724,7 @@ l_0efd:
 	jra	l_0ea2                             	| [$0eff: jr   $0EA2]
 l_0f01:
 	move.b	#0x09,d0                        	| [$0f01: ld   a,$09]
-	jra	l_0eb3                             	| [$0f03: jr   $0EB3]
+	jra	queue_sound_0eb3                             	| [$0f03: jr   $0EB3]
 l_0f05:
 	move.b	#0x0A,d0                        	| [$0f05: ld   a,$0A]
 	jra	l_0ea2                             	| [$0f07: jr   $0EA2]
@@ -2772,23 +2772,23 @@ l_0f49:
 	jra	l_0ea2                             	| [$0f4b: jp   $0EA2]
 l_0f4e:
 	move.b	#0x82,d0                        	| [$0f4e: ld   a,$82]
-	jbsr	l_0eb3                            	| [$0f50: call $0EB3]
+	jbsr	queue_sound_0eb3                            	| [$0f50: call $0EB3]
 	move.b	#0x95,d0                        	| [$0f53: ld   a,$95]
-	jra	l_0eb3                             	| [$0f55: jp   $0EB3]
+	jra	queue_sound_0eb3                             	| [$0f55: jp   $0EB3]
 l_0f58:
 	move.b	#0x96,d0                        	| [$0f58: ld   a,$96]
 	jbsr	l_0ea2                            	| [$0f5a: call $0EA2]
 	move.b	#0x97,d0                        	| [$0f5d: ld   a,$97]
 	jbsr	l_0ea2                            	| [$0f5f: call $0EA2]
 	move.b	#0x18,d0                        	| [$0f62: ld   a,$18]
-	jbsr	l_0eb3                            	| [$0f64: call $0EB3]
+	jbsr	queue_sound_0eb3                            	| [$0f64: call $0EB3]
 	move.b	#0x15,d0                        	| [$0f67: ld   a,$15]
-	jra	l_0eb3                             	| [$0f69: jp   $0EB3]
+	jra	queue_sound_0eb3                             	| [$0f69: jp   $0EB3]
 l_0f6c:
 	move.b	#0x19,d0                        	| [$0f6c: ld   a,$19]
-	jbsr	l_0eb3                            	| [$0f6e: call $0EB3]
+	jbsr	queue_sound_0eb3                            	| [$0f6e: call $0EB3]
 	move.b	#0x15,d0                        	| [$0f71: ld   a,$15]
-	jra	l_0eb3                             	| [$0f73: jp   $0EB3]
+	jra	queue_sound_0eb3                             	| [$0f73: jp   $0EB3]
 l_0f76:
 	move.b	l_8D68(a6),d0                   	| [$0f76: ld   a,($8D68)]
 	or.b	d0,d0                             	| [$0f79: or   a]
@@ -2825,9 +2825,9 @@ l_0fad:
 	jra	l_0fc3                             	| [$0faf: jp   $0FC3]
 l_0fb2:
 	move.b	#0x27,d0                        	| [$0fb2: ld   a,$27]
-	jbsr	l_0eb3                            	| [$0fb4: call $0EB3]
+	jbsr	queue_sound_0eb3                            	| [$0fb4: call $0EB3]
 	move.b	#0x15,d0                        	| [$0fb7: ld   a,$15]
-	jra	l_0eb3                             	| [$0fb9: jp   $0EB3]
+	jra	queue_sound_0eb3                             	| [$0fb9: jp   $0EB3]
 l_0fbc:
 	move.b	#0x28,d0                        	| [$0fbc: ld   a,$28]
 	jra	l_0fc3                             	| [$0fbe: jp   $0FC3]
@@ -3613,7 +3613,7 @@ in_game_159B:
 	.long	l_71b9
 
 continue_15D1:
-	move.b	l_8806(a6),d0                   	| [$15d1: ld   a,($8806)]
+	move.b	game_in_play_8806(a6),d0                   	| [$15d1: ld   a,($8806)]
 	                               	| [$15d4: and  a]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$15d5: ret  nz] [...]
@@ -3795,7 +3795,7 @@ l_16f3:
 	move.b	l_8904(a6),d0                   	| [$16f3: ld   a,($8904)]
 	                               	| [$16f6: and  a]
 	jne	l_1715                             	| [$16f7: jr   nz,$1715]
-	move.b	l_8806(a6),d0                   	| [$16f9: ld   a,($8806)]
+	move.b	game_in_play_8806(a6),d0                   	| [$16f9: ld   a,($8806)]
 	                               	| [$16fc: and  a]
 	jeq	l_1715                             	| [$16fd: jr   z,$1715]
 	move.b	round_number_8907(a6),d0                   	| [$16ff: ld   a,($8907)]
@@ -3867,7 +3867,7 @@ l_1770:
 	move.b	l_8904(a6),d0                   	| [$1779: ld   a,($8904)]
 	                               	| [$177c: and  a]
 	jne	l_17a1                             	| [$177d: jr   nz,$17A1]
-	move.b	l_8806(a6),d0                   	| [$177f: ld   a,($8806)]
+	move.b	game_in_play_8806(a6),d0                   	| [$177f: ld   a,($8806)]
 	                               	| [$1782: and  a]
 	jeq	l_1798                             	| [$1783: jr   z,$1798]
 	move.b	round_number_8907(a6),d0                   	| [$1785: ld   a,($8907)]
@@ -3942,7 +3942,7 @@ l_1808:
 	move.b	is_bonus_stage_8F50(a6),d0                   	| [$1811: ld   a,($8F50)]
 	                               	| [$1814: and  a]
 	jne	l_1848                             	| [$1815: jr   nz,$1848]
-	move.b	l_8806(a6),d0                   	| [$1817: ld   a,($8806)]
+	move.b	game_in_play_8806(a6),d0                   	| [$1817: ld   a,($8806)]
 	                               	| [$181a: and  a]
 	jne	l_1829                             	| [$181b: jr   nz,$1829]
 	move.b	l_8F3F(a6),d0                   	| [$181d: ld   a,($8F3F)]
@@ -4203,7 +4203,7 @@ l_19bc:
 	jbsr	ldir                              	| [$19c7: ldir]
 	rts                                    	| [$19c9: ret]
 l_19ca:
-	move.b	l_8806(a6),d0                   	| [$19ca: ld   a,($8806)]
+	move.b	game_in_play_8806(a6),d0                   	| [$19ca: ld   a,($8806)]
 	                               	| [$19cd: and  a]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$19ce: ret  nz] [...]
@@ -4256,7 +4256,7 @@ l_1a15:
 	move.b	(a0),d0                         	| [$1a1c: ld   a,(hl)]
 	and.b	#0x01,d0                         	| [$1a1d: and  $01]
 	jne	l_1a47                             	| [$1a1f: jr   nz,$1A47]
-	move.b	l_8806(a6),d0                   	| [$1a21: ld   a,($8806)]
+	move.b	game_in_play_8806(a6),d0                   	| [$1a21: ld   a,($8806)]
 	                               	| [$1a24: and  a]
 	jeq	l_1d3c                             	| [$1a25: jp   z,$1D3C]
 	move.b	is_bonus_stage_8F50(a6),d0                   	| [$1a28: ld   a,($8F50)]
@@ -4299,7 +4299,7 @@ l_1a64:
 	jbsr	l_2527                            	| [$1a6d: call $2527]
 	clr.b	d0                               	| [$1a70: xor  a]
 	move.b	d0,l_89E3(a6)                   	| [$1a71: ld   ($89E3),a]
-	move.b	l_8806(a6),d0                   	| [$1a74: ld   a,($8806)]
+	move.b	game_in_play_8806(a6),d0                   	| [$1a74: ld   a,($8806)]
 	                               	| [$1a77: and  a]
 	jeq	l_1d3c                             	| [$1a78: jp   z,$1D3C]
 	lea	nb_lives_8908(a6),a0               	| [$1a7b: ld   hl,nb_lives_8908]
@@ -4723,7 +4723,7 @@ l_1d15:
 	                               	| [$1d29: and  a]
 	jeq	l_1d3c                             	| [$1d2a: jr   z,$1D3C]
 	clr.b	d0                               	| [$1d2c: xor  a]
-	move.b	d0,l_8806(a6)                   	| [$1d2d: ld   ($8806),a]
+	move.b	d0,game_in_play_8806(a6)                   	| [$1d2d: ld   ($8806),a]
 	move.b	d0,in_game_sub_state_880A(a6)   	| [$1d30: ld   (in_game_sub_state_880A),a]
 	addq.b	#1,d0                           	| [$1d33: inc  a]
 	move.b	d0,screen_straight_881F(a6)                   	| [$1d34: ld   ($881F),a]
@@ -4732,7 +4732,7 @@ l_1d15:
 	rts                                    	| [$1d3b: ret]
 l_1d3c:
 	clr.b	d0                               	| [$1d3c: xor  a]
-	move.b	d0,l_8806(a6)                   	| [$1d3d: ld   ($8806),a]
+	move.b	d0,game_in_play_8806(a6)                   	| [$1d3d: ld   ($8806),a]
 	move.b	d0,in_game_sub_state_880A(a6)   	| [$1d40: ld   (in_game_sub_state_880A),a]
 	move.b	d0,current_player_is_p2_880D(a6)                   	| [$1d43: ld   ($880D),a]
 	move.b	d0,two_player_mode_880E(a6)                   	| [$1d46: ld   ($880E),a]
@@ -4827,7 +4827,7 @@ l_1dd3:
 	tst.b	l_8904(a6)                   	| [$1dd3: ld   a,($8904)]
 	                               	| [$1dd6: and  a]
 	jne	l_1deb                             	| [$1dda: jr   nz,$1DEB]
-	tst.b	l_8806(a6)                   	| [$1ddc: ld   a,($8806)]
+	tst.b	game_in_play_8806(a6)                   	| [$1ddc: ld   a,($8806)]
 	                               	       | [$1ddf: and  a]
 	jeq	l_1deb                             	| [$1de0: jr   z,$1DEB]
 	move.b	(a0),d0                         	| [$1de2: ld   a,(hl)]
@@ -4889,7 +4889,7 @@ l_1e55:
 	                               	| [$1e5f: and  a]
 	lea	player_bow_structure_8A80(a6),a2      	| [$1e60: ld   ix,player_bow_structure_8A80]
 	* failed test: cannot move!                             	| [$1e64: jr   nz,$1EA2]
-	move.b	l_8806(a6),d0                   	| [$1e66: ld   a,($8806)]
+	move.b	game_in_play_8806(a6),d0                   	| [$1e66: ld   a,($8806)]
 	                               	| [$1e69: and  a]
 	bne.b	0f                               	| [...]
 	rts                                    	| [$1e6a: ret  z] [...]
@@ -6148,7 +6148,7 @@ l_27b2:
 	addq.b	#1,(a0)                         	| [$27c7: inc  (hl)]
 	move.b	#0x08,d0                        	| [$27c8: ld   a,$08]
 	move.b	d0,l_892F(a6)                   	| [$27ca: ld   ($892F),a]
-	move.b	l_8806(a6),d0                   	| [$27cd: ld   a,($8806)]
+	move.b	game_in_play_8806(a6),d0                   	| [$27cd: ld   a,($8806)]
 	                               	| [$27d0: and  a]
 	jne	l_27e1                             	| [$27d1: jr   nz,$27E1]
 	move.b	is_bonus_stage_8F50(a6),d0                   	| [$27d3: ld   a,($8F50)]
@@ -10496,7 +10496,7 @@ l_59e8:
 	bne.b	0f                               	| [...]
 	rts                                    	| [$59ed: ret  z] [...]
 0:
-	move.b	l_882F(a6),d0                   	| [$59ee: ld   a,($882F)]
+	move.b	coinage_dsw_882F(a6),d0                   	| [$59ee: ld   a,($882F)]
 	cmp.b	#0x0F,d0                         	| [$59f1: cp   $0F]
 	bne.b	0f                               	| [...]
 	rts                                    	| [$59f3: ret  z] [...]
@@ -13060,7 +13060,7 @@ l_6b2e:
 	jra	write_4x4_tile_block_3325         	| [$6b37: call write_4x4_tile_block_3325]
 	                                    	| [$6b3a: ret]
 l_6b3b:
-	move.b	l_8806(a6),d0                   	| [$6b3b: ld   a,($8806)]
+	move.b	game_in_play_8806(a6),d0                   	| [$6b3b: ld   a,($8806)]
 	                               	| [$6b3e: and  a]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$6b3f: ret  nz] [...]
@@ -13290,7 +13290,7 @@ l_6ca5:
 	addq	#4,a7                        	| [$6ca9: pop  af]
 	rts                                    	| [$6caa: ret]
 l_6cab:
-	move.b	l_8806(a6),d0                   	| [$6cab: ld   a,($8806)]
+	move.b	game_in_play_8806(a6),d0                   	| [$6cab: ld   a,($8806)]
 	                               	| [$6cae: and  a]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$6caf: ret  nz] [...]
@@ -15030,7 +15030,7 @@ l_7900:
 	addq.w	#2,a4                           	| [$790f: inc  c]
 	*in   a,($0E)
 l_7912:
-	move.b	l_8806(a6),d0                   	| [$7912: ld   a,($8806)]
+	move.b	game_in_play_8806(a6),d0                   	| [$7912: ld   a,($8806)]
 	                               	| [$7915: and  a]
 	bne.b	0f                               	| [...]
 	rts                                    	| [$7916: ret  z] [...]

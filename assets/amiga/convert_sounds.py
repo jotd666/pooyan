@@ -31,7 +31,10 @@ def convert():
     sound_dict = {
 
     "CREDIT_SND"               :{"index":0xB,"channel":0,"sample_rate":hq_sample_rate,"priority":20},
-
+    "PLAYER_FALLING_SND"       :{"index":0x26,"channel":3,"sample_rate":hq_sample_rate,"priority":20},
+    "SHOT_BOUNCES_SND"             :{"index":0x11,"channel":2,"sample_rate":hq_sample_rate,"priority":5},
+    "SHOOTING_ARROW_SND"             :{"index":0x1,"channel":2,"sample_rate":hq_sample_rate,"priority":5},
+    "INFLATING_BALLOON_SND"             :{"index":0x4,"channel":3,"sample_rate":hq_sample_rate,"priority":5},
     #"MAIN_THEME_SND"                :{"index":26,"pattern":3,"volume":13,'loops':True},
 
 
