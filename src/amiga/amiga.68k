@@ -2489,26 +2489,20 @@ intreq_block_game:
 
 	* purple 
 
-	.word	0xEC01,0xFFFE
+
+	* pal limit
+    .word  0xFFDF,0xFFFE       | PAL wait
+	.word	0x1001,0xFFFE
 
 	| no bobs from now on, get a LOT of drawing time
 	.word	 intreq,0x8010
-
-	* pal limit
-    .word  0xFFCF,0xFFFE       | PAL wait
 
 	* black color sprites
 	*DECL_COLORS	16,16
 
 
-
 	
-    *.word  0x1401,0xFFFE		| wait more lines to set to black (big holes!)
-	
-    *.word   0x1C01,0xFFFE
-	
- 	*.word	beampos,0xFFFE
-    .long    -2					
+     .long    -2					
 	.ascii	"ENDCPLST"
 
 	* aligning on 8 bytes so .align will work

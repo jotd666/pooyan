@@ -1,10 +1,10 @@
 
 break on all jump table entrypoints, figure them all out
 
-- double buffering: coded but not working! seems that background restore makes
-  sprites disappear???
-- rock-pushing wolves: leftmost wolf tile not cleared: to test
-- sometimes wolf seem to be invincible blocking all attacks (level 1): check skill level
+- rock-pushing wolves: leftmost wolf tile not cleared: to test (now: crashing when wolf pushes)
+- add cheat keys whd menu
+- sometimes wolf seem to be invincible blocking all attacks (level 1): if attack blocked
+  once, then arrow bounces on balloon even if shield not up.
 - meat seems to miss wolves at times
 - end of level 2: boss stays on the ground
 - crash on game over HH and back-trace
@@ -13,7 +13,7 @@ break on all jump table entrypoints, figure them all out
 - continue to rip sounds & music
 - during tutorial, one character is off before "400"
 - still 4 wolves when skipping intro: diff memory with and without intro when game starts
-- demo: wrong timing/data
+- demo: wrong timing/data (? but still seems coherent)
 - capture screenshot memory dumps to filter out unused tiles/cluts
   to save A LOT OF memory
 

@@ -6038,10 +6038,9 @@ l_266b:
 l_2678:
 	LOAD_RAM_POINTER	rock_tile_video_ram_pointer_8932(a6),a2             	| [$2678: ld   ix,($8932)]
 	move.w	#0xFFC0,d3                          	| [$267c: ld   de,$FFC0]
+	move.l		a0,a1			| will be taking data from a1, as osd_w_videoram needs a0
 l_267f:
 	* wolf pushing rock tiles
-	movem.l	a0/a1,-(sp)                        	| [$267f: push hl]
-	exg		a0,a1
 	move.l	a2,a0
 	move.b	(a1)+,d0                         	| [$2680: ld   a,(hl)]
 	jbsr	osd_w_videoram                    	| [$2681: ld   (ix+$00),a]
@@ -6058,7 +6057,7 @@ l_267f:
 	lea		(0x21,a2),a0                    	| [$2690: ld   (ix+$21),a]
 	jbsr	osd_w_videoram
 	add.w	d3,a2                            	| [$2693: add  ix,de]
-	movem.l	(sp)+,a0/a1                        	| [$2695: pop  hl]
+	exg		a0,a1
 	subq.b	#1,d1                           	| [...]
 	jne	l_267f                             	| [$2696: djnz $267F]
 	move.b	tile_or_color_mode_8920(a6),d0                   	| [$2698: ld   a,($8920)]
