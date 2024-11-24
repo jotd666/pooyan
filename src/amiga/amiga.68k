@@ -1540,14 +1540,17 @@ osd_w_colorram:
 	movem.l	d0-d7/a0-a5,-(a7)
 	move.l	a0,d7		| save address
 	sub.l	a6,d7
-	jcs		0f
-	sub.w	#SCREEN_COLOR_ADDRESS-0x8000,d7
-	bcs.b	0f
 	.ifndef	RELEASE
+	jmi		2f
+	.endif
+	* no need as screen color address is 0x8000
+	*sub.w	#SCREEN_COLOR_ADDRESS-0x8000,d7
+	.ifndef	RELEASE
+	*bmi.b	2f
 	cmp.w	#0x400,d7
 	bcs.b	1f
 
-
+2:
 	* should not happen
 	add.w	#SCREEN_COLOR_ADDRESS-0x8000,d7
 	lea		write_colorram_out_of_range_error(pc),a0
@@ -1579,14 +1582,16 @@ osd_w_videoram:
 	movem.l	d0-d7/a0-a4,-(a7)
 	move.l	a0,d7		| save address
 	sub.l	a6,d7
-	jcs		0f
-	sub.w	#SCREEN_TILE_ADDRESS-0x8000,d7
-	bcs.b	0f
 	.ifndef	RELEASE
+	jmi		2f
+	.endif
+	sub.w	#SCREEN_TILE_ADDRESS-0x8000,d7
+	.ifndef	RELEASE
+	bmi.b	2f
 	cmp.w	#0x400,d7
 	bcs.b	1f
 
-
+2:
 	* should not happen
 	add.w	#SCREEN_TILE_ADDRESS,d7
 	lea		write_videoram_out_of_range_error(pc),a0

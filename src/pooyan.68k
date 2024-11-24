@@ -5032,6 +5032,8 @@ l_1f4e:
 	move.b	d2,d0                           	| [$1f4e: ld   a,c]
 	                               	| [$1f4f: and  a]
 	jne	l_1f7a                             	| [$1f50: jr   nz,$1F7A]
+
+	* DEBUG HERE! pb with D0 => 1FDA not loaded
 	move.b	round_number_8907(a6),d0                   	| [$1f52: ld   a,($8907)]
 	addq.b	#0x01,d0                        	| [$1f55: add  a,$01]
 	move.b	d0,d1                           	| [$1f57: ld   b,a]
