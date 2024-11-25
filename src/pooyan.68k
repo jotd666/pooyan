@@ -1528,7 +1528,7 @@ rom_check_0644:
 
 
     	| [$0667: ld   a,$01]
-                  	| [$0669: ld   ($8DF8),a]
+                  	| [$0669: ld   ($8DF8),a] checksum_failed_8DF8
 	rts                                    	| [$066c: ret]
 
 pooyan_irq:
@@ -3003,7 +3003,7 @@ l_10ea:
 	                               	| [$10f4: and  a]
 	jeq	l_1111                             	| [$10f5: jr   z,$1111]
 	move.b	d0,d1                           	| [$10f7: ld   b,a]
-	lea	l_8652+0x10(a6),a0                        	| [$10f8: ld   l,$62]
+	lea	l_8F62(a6),a0                        	| [$10f8: ld   l,$62]
 	add.b	(a0),d0                          	| [$10fa: add  a,(hl)]
 	move.b	d0,(a0)                         	| [$10fb: ld   (hl),a]
 	asl.b	#1,d1                            	| [$10fc: sla  b]
@@ -3081,7 +3081,7 @@ l_114f:
 	rts                                    	| [$1157: ret]
 l_1158:
 	clr.b	d0                               	| [$1158: xor  a]
-	move.b	#0x5B,d6                        	| [$1159: ld   l,$5B]
+	lea	l_8F5B(a6),a0                        	| [$1159: ld   l,$5B]
 	move.b	#0x09,d1                        	| [$115b: ld   b,$09]
 	jbsr	fill_area_0010                            	| [$115d: rst  $10]
 	jbsr	l_0ecf                            	| [$115e: call $0ECF]
@@ -4252,6 +4252,7 @@ l_1a15:
 	lea	nb_wolves_8901(a6),a0              	| [$1a15: ld   hl,nb_wolves_8901]
 	move.b	d2,(a0)                         	| [$1a18: ld   (hl),c]
 	lea	round_number_8907(a6),a0                        	| [$1a19: ld   l,$07]
+	move.b	#0x89,d5
 	addq.b	#1,(a0)                         	| [$1a1b: inc  (hl)]
 	move.b	(a0),d0                         	| [$1a1c: ld   a,(hl)]
 	and.b	#0x01,d0                         	| [$1a1d: and  $01]
@@ -4274,11 +4275,15 @@ l_1a3e:
 	lea	rom_pointer_8f45(a6),a0                      	| [$1a3f: ld   hl,$8F45]
 	move.b	#0x10,d1                        	| [$1a42: ld   b,$10]
 	jbsr	fill_area_0010                            	| [$1a44: rst  $10]
-	move.b	#0x81,d5                        	| [$1a45: ld   h,$81]
+	* separate code to write in color ram (8104) or ram (8904)
+	lea		l_8000+0x104,a0                        	| [$1a45: ld   h,$81]
+	moveq	#0,d0
+	jbsr	osd_w_colorram
+	jra		0f
 l_1a47:
-	move.b	#0x04,D6                        	| [$1a47: ld   l,$04]
-	LOAD_A0_FROM_D5D6
+	lea		l_8904(a6),a0                        	| [$1a47: ld   l,$04]
 	clr.b	(a0)                             	| [$1a49: ld   (hl),$00]
+0:
 	lea	l_8940(a6),a1                      	| [$1a4b: ld   de,$8940]
 	lea	play_variables_player_1_8900(a6),a0 	| [$1a4e: ld   hl,play_variables_player_1_8900]
 	move.w	#0x003F,d1                      	| [$1a51: ld   bc,$003F] 63
@@ -5190,18 +5195,18 @@ l_20d4:
 	jeq	l_20e8                             	| [$20db: jr   z,$20E8]
 	clr.b	(a0)                             	| [$20dd: ld   (hl),$00]
 											| [$20df: ld   b,l]
-	move.b	l_8FF8(a6),d0                        	| [$20e0: ld   l,$F8]
-	
-	move.b	(a0)+,d0                         	| [$20e2: ld   a,(hl)]
-	                           	| [$20e3: inc  hl]
-	and.b	(a0),d0                          	| [$20e4: and  (hl)]
-	jne	l_20ea                             	| [$20e5: jr   nz,$20EA]
-	subq	#1,a0                           	| [$20e7: ld   l,b]
+								| [$20e0: ld   l,$F8] skipped checksum failed test 8DF8!
+
+                         	| [$20e2: ld   a,(hl)]
+           	                | [$20e3: inc  hl]
+                         	| [$20e4: and  (hl)]
+                       	| [$20e5: jr   nz,$20EA]
+                        	| [$20e7: ld   l,b]
 l_20e8:
-	move.b	(a0),d0                         	| [$20e8: ld   a,(hl)]
+                        	| [$20e8: ld   a,(hl)]
 	                               	| [$20e9: and  a]
 l_20ea:
-	jne	l_241e                             	| [$20ea: jp   nz,$241E]
+	                             	| [$20ea: jp   nz,$241E] bogus jump!
 	lea	player_bow_structure_8A80(a6),a2      	| [$20ed: ld   ix,player_bow_structure_8A80]
 	jbsr	l_2329                            	| [$20f1: call $2329]
 	jbsr	l_2101                            	| [$20f4: call $2101]
@@ -5719,9 +5724,9 @@ jump_table_2436:
 	.long	player_hit_lying_on_groundl_24fb
 
 init_player_hit_2442:
-											| [$2442: ld   hl,$89E8]
+											| [$2442: ld   hl,$89E8] checksum_failed_89e8
 											| [$2445: ld   a,(hl)]
-											| [$2446: ld   l,$EF]
+											| [$2446: ld   l,$EF] checksum_failed_89ef
 												| [$2448: or   (hl)]
 											| [...]
 											| [$2449: ret  nz] [...]
@@ -5816,7 +5821,7 @@ player_hit_lying_on_groundl_24fb:
 	beq.b	0f                               	| [...]
 	rts                                    	| [$24fe: ret  nz] [...]
 0:
-	                      	| [$24ff: ld   hl,$882B]
+	                      	| [$24ff: ld   hl,$882B]  checksum_failed_882B
 	         	| [$2502: ld   a,(hl)]
 	                               	| [$2503: and  a]
                              	| [$2504: jr   nz,$2508]
@@ -8672,7 +8677,7 @@ l_3c3b:
 	addq.b	#1,(a0)                         	| [$3c3e: inc  (hl)]
 	lea	l_8D40(a6),a0                      	| [$3c3f: ld   hl,$8D40]
 	subq.b	#1,(a0)                         	| [$3c42: dec  (hl)]
-	lea	l_897d(a6),a0                        	| [$3c43: ld   l,$7D]
+	lea	nb_pigs_taken_8D7D(a6),a0               | [$3c43: ld   l,$7D]
 	addq.b	#1,(a0)                         	| [$3c45: inc  (hl)]
 	move.b	(0x07,a2),d0                    	| [$3c46: ld   a,(ix+$07)]
 	and.b	#0xF0,d0                         	| [$3c49: and  $F0]
@@ -13791,7 +13796,6 @@ l_6f9d:
 	lea	l_8634(a6),a0                      	| [$6fa0: ld   hl,$8634]
 	move.b	d0,(a0)                         	| [$6fa3: ld   (hl),a]
 	move.b	d0,d1                           	| [$6fa4: ld   b,a]
-	CLEAR_XC_FLAGS                         	| [$6fa5: xor  a]
 	clr.b	d0                               	| [$6fa5: xor  a]
 l_6fa6:
 	addq.b	#0x05,d0                        	| [$6fa6: add  a,$05]
@@ -14094,7 +14098,7 @@ l_722a:
 	move.b	(a0),d0                         	| [$722d: ld   a,(hl)]
 	                               	| [$722e: and  a]
 	jne	l_7292                             	| [$722f: jp   nz,$7292]
-	subq.w	#0xE-0xB,a0                        	| [$7232: ld   l,$3B]
+	lea	l_8F3E-3(a6),a0                        	| [$7232: ld   l,$3B]
 	addq.b	#1,(a0)                         	| [$7234: inc  (hl)]
 	move.b	(a0),d0                         	| [$7235: ld   a,(hl)]
 	and.b	#0x07,d0                         	| [$7236: and  $07]
@@ -15006,6 +15010,8 @@ l_78e2:
 l_78ec:
 	move.b	D6,d0                           	| [$78ec: ld   a,l]
 	add.b	D5,d0                            	| [$78ed: add  a,h]
+	* strange code, plus should load d5/d6 in A0 for code in 320 
+	illegal
 	add.b	#0xA6,d0                         	| [$78ee: add  a,$A6]
 	jne	l_0320                             	| [$78f0: jp   nz,$0320]
 	lea	wolf_structure_array_8AE0(a6),a0                      	| [$78f3: ld   hl,$8AE0]
@@ -15017,22 +15023,6 @@ l_78ec:
 	jbsr	l_77c8                            	| [$78fc: call $77C8]
 	rts                                    	| [$78ff: ret]
 	
-l_7900:
-	cmp.b	d1,d0                            	| [$7900: cp   b]
-	move.b	d0,(a4)+                         	| [$7901: ld   (bc),a]
-	sub.b	d5,d0                            	| [$7902: sub  h]
-	                           	| [$7903: inc  bc]
-	                          	| [$7904: ld   hl,$EB05]
-	subq.b	#1,d1                           	| [$7907: dec  b]
-	move.w	#0x4009,d5                 	| [$7908: ld   hl,($4009)]
-	LOAD_D5D6_FROM_D5_16
-	move.b	(a4),d0                         	| [$790b: ld   a,(bc)]
-	illegal
-	move.b	d2,d1                           	| [$790c: ld   b,c]
-												| [$790d: inc  c]
-	and.b	d5,d0                            	| [$790e: and  h]
-	addq.w	#2,a4                           	| [$790f: inc  c]
-	*in   a,($0E)
 l_7912:
 	move.b	game_in_play_8806(a6),d0                   	| [$7912: ld   a,($8806)]
 	                               	| [$7915: and  a]
