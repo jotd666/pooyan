@@ -83,7 +83,7 @@ if sorted_cmp:
 with open("amiga.tr","w") as f:
     f.writelines(lst)
 
-# generated using log:     trace mame.tr,,,{tracelog "A=%02X, B=%02X, C=%02X, D=%02X, E=%02X, H=%02X, L=%02X, IX=%04X, IY=%04X ",a,b,c,d,e,h,l,ix,iy}
+# generated using log:     trace mame.tr,,,{tracelog "A=%02X, B=%02X, C=%02X, D=%02X, E=%02X, H=%02X, L=%02X, IX=%04X, IY=%04X, I=%02X ",a,b,c,d,e,h,l,ix,iy,i}
 lst = []
 print("reading MAME trace file...")
 with open(r"K:\Emulation\MAME\mame.tr","r") as f:

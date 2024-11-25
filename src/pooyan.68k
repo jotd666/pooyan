@@ -11297,7 +11297,7 @@ l_5f53:
 										| [$5f58: and  a]
 								| [$5f59: jr   nz,$5F5D]
 									| [$5f5b: ld   e,$FE]
-l_5f5d:
+
 	move.b	(0x00,a2),d0                    	| [$5f5d: ld   a,(ix+$00)]
 	add.b	d4,d0                            	| [$5f60: add  a,e]
 	move.b	d0,d4                           	| [$5f61: ld   e,a]
@@ -11435,9 +11435,10 @@ arrow_balloon_collision_602f:
 	clr.b	d0                               	| [$6035: xor  a]
 	move.b	d0,i_reg                             	| [$6036: ld   i,a]
 	move.w	#0x0004,d3                      	| [$6038: ld   de,$0004] 4
+	* 3 passes, one pass with i = 0, one pass with i = 2
 l_603b:
 	jbsr	exx                               	| [$603b: exx]
-	jbsr	l_6048                            	| [$603c: call $6048]
+	jbsr	arrow_balloon_collision_6048                            	| [$603c: call $6048]
 	jbsr	exx                               	| [$603f: exx]
 	add.w	d3,a3                            	| [$6040: add  iy,de]
 	move.b	d1,d0                           	| [$6042: ld   a,b]
@@ -11445,7 +11446,10 @@ l_603b:
 	subq.b	#1,d1                           	| [...]
 	jne	l_603b                             	| [$6045: djnz $603B]
 	rts                                    	| [$6047: ret]
-l_6048:
+	
+	
+* depending on value of i reg, pop or just deflates balloons
+arrow_balloon_collision_6048:
 	lea	arrow_structure_array_8C90(a6),a2                      	| [$6048: ld   ix,$8C90]
 	move.b	i_reg,d0                           	| [$604c: ld   a,i] special case: Z80 sets Z flag with i reg
 	                               	| [$604e: and  a]
@@ -11455,6 +11459,7 @@ l_6055:
 	move.b	(0x00,a2),d0                    	| [$6055: ld   a,(ix+$00)]
 	                               	| [$6058: and  a]
 	bne.b	0f                               	| [...]
+	* not active: return
 	rts                                    	| [$6059: ret  z] [...]
 0:
 	cmp.b	#PROJECTILE_MEAT,d0                         	| [$605a: cp   $03]
@@ -11777,6 +11782,7 @@ l_627e:
 	jbsr	l_0ef1                            	| [$6282: call $0EF1]
 	addq	#4,a7                        	| [$6285: pop  af]
 	rts                                    	| [$6286: ret]
+	
 l_6287:
 	move.b	d0,d2                           	| [$6287: ld   c,a]
 	move.b	#0x06,d4                        	| [$6288: ld   e,$06]
@@ -11974,7 +11980,6 @@ l_6410:
 	lea	l_8848(a6),a3                      	| [$6410: ld   iy,$8848]
 	move.b	#0x02,d1                        	| [$6414: ld   b,$02]
 	move.w	#0x0004,d3                      	| [$6416: ld   de,$0004] 4
-	CLEAR_XC_FLAGS                         	| [$6419: xor  a]
 	clr.b	d0                               	| [$6419: xor  a]
 	move.b	d0,i_reg                              	| [$641a: ld   i,a]
 l_641c:
