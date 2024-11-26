@@ -4252,7 +4252,6 @@ l_1a15:
 	lea	nb_wolves_8901(a6),a0              	| [$1a15: ld   hl,nb_wolves_8901]
 	move.b	d2,(a0)                         	| [$1a18: ld   (hl),c]
 	lea	round_number_8907(a6),a0                        	| [$1a19: ld   l,$07]
-	move.b	#0x89,d5
 	addq.b	#1,(a0)                         	| [$1a1b: inc  (hl)]
 	move.b	(a0),d0                         	| [$1a1c: ld   a,(hl)]
 	and.b	#0x01,d0                         	| [$1a1d: and  $01]
@@ -4276,7 +4275,7 @@ l_1a3e:
 	move.b	#0x10,d1                        	| [$1a42: ld   b,$10]
 	jbsr	fill_area_0010                            	| [$1a44: rst  $10]
 	* separate code to write in color ram (8104) or ram (8904)
-	lea		l_8000+0x104,a0                        	| [$1a45: ld   h,$81]
+	lea		l_8000+0x104(a6),a0                        	| [$1a45: ld   h,$81]
 	moveq	#0,d0
 	jbsr	osd_w_colorram
 	jra		0f
