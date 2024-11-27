@@ -1365,10 +1365,6 @@ display_string_05b2:
 	rts
 2:
 	clr.b	must_skip_konami_logo_flag
-	* compensate for the init not done because intro is skipped
-	* not sure if it's enough...
-	lea	l_8903(a6),a0
-	move.b	#2,(a0)
 
 0:
 	add.b	d0,d0                            	| [$05b2: add  a,a]
@@ -3757,6 +3753,12 @@ l_16a6:
 
 
 init_level_background_16b7:
+	tst.b 	skip_intro_flag
+	jeq		0f
+	* compensate for the init not done when intro is skipped
+	lea	l_8903(a6),a0
+	move.b	#2,(a0)
+0:
 	lea	l_8808(a6),a0                      	| [$16b7: ld   hl,$8808]
 	subq.b	#1,(a0)                         	| [$16ba: dec  (hl)]
 	beq.b	0f                               	| [...]
@@ -6934,7 +6936,7 @@ one_more_wolf_on_ladder_2d98:
 	move.b	d0,D6                           	| [$2d9d: ld   l,a]
 	move.b	#0x84,D5                        	| [$2d9e: ld   h,$84]
 	LOAD_A0_FROM_D5D6
-	STORE_RAM_POINTER	a0,video_ram_pointer_8f19(a6)            	| [$2da0: ld   ($8F19),hl]
+	STORE_RAM_POINTER	a0,wolf_video_ram_pointer_8f19(a6)            	| [$2da0: ld   ($8F19),hl]
 	
 	move.b	nb_wolves_on_ladders_8F18(a6),d0                   	| [$2da3: ld   a,($8F18)]
 	move.b	d0,d1                           	| [$2da6: ld   b,a]
@@ -6978,7 +6980,7 @@ l_2dc5:
 l_2ddd:
 	LOAD_ROM	0x2DEE,a0                          	| [$2ddd: ld   hl,$2DEE]
 	jbsr	load_16bit_rom_pointer_0c45                            	| [$2de0: call $0C45]
-	LOAD_RAM_POINTER	video_ram_pointer_8f19(a6),a0             	| [$2de3: ld   hl,($8F19)]
+	LOAD_RAM_POINTER	wolf_video_ram_pointer_8f19(a6),a0             	| [$2de3: ld   hl,($8F19)]
 	jbsr	write_4x4_tile_block_3325         	| [$2de6: call write_4x4_tile_block_3325]
 	lea	ladder_wolves_slots_8F1B(a6),a0                      	| [$2de9: ld   hl,$8F1B]
 	addq.b	#1,(a0)                         	| [$2dec: inc  (hl)]
