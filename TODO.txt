@@ -1,11 +1,10 @@
 
 break on all jump table entrypoints, figure them all out
 
-- now only 3 wolves on ladder, debug nb on ladder in wolf_reaches_ladder_2d80
 - rock-pushing wolves: leftmost wolf tile not cleared: to test (now: crashing when wolf pushes)
 - add cheat keys whd menu
 - sometimes wolf seem to be invincible blocking all attacks (level 1): if high attack blocked
-  once (by balloon shield), then arrow bounces on balloon even if shield not up.
+  once (by balloon shield), then arrow bounces on balloon even if shield not up: debug around handle_high_ballon_shield_5d1e
 - meat seems to miss wolves at times
 - end of level 2: boss stays on the ground
 - crash on game over HH and back-trace

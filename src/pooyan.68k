@@ -424,7 +424,7 @@ animation_timer_0e = 0xe
 sprite_code_0f = 0xf
 sprite_attributes_10 = 0x10
 character_timer_11 = 0x11
-unknown_12 = 0x12
+temp_high_balloon_shield_timer_12 = 0x12
 unknown_13 = 0x13
 associated_object_id_14 = 0x14
 unknown_15 = 0x15
@@ -3756,6 +3756,7 @@ init_level_background_16b7:
 	tst.b 	skip_intro_flag
 	jeq		0f
 	* compensate for the init not done when intro is skipped
+	* (8903 is increased twice during intro)
 	lea	l_8903(a6),a0
 	move.b	#2,(a0)
 0:
@@ -8796,7 +8797,7 @@ wolf_hit_3d18:
 	                               	| [$3d20: and  a]
 	jeq	l_3d3b                             	| [$3d21: jr   z,$3D3B]
 	* seems that in that case, wolf+balloon get score
-	move.b	(unknown_12,a2),d2                    	| [$3d23: ld   c,(ix+$12)]
+	move.b	(temp_high_balloon_shield_timer_12,a2),d2                    	| [$3d23: ld   c,(ix+$12)]
 	addq.b	#1,d2                           	| [$3d26: inc  c]
 	jeq	l_3d3b                             	| [$3d27: jr   z,$3D3B]
 	cmp.b	#0x04,d0                         	| [$3d29: cp   $04]
@@ -10897,16 +10898,18 @@ l_5bfd:
 	neg.b	d0                               	| [$5c12: neg]
 l_5c14:
 	cmp.b	#0x09,d0                         	| [$5c14: cp   $09]
-	jcc	l_5c48                             	| [$5c16: jr   nc,$5C48]
-	* edge case: wolf avoids arrow but still makes a funny face
+	jcc	next_arrow_5c48                             	| [$5c16: jr   nc,$5C48]
+
+	* special case once in a while: wolf avoids arrow with upper balloon shield
 	LOAD_ROM	0x5C80,a1                          	| [$5c18: ld   de,$5C80]
 	btst.b	#1,(unknown_07,a2)                    	| [$5c1b: bit  1,(ix+$07)]
 	jeq	l_5c24                             	| [$5c1f: jr   z,$5C24]
 	LOAD_ROM	0x5C89,a1                          	| [$5c21: ld   de,$5C89]
 l_5c24:
 	jbsr	store_de_in_struct_381e                            	| [$5c24: call $381E]
-	move.b	#0x10,(unknown_12,a2)                 	| [$5c27: ld   (ix+$12),$10]
-	move.b	#0x02,(flags_16,a2)                 	| [$5c2b: ld   (ix+$16),$02]
+	* if we skip to 5C73 here, high balloon shield never triggers
+	move.b	#0x10,(temp_high_balloon_shield_timer_12,a2)                 	| [$5c27: ld   (ix+$12),$10]
+	move.b	#0x02,(flags_16,a2)                 	| [$5c2b: ld   (ix+$16),$02] wolf blocks arrow for a while
 	lea	balloon_structures_8B70(a6),a3                      	| [$5c2f: ld   iy,$8B70]
 	move.w	#0x0018,d3                      	| [$5c33: ld   de,$0018] 24
 	move.b	#0x05,d1                        	| [$5c36: ld   b,$05]
@@ -10922,7 +10925,7 @@ l_5c38:
 next_arrow_5c46:
 	addq.w	#2,a0                           	| [$5c46: inc  l]
 	                           	| [$5c47: inc  l]
-l_5c48:
+next_arrow_5c48:
 	addq.w	#2,a0                           	| [$5c48: inc  l]
 	                           	| [$5c49: inc  l]
 	move.w	#0x0018,d3                      	| [$5c4a: ld   de,$0018] 24
@@ -10931,6 +10934,7 @@ l_5c48:
 	jne	l_5bbe                             	| [$5c50: jp   nz,$5BBE]
 	rts                                    	| [$5c53: ret]
 l_5c54:
+	* start high-shield balloon animation
 	LOAD_ROM	0x5C92,a0                          	| [$5c54: ld   hl,$5C92]
 	move.b	(0x07,a2),d0                    	| [$5c57: ld   a,(ix+$07)]
 	and.b	#0xF0,d0                         	| [$5c5a: and  $F0]
@@ -10958,13 +10962,14 @@ l_5d0c:
 	move.b	#0x06,d1                        	| [$5d12: ld   b,$06]
 l_5d14:
 	jbsr	exx                               	| [$5d14: exx]
-	jbsr	l_5d1e                            	| [$5d15: call $5D1E]
+	jbsr	handle_high_ballon_shield_5d1e                            	| [$5d15: call $5D1E]
 	jbsr	exx                               	| [$5d18: exx]
 	add.w	d3,a2                            	| [$5d19: add  ix,de]
 	subq.b	#1,d1                           	| [...]
 	jne	l_5d14                             	| [$5d1b: djnz $5D14]
 	rts                                    	| [$5d1d: ret]
-l_5d1e:
+	
+handle_high_ballon_shield_5d1e:
 	btst.b	#0,(0x0b,a2)                    	| [$5d1e: bit  0,(ix+$0b)]
 	jne	l_5d2a                             	| [$5d22: jr   nz,$5D2A]
 	move.b	round_number_8907(a6),d0                   	| [$5d24: ld   a,($8907)]
@@ -10981,10 +10986,12 @@ l_5d2a:
 	bne.b	0f                               	| [...]
 	rts                                    	| [$5d33: ret  z] [...]
 0:
-	subq.b	#1,(0x12,a2)                    	| [$5d34: dec  (ix+$12)]
+	move.w	#0xF00,0xDFF180
+	subq.b	#1,(temp_high_balloon_shield_timer_12,a2)                    	| [$5d34: dec  (ix+$12)]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$5d37: ret  nz] [...]
 0:
+	* wolf is no longer invincible (high balloon shield)
 	move.b	(0x13,a2),d0                    	| [$5d38: ld   a,(ix+$13)]
 	and.b	#0x03,d0                         	| [$5d3b: and  $03]
 	jeq	l_5d48                             	| [$5d3d: jr   z,$5D48]
