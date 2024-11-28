@@ -10699,7 +10699,7 @@ l_5ae4:
 	jbsr	l_5d4d                            	| [$5af6: call $5D4D]
 	jbsr	check_wolves_just_avoiding_arrow_5b86                            	| [$5af9: call $5B86]
 	jbsr	l_6404                            	| [$5afc: call $6404]
-	*jbsr	rom_checksum_5d0b                            	| [$5aff: call $5D0B]
+	jbsr	handle_balloon_shields_5d0b                            	| [$5aff: call $5D0B]
 	jbsr	l_5b2c                            	| [$5b02: call $5B2C]
 	rts                                    	| [$5b05: ret]
 	
@@ -10956,8 +10956,8 @@ store_animation_sequence_in_object_5c75:
 	clr.b	(animation_timer_0e,a3)                        	| [$5c7b: ld   (iy+$0e),$00]
 	rts                                    	| [$5c7f: ret]
 
-l_5d0c:
-	lea	wolf_structure_array_8AE0(a6),a0                      	| [$5d0c: ld   hl,$8AE0]
+handle_balloon_shields_5d0b:
+	lea	wolf_structure_array_8AE0(a6),a2                      	| [$5d0c: ld   hl,$8AE0]
 	move.w	#0x0018,d3                      	| [$5d0f: ld   de,$0018] 24
 	move.b	#0x06,d1                        	| [$5d12: ld   b,$06]
 l_5d14:
@@ -10986,7 +10986,6 @@ l_5d2a:
 	bne.b	0f                               	| [...]
 	rts                                    	| [$5d33: ret  z] [...]
 0:
-	move.w	#0xF00,0xDFF180
 	subq.b	#1,(temp_high_balloon_shield_timer_12,a2)                    	| [$5d34: dec  (ix+$12)]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$5d37: ret  nz] [...]
