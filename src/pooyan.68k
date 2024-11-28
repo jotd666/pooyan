@@ -5959,6 +5959,8 @@ l_25a6:
 	STORE_RAM_POINTER	a1,rock_tile_video_ram_pointer_8932(a6)            	| [$25d5: ld   ($8932),de]
 	
 	jra	l_25eb                             	| [$25d9: jr   $25EB]
+	
+	
 l_25db:
 	move.b	(a1),d0                         	| [$25db: ld   a,(de)]
 	                               	| [$25dc: and  a]

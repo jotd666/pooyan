@@ -41,7 +41,7 @@ _expmem
 _config
 	dc.b	"C1:X:invincible:0;"
 	dc.b	"C1:X:infinite lives:1;"
-	;dc.b	"C1:X:cheat keys:4;"
+	dc.b	"C1:X:cheat keys:4;"
 	;dc.b    "C2:L:start level color:default,2,3,4;"
 	dc.b	"C3:X:skip introduction:0;"
 	IFD		CHIP_ONLY
