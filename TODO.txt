@@ -1,7 +1,9 @@
 
 break on all jump table entrypoints, figure them all out (end of level 2!!)
 
-- nb pigs taken 2, but does that increase when a wolf passes
+- bottom row trashed on level 2 at some point
+- level 2: at some point no collision detection, no more ability to shoot arrows
+- regression: no wolf on ladder when a wolf passes
 - victory wolves: tile should be symmetric (use runtime symmetry like in elevator action)
 - rock kills player: player keeps on falling and falling
 - end of level 2: boss stays on the ground

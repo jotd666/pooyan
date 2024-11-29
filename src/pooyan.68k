@@ -15008,42 +15008,41 @@ wait_while_title_displayed_7881:
 										| [$78b5: jr   nz,$7891]
 	move.b	#0x02,d0                        	| [$78b7: ld   a,$02]
 	move.b	d0,title_sub_state_8E51(a6)     	| [$78b9: ld   (title_sub_state_8E51),a]
-	lea	l_8548(a6),a3                      	| [$78bc: ld   iy,$8548]
-	move.w	#0x0000,d5                      	| [$78c0: ld   hl,$0000] 0
-	move.w	#0x0000,d6                      	| [$78c0: ld   hl,$0000] 0
-	move.w	#0x0020,d3                      	| [$78c3: ld   de,$0020] 32
-	move.b	#0x04,d2                        	| [$78c6: ld   c,$04]
-l_78c8:
-	move.b	#0x0C,d1                        	| [$78c8: ld   b,$0C]
-l_78ca:
-	move.b	(0x00,a3),d0                    	| [$78ca: ld   a,(iy+$00)]
-	add.b	d6,d0                            	| [$78cd: add  a,l]
-	jcc	l_78d1                             	| [$78ce: jr   nc,$78D1]
-	addq.b	#1,d5                           	| [$78d0: inc  h]
-l_78d1:
-	move.b	d0,d6                           	| [$78d1: ld   l,a]
-	add.w	d3,a3                            	| [$78d2: add  iy,de]
-	subq.b	#1,d1                           	| [...]
-	jne	l_78ca                             	| [$78d4: djnz $78CA]
-	btst.b	#0,d2                           	| [$78d6: bit  0,c]
-	jne	l_78e2                             	| [$78d8: jr   nz,$78E2]
-	move.w	#-0x20,d3                          	| [$78da: ld   de,$FFE0]
-	addq.w	#1,a3                           	| [$78dd: inc  iy]
-	subq.w	#1,d2                           	| [$78df: dec  c]
-	jra	l_78c8                             	| [$78e0: jr   $78C8]
-l_78e2:
-	subq.w	#1,d2                           	| [$78e2: dec  c]
-	jeq	l_78ec                             	| [$78e3: jr   z,$78EC]
-	move.w	#0xFBFF,d3                          	| [$78e5: ld   de,$FBFF]
-	add.w	d3,a3                            	| [$78e8: add  iy,de]
-	jra	l_78e2                             	| [$78ea: jr   $78E2]
-l_78ec:
-	move.b	D6,d0                           	| [$78ec: ld   a,l]
-	add.b	D5,d0                            	| [$78ed: add  a,h]
-	* strange code, plus should load d5/d6 in A0 for code in 320 
-	illegal
-	add.b	#0xA6,d0                         	| [$78ee: add  a,$A6]
-	jne	l_0320                             	| [$78f0: jp   nz,$0320]
+	* another video RAM checksum, after title screen is shown				| [$78bc: ld   iy,$8548]
+													| [$78c0: ld   hl,$0000] 0
+													| [$78c0: ld   hl,$0000] 0
+													| [$78c3: ld   de,$0020] 32
+													| [$78c6: ld   c,$04]
+							
+													| [$78c8: ld   b,$0C]
+							
+													| [$78ca: ld   a,(iy+$00)]
+													| [$78cd: add  a,l]
+												| [$78ce: jr   nc,$78D1]
+													| [$78d0: inc  h]
+							
+													| [$78d1: ld   l,a]
+													| [$78d2: add  iy,de]
+													| [...]
+												| [$78d4: djnz $78CA]
+													| [$78d6: bit  0,c]
+												| [$78d8: jr   nz,$78E2]
+													| [$78da: ld   de,$FFE0]
+													| [$78dd: inc  iy]
+													| [$78df: dec  c]
+												| [$78e0: jr   $78C8]
+							
+													| [$78e2: dec  c]
+												| [$78e3: jr   z,$78EC]
+														| [$78e5: ld   de,$FBFF]
+													| [$78e8: add  iy,de]
+												| [$78ea: jr   $78E2]
+							
+													| [$78ec: ld   a,l]
+													| [$78ed: add  a,h]
+							
+													| [$78ee: add  a,$A6]
+												| [$78f0: jp   nz,$0320]
 	lea	wolf_structure_array_8AE0(a6),a0                      	| [$78f3: ld   hl,$8AE0]
 	clr.b	d0                               	| [$78f6: xor  a]
 	move.b	d0,d1                           	| [$78f7: ld   b,a]

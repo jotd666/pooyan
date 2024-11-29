@@ -11905,6 +11905,7 @@ jump_table_7715:
 78B5: 20 DA       jr   nz,$7891
 ; end romcheck
 78B7: 3E 02       ld   a,$02
+; another video RAM checksum, after title screen is shown
 78B9: 32 51 8E    ld   (title_sub_state_8E51),a
 78BC: FD 21 48 85 ld   iy,$8548
 78C0: 21 00 00    ld   hl,$0000
