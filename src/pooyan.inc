@@ -16,7 +16,7 @@
 	OPT_SKIP_GAME_DEMO=0                        | do not change!
 	OPT_ONLY_ONE_ENEMY=0                        | do not change!
 	OPT_ONLY_ONE_LIFE=0                         | do not change!
-	
+	OPT_START_AT_LEVEL_2=0
 	.else
 	
 	* debug release, options can be changed
@@ -36,7 +36,7 @@
 	* 
 	OPT_ONLY_ONE_ENEMY=0
 	OPT_ONLY_ONE_LIFE=0
-
+	OPT_START_AT_LEVEL_2=1
 	
 	
 	.endif

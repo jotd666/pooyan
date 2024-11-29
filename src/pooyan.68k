@@ -413,7 +413,7 @@ fine_y_pos_03 = 3
 y_pos_04 = 4
 fine_x_pos_05 = 5
 x_pos_06 = 6
-unknown_07 = 7
+copy_of_control_bits_07 = 7
 unknown_08 = 0x8
 character_speed_09 = 0x9
 character_speed_0a = 0xa
@@ -454,6 +454,9 @@ pooyan_reset:
 
 * fill (hl) b times with a value
 fill_area_0010:
+	.ifndef		RELEASE
+	* TODO: check if area isn't video/color ram
+	.endif
 l_0010:
 	move.b	d0,(a0)+                         	| [$0010: ld   (hl),a]
 	                           	| [$0011: inc  hl]
@@ -2694,7 +2697,7 @@ l_0eda:
 	move.b	#0x03,d0                        	| [$0edf: ld   a,$03]
 	jra	queue_sound_0eb3                             	| [$0ee1: jr   $0EB3]
 l_0ee3:
-	move.b	l_8F24(a6),d0                   	| [$0ee3: ld   a,($8F24)]
+	move.b	big_rock_hits_player_8F24(a6),d0                   	| [$0ee3: ld   a,($8F24)]
 	                               	| [$0ee6: and  a]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$0ee7: ret  nz] [...]
@@ -2883,7 +2886,7 @@ l_1016:
 	jbsr	l_20d4                            	| [$101f: call $20D4]
 	jbsr	l_511b                            	| [$1022: call $511B]
 	jbsr	update_wolves_1219                            	| [$1025: call $1219]
-	jbsr	handle_lonely_balloons_40bd                            	| [$1028: call $40BD]
+	jbsr	handle_loose_balloons_40bd                            	| [$1028: call $40BD]
 	jbsr	update_sprite_shadows_02EF        	| [$102b: call update_sprite_shadows_02EF]
 	jbsr	l_5ae4                            	| [$102e: call $5AE4]
 	jbsr	l_0e64                            	| [$1031: call $0E64]
@@ -2891,7 +2894,7 @@ l_1016:
 l_1035:
 	jbsr	move_arrow_and_animate_bow_2157                            	| [$1035: call $2157]
 	jbsr	update_wolves_1219                            	| [$1038: call $1219]
-	jbsr	handle_lonely_balloons_40bd                            	| [$103b: call $40BD]
+	jbsr	handle_loose_balloons_40bd                            	| [$103b: call $40BD]
 	jbsr	update_sprite_shadows_02EF        	| [$103e: call update_sprite_shadows_02EF]
 	rts                                    	| [$1041: ret]
 l_1042:
@@ -2902,7 +2905,7 @@ l_1042:
 	move.b	(character_state_02,a2),d0                    	| [$104f: ld   a,(ix+$02)]
 	                               	| [$1052: and  a]
 	jne	l_1078                             	| [$1053: jr   nz,$1078]
-	move.b	l_8F24(a6),d0                   	| [$1055: ld   a,($8F24)]
+	move.b	big_rock_hits_player_8F24(a6),d0                   	| [$1055: ld   a,($8F24)]
 	lea	l_8F57(a6),a0                      	| [$1058: ld   hl,$8F57]
 	or.b	(a0),d0                           	| [$105b: or   (hl)]
 	jne	l_1078                             	| [$105c: jr   nz,$1078]
@@ -3697,6 +3700,10 @@ l_1653:
 l_166c:
 	jbsr	ldir                              	| [$166c: ldir]
 
+	.ifne	OPT_START_AT_LEVEL_2
+	move.b	#1,round_number_8907(a6)
+	.endif
+	
 	.ifne	OPT_ONLY_ONE_LIFE
 	lea	nb_lives_8908(a6),a1
 	clr.b	(a1)
@@ -3890,11 +3897,11 @@ l_1798:
 	move.b	d0,l_8903(a6)                   	| [$179e: ld   ($8903),a]
 l_17a1:
 	jbsr	l_1ead                            	| [$17a1: call $1EAD]
-	jbsr	display_nb_lives_2065                            	| [$17a4: call $2065]
-	jbsr	l_4a0b                            	| [$17a7: call $4A0B]
+	jbsr	display_nb_lives_2065               | [$17a4: call $2065]
+	jbsr	update_wolves_pushing_rock_4a0b     | [$17a7: call $4A0B]
 	move.b	#0x10,d0                        	| [$17aa: ld   a,$10]
 	move.b	d0,l_8A91(a6)                   	| [$17ac: ld   ($8A91),a]
-	move.b	d0,animation_timer_8F06(a6)                   	| [$17af: ld   ($8F06),a]
+	move.b	d0,animation_timer_8F06(a6)         | [$17af: ld   ($8F06),a]
 	move.b	d0,l_8F09(a6)                   	| [$17b2: ld   ($8F09),a]
 	jbsr	l_540d                            	| [$17b5: call $540D]
 	jbsr	update_sprite_shadows_02EF        	| [$17b8: call update_sprite_shadows_02EF]
@@ -4030,12 +4037,12 @@ l_18a9:
 	rts                                    	| [$18ae: ret]
 
 main_game_sequence_18af:
-	jbsr	l_1e55                            	| [$18af: call $1E55]
+	jbsr	read_controls_1e55                            	| [$18af: call $1E55]
 	jbsr	l_6cab                            	| [$18b2: call $6CAB]
 	jbsr	l_20d4                            	| [$18b5: call $20D4]
 	jbsr	l_511b                            	| [$18b8: call $511B]
 	jbsr	update_wolves_3377                            	| [$18bb: call $3377]
-	jbsr	handle_lonely_balloons_40bd                            	| [$18be: call $40BD]
+	jbsr	handle_loose_balloons_40bd                            	| [$18be: call $40BD]
 	jbsr	update_sprite_shadows_02EF        	| [$18c1: call update_sprite_shadows_02EF]
 	jbsr	handle_extra_life_award_18da                            	| [$18c4: call $18DA]
 	jbsr	l_191c                            	| [$18c7: call $191C]
@@ -4151,7 +4158,7 @@ l_196e:
 	beq.b	0f                               	| [...]
 	rts                                    	| [$1972: ret  nz] [...]
 0:
-	move.b	l_8902(a6),d0                   	| [$1973: ld   a,($8902)]
+	move.b	nb_wolves_pushing_rock_8902(a6),d0                   	| [$1973: ld   a,($8902)]
 	cmp.b	#0x05,d0                         	| [$1976: cp   $05]
 	jcs	l_19a0                             	| [$1978: jr   c,$19A0]
 	jeq	l_198a                             	| [$197a: jr   z,$198A]
@@ -4181,7 +4188,7 @@ l_19a0:
 	beq.b	0f                               	| [...]
 	rts                                    	| [$19a4: ret  nz] [...]
 0:
-	move.b	l_8F24(a6),d0                   	| [$19a5: ld   a,($8F24)]
+	move.b	big_rock_hits_player_8F24(a6),d0                   	| [$19a5: ld   a,($8F24)]
 	                               	| [$19a8: and  a]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$19a9: ret  nz] [...]
@@ -4235,17 +4242,17 @@ l_19e7:
 	jbsr	update_88A0_0038                            	| [$19ec: rst  $38]
 	rts                                    	| [$19ed: ret]
 level_completed_19ee:
-	jbsr	l_308b                            	| [$19ee: call $308B]
-	jbsr	l_25a6                            	| [$19f1: call $25A6]
+	jbsr	handle_falling_rock_308b                            	| [$19ee: call $308B]
+	jbsr	handle_side_wolves_25a6                            	| [$19f1: call $25A6]
 	jbsr	update_wolves_3377                            	| [$19f4: call $3377]
-	jbsr	handle_lonely_balloons_40bd                            	| [$19f7: call $40BD]
+	jbsr	handle_loose_balloons_40bd                            	| [$19f7: call $40BD]
 	jbsr	l_28c6                            	| [$19fa: call $28C6]
 	jbsr	update_sprite_shadows_02EF        	| [$19fd: call update_sprite_shadows_02EF]
 	rts                                    	| [$1a00: ret]
 prepare_next_round_1a01:
 	jbsr	l_2527                            	| [$1a01: call $2527]
-	move.b	d0,l_8902(a6)                   	| [$1a04: ld   ($8902),a]
-	move.b	d0,l_8934(a6)                   	| [$1a07: ld   ($8934),a]
+	move.b	d0,nb_wolves_pushing_rock_8902(a6)                   	| [$1a04: ld   ($8902),a]
+	move.b	d0,nb_wolves_pushing_rock_8934(a6)                   	| [$1a07: ld   ($8934),a]
 	move.b	#0x30,d2                        	| [$1a0a: ld   c,$30]
 	move.b	round_number_8907(a6),d0                   	| [$1a0c: ld   a,($8907)]
 	cmp.b	#0x02,d0                         	| [$1a0f: cp   $02]
@@ -4885,7 +4892,7 @@ l_1e27:
 	jne	l_1e27                             	| [$1e29: djnz $1E27]
 	rts                                    	| [$1e2b: ret]
 
-l_1e55:
+read_controls_1e55:
 	                     	| [$1e55: ld   hl,rom_checksum_failed_89e5]
 	    	| [$1e58: ld   b,(hl)]
 	* remove rom_check_failed_89FB flag               	| [$1e59: ld   a,l]
@@ -4901,11 +4908,11 @@ l_1e55:
 	bne.b	0f                               	| [...]
 	rts                                    	| [$1e6a: ret  z] [...]
 0:
-	lea	arrow_structure_array_8C90(a6),a3                      	| [$1e6b: ld   iy,$8C90]
-	move.b	(0x02,a2),d0                    	| [$1e6f: ld   a,(ix+$02)]
+	lea	arrow_structure_array_8C90(a6),a3     	| [$1e6b: ld   iy,$8C90] useful??
+	move.b	(character_state_02,a2),d0                    	| [$1e6f: ld   a,(ix+$02)]
 	                               	| [$1e72: and  a]
 	jne	l_1ea2                             	| [$1e73: jr   nz,$1EA2]
-	move.b	l_8F24(a6),d0                   	| [$1e75: ld   a,($8F24)]
+	move.b	big_rock_hits_player_8F24(a6),d0                   	| [$1e75: ld   a,($8F24)]
 	lea	l_8F57(a6),a0                      	| [$1e78: ld   hl,$8F57]
 	or.b	(a0),d0                           	| [$1e7b: or   (hl)]
 	jne	l_1ea2                             	| [$1e7c: jr   nz,$1EA2]
@@ -4919,7 +4926,7 @@ l_1e55:
 l_1e8a:
 	CLEAR_XC_FLAGS
 	not.b	d0                               	| [$1e8a: cpl]
-	move.b	d0,(0x07,a2)                    	| [$1e8b: ld   (ix+$07),a]
+	move.b	d0,(copy_of_control_bits_07,a2)                    	| [$1e8b: ld   (ix+$07),a]
 	roxl.b	#3,d0                           	| [$1e8e: rla] * 3
 	lea	l_8F03(a6),a0                      	| [$1e91: ld   hl,$8F03]
 	roxl.b	#1,d0                           	| [$1e94: rla]
@@ -4932,10 +4939,10 @@ l_1e8a:
 	bne.b	0f                               	| [...]
 	rts                                    	| [$1e9c: ret  z] [...]
 0:
-	bclr.b	#4,(0x07,a2)                    	| [$1e9d: res  4,(ix+$07)]
+	bclr.b	#4,(copy_of_control_bits_07,a2)                    	| [$1e9d: res  4,(ix+$07)]
 	rts                                    	| [$1ea1: ret]
 l_1ea2:
-	clr.b	(0x07,a2)                        	| [$1ea2: ld   (ix+$07),$00]
+	clr.b	(copy_of_control_bits_07,a2)                        	| [$1ea2: ld   (ix+$07),$00]
 	rts                                    	| [$1ea6: ret]
 
 l_1ead:
@@ -5213,8 +5220,8 @@ l_20ea:
 	jbsr	l_2329                            	| [$20f1: call $2329]
 	jbsr	l_2101                            	| [$20f4: call $2101]
 	jbsr	animate_pigs_in_house_2563                            	| [$20f7: call $2563]
-	jbsr	l_25a6                            	| [$20fa: call $25A6]
-	jbsr	l_308b                            	| [$20fd: call $308B]
+	jbsr	handle_side_wolves_25a6                            	| [$20fa: call $25A6]
+	jbsr	handle_falling_rock_308b                            	| [$20fd: call $308B]
 	rts                                    	| [$2100: ret]
 l_2101:
 	jbsr	pickup_meat_management_2778                            	| [$2101: call $2778]
@@ -5706,8 +5713,8 @@ l_241a:
 	rts                                    	| [$241d: ret]
 l_241e:
 	jbsr	l_2101                            	| [$241e: call $2101]
-	jbsr	l_25a6                            	| [$2421: call $25A6]
-	jbsr	l_308b                            	| [$2424: call $308B]
+	jbsr	handle_side_wolves_25a6                            	| [$2421: call $25A6]
+	jbsr	handle_falling_rock_308b                            	| [$2424: call $308B]
 	                   	| [$2427: ld   a,($881E)]
 	                               	| [$242a: and  a]
 												| [...]
@@ -5744,7 +5751,7 @@ init_player_hit_2442:
 	move.b	d0,(y_pos_04,a2)                    	| [$2461: ld   (ix+$04),a]
 	LOAD_ROM	0x26BD,a0                          	| [$2464: ld   hl,$26BD]
 	jbsr	l_250f                            	| [$2467: call $250F]
-	move.b	l_8F24(a6),d0                   	| [$246a: ld   a,($8F24)]
+	move.b	big_rock_hits_player_8F24(a6),d0                   	| [$246a: ld   a,($8F24)]
 	                               	| [$246d: and  a]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$246e: ret  nz] [...]
@@ -5853,14 +5860,16 @@ l_2514:
 l_2527:
 	move.w	#0x0818,d3                        	| [$2527: ld   d,$08]
 	jbsr	update_88A0_0038                            	| [$2529: rst  $38]
-	lea	l_8902(a6),a0                      	| [$252a: ld   hl,$8902]
+	lea	nb_wolves_pushing_rock_8902(a6),a0                      	| [$252a: ld   hl,$8902]
 	move.b	(a0),d7                         	| [$252d: ld   a,(hl)]
 	clr.b	d0                               	| [$2530: ld   a,$00]
 	cmp.b	#0x07,d7                         	| [$252e: cp   $07]
 	jcs	l_2541                             	| [$2532: jr   c,$2541]
 	moveq	#0,d0                   	| [$2534: ld   a,(rom_check_failed_89FB)]
+	* reset the number of wolves pushing rocks to 4 when player died with more
+	* than 4 wolves pushing rock on top
 	move.b	#0x04,(a0)                      	| [$2537: ld   (hl),$04]
-	lea	l_8934(a6),a0                        	| [$2539: ld   l,$34]
+	lea	nb_wolves_pushing_rock_8934(a6),a0                        	| [$2539: ld   l,$34]
 	move.b	#0x04,(a0)                      	| [$253b: ld   (hl),$04]
 	move.b	#0x20,d1                        	| [$253d: ld   b,$20]
 	lea	tile_or_color_mode_8920(a6),a0                           	| [$253f: ld   l,b]
@@ -5925,17 +5934,20 @@ write_two_4x4_tile_block_2599:
 	move.l	(sp)+,a1                        	| [$25a1: pop  de]
 	jbsr	write_4x4_tile_block_3325         	| [$25a2: call write_4x4_tile_block_3325]
 	rts                                    	| [$25a5: ret]
-l_25a6:
+	
+* handle wolves on ladder (level 1)
+* handle wolves pushing rock (level 2)
+handle_side_wolves_25a6:
 	move.b	round_number_8907(a6),d0                   	| [$25a6: ld   a,($8907)]
 	btst.b	#0,d0                           	| [$25a9: bit  0,a]
-	jeq	handle_ladder_wolves_2d66                             	| [$25ab: jp   z,$2D66]
+	jeq	handle_ladder_wolves_2d66             | [$25ab: jp   z,$2D66]
 	lea	l_8F09(a6),a0                      	| [$25ae: ld   hl,$8F09]
 	subq.b	#1,(a0)                         	| [$25b1: dec  (hl)]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$25b2: ret  nz] [...]
 0:
 	move.b	#0x10,(a0)                      	| [$25b3: ld   (hl),$10]
-	move.b	l_8902(a6),d0                   	| [$25b5: ld   a,($8902)]
+	move.b	nb_wolves_pushing_rock_8902(a6),d0                   	| [$25b5: ld   a,($8902)]
 	                               	| [$25b8: and  a]
 	bne.b	0f                               	| [...]
 	rts                                    	| [$25b9: ret  z] [...]
@@ -5946,7 +5958,7 @@ l_25a6:
 	jne	l_2635                             	| [$25bf: jr   nz,$2635]
 	move.b	d2,d0                           	| [$25c1: ld   a,c]
 	lea	l_8F05(a6),a1                      	| [$25c2: ld   de,$8F05]
-	lea	l_8934(a6),a0                      	| [$25c5: ld   hl,$8934]
+	lea	nb_wolves_pushing_rock_8934(a6),a0                      	| [$25c5: ld   hl,$8934]
 	cmp.b	(a0),d0                          	| [$25c8: cp   (hl)]
 	jeq	l_25db                             	| [$25c9: jr   z,$25DB]
 	move.b	(a1),d0                         	| [$25cb: ld   a,(de)]
@@ -5975,11 +5987,12 @@ l_25eb:
 	move.b	(a0),d0                         	| [$25eb: ld   a,(hl)]
 	cmp.b	#0x07,d0                         	| [$25ec: cp   $07]
 	jcs	l_25fe                             	| [$25ee: jr   c,$25FE]
+	* too many wolves pushing rock
 	move.b	rock_tile_video_ram_pointer_8932(a6),d0                   	| [$25f0: ld   a,($8932)]
 	cmp.b	#0xC3,d0                         	| [$25f3: cp   $C3]
-	jne	l_25fc                             	| [$25f5: jr   nz,$25FC] drop boulder
+	jne	l_25fc                             	| [$25f5: jr   nz,$25FC] drop big rock
 	move.b	#0x01,d0                        	| [$25f7: ld   a,$01]
-	move.b	d0,l_8F04(a6)                   	| [$25f9: ld   ($8F04),a]
+	move.b	d0,falling_rock_active_8F04(a6)                   	| [$25f9: ld   ($8F04),a]
 l_25fc:
 	move.b	#0x07,d0                        	| [$25fc: ld   a,$07]
 l_25fe:
@@ -5987,7 +6000,7 @@ l_25fe:
 	move.w  #0xFFC0,d3                          	| [$25ff: ld   de,$FFC0]
 	move.b	l_8F05(a6),d0                   	| [$2602: ld   a,($8F05)]
 	                               	| [$2605: and  a]
-	jeq	l_266b                             	| [$2606: jr   z,$266B]
+	jeq	animate_rock_pushing_wolves_266b                             	| [$2606: jr   z,$266B]
 	lea	l_8F09(a6),a0                      	| [$2608: ld   hl,$8F09]
 	move.b	#0x1C,(a0)                      	| [$260b: ld   (hl),$1C]
 	move.w	#-0x20,d3                          	| [$260d: ld   de,$FFE0]
@@ -6009,12 +6022,13 @@ l_2625:
 	jbsr	osd_w_videoram
 	lea		(0x41,a2),a0                 	| [$2629: ld   (ix+$41),$10]
 	jbsr	osd_w_videoram
+	move.l	(a7)+,a0
 	jbsr	l_0f19                            	| [$262d: call $0F19]
 	jbsr	l_0f11                            	| [$2630: call $0F11]
 	jra	l_2678                             	| [$2633: jr   $2678]
 l_2635:
 	move.b	l_8F0A(a6),d0                   	| [$2635: ld   a,($8F0A)]
-	LOAD_ROM	0x2770,a0                          	| [$263a: ld   hl,$2770]
+	lea		table_2770,a0                          	| [$263a: ld   hl,$2770]
 	btst.b	#0,d0                           	| [$2638: bit  0,a]
 	jeq	l_2642                             	| [$263d: jr   z,$2642]
 	lea	table_2774,a0                      	| [$263f: ld   hl,table_2774]
@@ -6028,17 +6042,21 @@ l_2642:
 	cmp.b	#0x80,d0                         	| [$264f: cp   $80]
 	jeq	l_2678                             	| [$2653: jr   z,$2678]
 	move.b	#0x80,d0                        	| [$2655: ld   a,$80]
-	move.w	#0xFFC0,d3                          	| [$2657: ld   de,$FFC0]
+	move.w	#-0x40,d3                          	| [$2657: ld   de,$FFC0]
 l_265a:
-	move.b	d0,(0x00,a3)                    	| [$265a: ld   (iy+$00),a]
-	move.b	d0,(0x01,a3)                    	| [$265d: ld   (iy+$01),a]
+	move.l	a0,-(a7)
+	lea		(0x00,a3),a0                    	| [$265a: ld   (iy+$00),a]
+	jbsr	osd_w_videoram
+	lea		(0x01,a3),a0                    	| [$265d: ld   (iy+$01),a]
+	jbsr	osd_w_videoram
+	move.l	(a7)+,a0
 	add.w	d3,a3                            	| [$2660: add  iy,de]
 	subq.b	#1,d1                           	| [...]
 	jne	l_265a                             	| [$2662: djnz $265A]
 	jbsr	l_0f49                            	| [$2664: call $0F49]
 	move.b	#0x07,d1                        	| [$2667: ld   b,$07]
 	jra	l_2678                             	| [$2669: jr   $2678]
-l_266b:
+animate_rock_pushing_wolves_266b:
 	move.b	l_8F0A(a6),d0                   	| [$266b: ld   a,($8F0A)]
 	LOAD_ROM	0x2768,a0                          	| [$2670: ld   hl,$2768]
 	btst.b	#0,d0                           	| [$266e: bit  0,a]
@@ -6049,24 +6067,23 @@ l_2678:
 	move.w	#0xFFC0,d3                          	| [$267c: ld   de,$FFC0]
 	move.l		a0,a1			| will be taking data from a1, as osd_w_videoram needs a0
 l_267f:
-	* wolf pushing rock tiles
+	* wolf pushing rock tiles / wolf celebrating (when rock is pushed off the cliff)
 	move.l	a2,a0
-	move.b	(a1)+,d0                         	| [$2680: ld   a,(hl)]
+	move.b	(a1),d0                         	| [$2680: ld   a,(hl)]
 	jbsr	osd_w_videoram                    	| [$2681: ld   (ix+$00),a]
 	                           	| [$2684: inc  hl]
-	move.b	(a1)+,d0                         	| [$2685: ld   a,(hl)]
+	move.b	(1,a1),d0                         	| [$2685: ld   a,(hl)]
 	lea		(0x01,a2),a0                    	| [$2686: ld   (ix+$01),a]
 	jbsr	osd_w_videoram
 	                           	| [$2689: inc  hl]
-	move.b	(a1)+,d0                         	| [$268a: ld   a,(hl)]
+	move.b	(2,a1),d0                         	| [$268a: ld   a,(hl)]
 	lea		(0x20,a2),a0                    	| [$268b: ld   (ix+$20),a]
 	jbsr	osd_w_videoram
 	                           	| [$268e: inc  hl]
-	move.b	(a1),d0                         	| [$268f: ld   a,(hl)]
+	move.b	(3,a1),d0                         	| [$268f: ld   a,(hl)]
 	lea		(0x21,a2),a0                    	| [$2690: ld   (ix+$21),a]
 	jbsr	osd_w_videoram
 	add.w	d3,a2                            	| [$2693: add  ix,de]
-	exg		a0,a1
 	subq.b	#1,d1                           	| [...]
 	jne	l_267f                             	| [$2696: djnz $267F]
 	move.b	tile_or_color_mode_8920(a6),d0                   	| [$2698: ld   a,($8920)]
@@ -6302,7 +6319,7 @@ l_28c6:
 	move.b	#0x06,(a0)                      	| [$28d3: ld   (hl),$06]
 	rts                                    	| [$28d5: ret]
 l_28d6:
-	move.b	l_8F08(a6),d0                   	| [$28d6: ld   a,($8F08)]
+	move.b	rock_dropped_sub_state_8F08(a6),d0                   	| [$28d6: ld   a,($8F08)]
 	                               	| [$28d9: and  a]
 	jeq	l_28df                             	| [$28da: jr   z,$28DF]
 	move.b	#0x04,(a0)                      	| [$28dc: ld   (hl),$04]
@@ -6575,7 +6592,7 @@ l_2ae8:
 	lea	l_8A81(a6),a1                      	| [$2aed: ld   de,$8A81]
 	move.w	#0x0240,d1                          	| [$2af0: ld   bc,$0240]
 	jbsr	ldir                              	| [$2af3: ldir]
-	move.b	d0,l_8902(a6)                   	| [$2af5: ld   ($8902),a]
+	move.b	d0,nb_wolves_pushing_rock_8902(a6)                   	| [$2af5: ld   ($8902),a]
 	move.b	d0,l_8903(a6)                   	| [$2af8: ld   ($8903),a]
 	move.b	d0,l_8931(a6)                   	| [$2afb: ld   ($8931),a]
 	move.b	#0x06,d0                        	| [$2afe: ld   a,$06]
@@ -7243,15 +7260,11 @@ check_attacking_ladder_wolf_collision_305f:
 	bcs.b	0f                               	| [...]
 	rts                                    	| [$3074: ret  nc] [...]
 0:
-	lea	l_8F24(a6),a0                      	| [$3075: ld   hl,$8F24]
-	move.b	l_8F08(a6),d0                   	| [$3078: ld   a,($8F08)]
+	lea	big_rock_hits_player_8F24(a6),a0                      	| [$3075: ld   hl,$8F24]
+	move.b	rock_dropped_sub_state_8F08(a6),d0                   	| [$3078: ld   a,($8F08)]
 	or.b	(a0),d0                           	| [$307b: or   (hl)]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$307c: ret  nz] [...]
-0:
-	tst.b	invincible_flag
-	jeq		0f
-	rts
 0:
 	move.b	#0x01,d0                        	| [$307d: ld   a,$01]
 	move.b	d0,player_killed_flag_8D32(a6)                   	| [$307f: ld   ($8D32),a]
@@ -7264,13 +7277,13 @@ check_attacking_ladder_wolf_collision_305f:
 										| [$3088: and  b]
 										| [$3089: add  a,b]
 										| [$308a: ld   e,b]
-l_308b:
-	move.b	l_8F04(a6),d0                   	| [$308b: ld   a,($8F04)]
+handle_falling_rock_308b:
+	move.b	falling_rock_active_8F04(a6),d0                   	| [$308b: ld   a,($8F04)]
 	                               	| [$308e: and  a]
 	bne.b	0f                               	| [...]
 	rts                                    	| [$308f: ret  z] [...]
 0:
-	move.b	l_8F08(a6),d0                   	| [$3090: ld   a,($8F08)]
+	move.b	rock_dropped_sub_state_8F08(a6),d0                   	| [$3090: ld   a,($8F08)]
 	                               	| [$3093: and  a]
 	jne	l_30e0                             	| [$3094: jr   nz,$30E0]
 	lea	wolf_structure_array_8AE0(a6),a2                      	| [$3096: ld   ix,$8AE0]
@@ -7278,7 +7291,7 @@ l_308b:
 	move.w	#0x0018,d3                      	| [$309e: ld   de,$0018] 24
 	move.b	#0x11,d1                        	| [$30a1: ld   b,$11]
 l_30a3:
-	move.b	(0x00,a2),d0                    	| [$30a3: ld   a,(ix+$00)]
+	move.b	(wolf_flying_00,a2),d0                    	| [$30a3: ld   a,(ix+$00)]
 	                               	| [$30a6: and  a]
 	jeq	l_30b6                             	| [$30a7: jr   z,$30B6]
 	cmp.b	#0x05,d0                         	| [$30a9: cp   $05]
@@ -7291,7 +7304,7 @@ l_30ad:
 	move.b	d0,tile_or_color_mode_8920(a6)                   	| [$30b2: ld   ($8920),a]
 	rts                                    	| [$30b5: ret]
 l_30b6:
-	move.b	(0x01,a2),d0                    	| [$30b6: ld   a,(ix+$01)]
+	move.b	(wolf_walking_01,a2),d0                    	| [$30b6: ld   a,(ix+$01)]
 	                               	| [$30b9: and  a]
 	jne	l_30ad                             	| [$30ba: jr   nz,$30AD]
 
@@ -7305,16 +7318,16 @@ l_30b6:
 	jbsr	read_iyl_in_d0                         	| [$30d1: ld   a,iyl]
 	cmp.b	#0x28,d0                         	| [$30d3: cp   $28]
 	jne	l_30ad                             	| [$30d5: jr   nz,$30AD]
-	lea	l_8F08(a6),a0                      	| [$30d7: ld   hl,$8F08]
-	move.b	#0x01,(a0)                      	| [$30da: ld   (hl),$01]
-	addq.w	#1,a0                           	| [$30dc: inc  hl]
+	lea	rock_dropped_sub_state_8F08(a6),a0                      	| [$30d7: ld   hl,$8F08]
+	move.b	#0x01,(a0)+                      	| [$30da: ld   (hl),$01]
+	                           	| [$30dc: inc  hl]
 	move.b	#0x20,(a0)                      	| [$30dd: ld   (hl),$20]
 	rts                                    	| [$30df: ret]
 l_30e0:
 	pea	l_32BD(pc)                          	| [$30e0: ld   hl,$32BD]
 
 	                        	| [$30e3: push hl]
-	move.b	l_8F08(a6),d0                   	| [$30e4: ld   a,($8F08)]
+	move.b	rock_dropped_sub_state_8F08(a6),d0                   	| [$30e4: ld   a,($8F08)]
 	and.b	#0x03,d0                         	| [$30e7: and  $03]
 	subq.b	#1,d0                           	| [$30e9: dec  a]
 	jbsr	jump_from_table_below_0028                            	| [$30ea: rst  $28]
@@ -7352,15 +7365,16 @@ l_30fa:
 	jne	l_30fa                             	| [$3120: djnz $30FA]
 	move.b	#0x0C,d0                        	| [$3122: ld   a,$0C]
 	move.b	d0,l_8928(a6)                   	| [$3124: ld   ($8928),a]
-	lea	l_8F08(a6),a0                      	| [$3127: ld   hl,$8F08]
+	lea	rock_dropped_sub_state_8F08(a6),a0                      	| [$3127: ld   hl,$8F08]
 	addq.b	#1,(a0)                         	| [$312a: inc  (hl)]
 	move.b	#0x10,d0                        	| [$312b: ld   a,$10]
 	move.w	#0x001D,d3                      	| [$312d: ld   de,$001D] 29
+	* erase big rock tiles
 	lea	l_84C2(a6),a0                      	| [$3130: ld   hl,$84C2]
 	move.b	#0x03,d2                        	| [$3133: ld   c,$03]
 l_3135:
 	move.b	#0x03,d1                        	| [$3135: ld   b,$03]
-	jbsr	fill_area_0010                            	| [$3137: rst  $10]
+	jbsr	fill_area_0010_video              	| [$3137: rst  $10]
 	add.w	d3,a0                            	| [$3138: add  hl,de]
 	subq.b	#1,d2                           	| [$3139: dec  c]
 	jne	l_3135                             	| [$313a: jr   nz,$3135]
@@ -7419,11 +7433,11 @@ l_3177:
 	move.b	(a0),d0                         	| [$3182: ld   a,(hl)]
 	                               	| [$3183: and  a]
 	jeq	l_3199                             	| [$3184: jr   z,$3199]
-	add.b	(0x05,a3),d0                     	| [$3186: add  a,(iy+$05)]
+	add.b	(fine_x_pos_05,a3),d0                     	| [$3186: add  a,(iy+$05)]
 	jcc	l_318e                             	| [$3189: jr   nc,$318E]
-	addq.b	#1,(0x06,a3)                    	| [$318b: inc  (iy+$06)]
+	addq.b	#1,(x_pos_06,a3)                    	| [$318b: inc  (iy+$06)]
 l_318e:
-	move.b	d0,(0x05,a3)                    	| [$318e: ld   (iy+$05),a]
+	move.b	d0,(fine_x_pos_05,a3)                    	| [$318e: ld   (iy+$05),a]
 	addq.w	#1,a0                           	| [$3191: inc  hl]
 	move.b	(a0)+,d0                         	| [$3192: ld   a,(hl)]
 	                           	| [$3193: inc  hl]
@@ -7437,13 +7451,13 @@ l_3199:
 l_31a1:
 	move.b	(0x09,a3),d0                    	| [$31a1: ld   a,(iy+$09)]
 l_31a4:
-	add.b	(0x03,a3),d0                     	| [$31a4: add  a,(iy+$03)]
+	add.b	(fine_y_pos_03,a3),d0                     	| [$31a4: add  a,(iy+$03)]
 	jcc	l_31ac                             	| [$31a7: jr   nc,$31AC]
-	addq.b	#1,(0x04,a3)                    	| [$31a9: inc  (iy+$04)]
+	addq.b	#1,(y_pos_04,a3)                    	| [$31a9: inc  (iy+$04)]
 l_31ac:
-	move.b	d0,(0x03,a3)                    	| [$31ac: ld   (iy+$03),a]
+	move.b	d0,(fine_y_pos_03,a3)                    	| [$31ac: ld   (iy+$03),a]
 	                               	| [$31b2: and  a]
-	move.b	(0x04,a3),d0                    	| [$31b3: ld   a,(iy+$04)]
+	move.b	(y_pos_04,a3),d0                    	| [$31b3: ld   a,(iy+$04)]
 	tst.b	ram_or_rom_pointer_8f4a(a6)                   	| [$31af: ld   a,($8F4A)]
 	jne	l_31d7                             	| [$31b6: jr   nz,$31D7]
 	rol.b	#3,d0                            	| [$31b8: rlca] * 3
@@ -7452,8 +7466,9 @@ l_31ac:
 	move.b	player_y_8A84(a6),d0          	| [$31be: ld   a,(player_y_8A84)]
 	cmp.b	d2,d0                            	| [$31c1: cp   c]
 	jcc	l_31e5                             	| [$31c2: jr   nc,$31E5]
+	jbsr	osd_break
 	move.b	#0x01,d0                        	| [$31c4: ld   a,$01]
-	move.b	d0,l_8F24(a6)                   	| [$31c6: ld   ($8F24),a]
+	move.b	d0,big_rock_hits_player_8F24(a6)                   	| [$31c6: ld   ($8F24),a]
 	move.b	d0,ram_or_rom_pointer_8f4a(a6)                   	| [$31c9: ld   ($8F4A),a]
 	LOAD_ROM	0x3348,a0                          	| [$31cc: ld   hl,$3348]
 	STORE_ROM_POINTER	a0,rom_pointer_8f48(a6)            	| [$31cf: ld   ($8F4B),hl]
@@ -7464,25 +7479,25 @@ l_31d7:
 	cmp.b	#0x1B,d0                         	| [$31d7: cp   $1B]
 	jcs	l_31e5                             	| [$31d9: jr   c,$31E5]
 	move.b	d0,l_8928(a6)                   	| [$31db: ld   ($8928),a]
-	lea	l_8F08(a6),a0                      	| [$31de: ld   hl,$8F08]
+	lea	rock_dropped_sub_state_8F08(a6),a0                      	| [$31de: ld   hl,$8F08]
 	addq.b	#1,(a0)                         	| [$31e1: inc  (hl)]
 	jbsr	l_0f1d                            	| [$31e2: call $0F1D]
 l_31e5:
-	move.b	(0x04,a3),d2                    	| [$31e5: ld   c,(iy+$04)]
-	move.b	(0x06,a3),d1                    	| [$31e8: ld   b,(iy+$06)]
+	move.b	(y_pos_04,a3),d2                    	| [$31e5: ld   c,(iy+$04)]
+	move.b	(x_pos_06,a3),d1                    	| [$31e8: ld   b,(iy+$06)]
 	lea	tile_or_color_mode_8920(a6),a2                      	| [$31eb: ld   ix,$8920]
 	move.w	#0x0003,d3                      	| [$31ef: ld   de,$0003] 3
 	move.b	(0x02,a2),D6                    	| [$31f2: ld   l,(ix+$02)]
 	move.b	(0x03,a2),D5                    	| [$31f5: ld   h,(ix+$03)]
 	LOAD_A0_FROM_D5D6
 	add.w	d3,a0                            	| [$31f8: add  hl,de]
-	move.b	(0x03,a3),d0                    	| [$31f9: ld   a,(iy+$03)]
+	move.b	(fine_y_pos_03,a3),d0                    	| [$31f9: ld   a,(iy+$03)]
 	move.b	d0,(a0)+                         	| [$31fc: ld   (hl),a]
 	                           	| [$31fd: inc  hl]
 	move.b	d2,d0                           	| [$31fe: ld   a,c]
 	move.b	d0,(a0)+                         	| [$31ff: ld   (hl),a]
 	                           	| [$3200: inc  hl]
-	move.b	(0x05,a3),d0                    	| [$3201: ld   a,(iy+$05)]
+	move.b	(fine_x_pos_05,a3),d0                    	| [$3201: ld   a,(iy+$05)]
 	move.b	d0,(a0)+                         	| [$3204: ld   (hl),a]
 	                           	| [$3205: inc  hl]
 	move.b	d1,d0                           	| [$3206: ld   a,b]
@@ -7492,14 +7507,14 @@ l_31e5:
 	move.b	(0x5,a2),D5                    	| [$320d: ld   h,(ix+$05)]
 	LOAD_A0_FROM_D5D6
 	add.w	d3,a0                            	| [$3210: add  hl,de]
-	move.b	(0x03,a3),d0                    	| [$3211: ld   a,(iy+$03)]
+	move.b	(fine_y_pos_03,a3),d0                    	| [$3211: ld   a,(iy+$03)]
 	move.b	d0,(a0)+                         	| [$3214: ld   (hl),a]
 	                           	| [$3215: inc  hl]
 	move.b	d2,d0                           	| [$3216: ld   a,c]
 	addq.b	#0x02,d0                        	| [$3217: add  a,$02]
 	move.b	d0,(a0)+                         	| [$3219: ld   (hl),a]
 												| [$321a: inc  hl]
-	move.b	(0x05,a3),d0                    	| [$321b: ld   a,(iy+$05)]
+	move.b	(fine_x_pos_05,a3),d0                    	| [$321b: ld   a,(iy+$05)]
 	move.b	d0,(a0)+                         	| [$321e: ld   (hl),a]
 	                           	| [$321f: inc  hl]
 	move.b	d1,d0                           	| [$3220: ld   a,b]
@@ -7508,14 +7523,14 @@ l_31e5:
 	move.b	(0x07,a2),D5                    	| [$3225: ld   h,(ix+$07)]
 	LOAD_A0_FROM_D5D6
 	add.w	d3,a0                            	| [$3228: add  hl,de]
-	move.b	(0x03,a3),d0                    	| [$3229: ld   a,(iy+$03)]
+	move.b	(fine_y_pos_03,a3),d0                    	| [$3229: ld   a,(iy+$03)]
 	move.b	d0,(a0)+                         	| [$322c: ld   (hl),a]
 	                           	| [$322d: inc  hl]
 	move.b	d2,d0                           	| [$322e: ld   a,c]
 	addq.b	#0x02,d0                        	| [$322f: add  a,$02]
 	move.b	d0,(a0)+                         	| [$3231: ld   (hl),a]
 	                           	| [$3232: inc  hl]
-	move.b	(0x05,a3),d0                    	| [$3233: ld   a,(iy+$05)]
+	move.b	(fine_x_pos_05,a3),d0                    	| [$3233: ld   a,(iy+$05)]
 	move.b	d0,(a0)+                         	| [$3236: ld   (hl),a]
 	                           	| [$3237: inc  hl]
 	move.b	d1,d0                           	| [$3238: ld   a,b]
@@ -7581,7 +7596,7 @@ rom_checksum_3266:
       	| [$32b6: jp   $3829]
 
 l_32BD:
-	move.b	l_8F24(a6),d0                   	| [$32bd: ld   a,($8F24)]
+	move.b	big_rock_hits_player_8F24(a6),d0                   	| [$32bd: ld   a,($8F24)]
 	                               	| [$32c0: and  a]
 	bne.b	0f                               	| [...]
 	rts                                    	| [$32c1: ret  z] [...]
@@ -7598,7 +7613,7 @@ l_32BD:
 	addq.w	#1,a0                           	| [$32cc: inc  hl]
 	move.b	#0x20,(a0)                      	| [$32cd: ld   (hl),$20]
 	jbsr	l_0fad                            	| [$32cf: call $0FAD]
-	lea	l_8F24(a6),a0                      	| [$32d2: ld   hl,$8F24]
+	lea	big_rock_hits_player_8F24(a6),a0                      	| [$32d2: ld   hl,$8F24]
 	addq.b	#1,(a0)                         	| [$32d5: inc  (hl)]
 												| [$32d6: ld   hl,$0779]
 												| [$32d9: ld   bc,$2000]
@@ -7633,7 +7648,7 @@ l_32f6:
 0:
 	addq.b	#1,d0                           	| [$32fe: inc  a]
 	move.b	d0,player_killed_flag_8D32(a6)                   	| [$32ff: ld   ($8D32),a]
-	lea	l_8F24(a6),a0                      	| [$3302: ld   hl,$8F24]
+	lea	big_rock_hits_player_8F24(a6),a0                      	| [$3302: ld   hl,$8F24]
 	addq.b	#1,(a0)                         	| [$3305: inc  (hl)]
 	rts                                    	| [$3306: ret]
 	
@@ -7882,8 +7897,8 @@ l_34b0:
 l_34c0:
 	move.b	in_game_sub_state_880A(a6),d0   	| [$34c0: ld   a,(in_game_sub_state_880A)]
 	cmp.b	#0x04,d0                         	| [$34c3: cp   $04]
-	jne	write_number_of_remaining_wolves_34c9                             	| [$34c5: jr   nz,$34C9]
-	addq.w	#1,a0                           	| [$34c7: inc  l]
+	jne	write_number_of_remaining_wolves_34c9       | [$34c5: jr   nz,$34C9]
+	lea		nb_wolves_pushing_rock_8902(a6),a0     | [$34c7: inc  l]
 	addq.b	#1,(a0)                         	| [$34c8: inc  (hl)]
 write_number_of_remaining_wolves_34c9:
 	move.b	nb_wolves_8901(a6),d0           	| [$34c9: ld   a,(nb_wolves_8901)]
@@ -8817,7 +8832,7 @@ l_3d2f:
 l_3d3b:
 	move.b	d1,(character_timer_11,a2)         | [$3d3b: ld   (ix+$11),b]
 	move.b	d2,d0                           	| [$3d3e: ld   a,c]
-	btst.b	#1,(unknown_07,a2)                    	| [$3d3f: bit  1,(ix+$07)]
+	btst.b	#1,(copy_of_control_bits_07,a2)                    	| [$3d3f: bit  1,(ix+$07)]
 	jeq	l_3d50                             	| [$3d43: jr   z,$3D50]
 	addq.b	#1,d2                           	| [$3d45: inc  c]
 	move.b	d2,d0                           	| [$3d4a: ld   a,c]
@@ -8871,7 +8886,7 @@ wolf_shot_by_arrow_falls_3d8f:
 
 l_3d99:
 	LOAD_ROM	0x4076,a0                          	| [$3d99: ld   hl,$4076]
-	move.b	(unknown_07,a2),d0                    	| [$3d9c: ld   a,(ix+$07)]
+	move.b	(copy_of_control_bits_07,a2),d0                    	| [$3d9c: ld   a,(ix+$07)]
 	and.b	#0x03,d0                         	| [$3d9f: and  $03]
 	subq.b	#1,d0                           	| [$3da1: dec  a]
 	jbsr	load_16bit_rom_pointer_0c45                            	| [$3da2: call $0C45]
@@ -9197,7 +9212,7 @@ l_4066:
 	
 * only really active on even levels
 
-handle_lonely_balloons_40bd:
+handle_loose_balloons_40bd:
 	lea	lonely_balloons_struct_array_8C30(a6),a2                      	| [$40bd: ld   ix,$8C30]
 	move.w	#0x0018,d3                      	| [$40c1: ld   de,$0018] 24
 	move.b	#0x04,d1                        	| [$40c4: ld   b,$04]
@@ -9598,17 +9613,17 @@ l_43ce:
 	jra	l_43a8                             	| [$43df: jr   $43A8]
 
 
-l_4a0b:
+update_wolves_pushing_rock_4a0b:
 	move.b	round_number_8907(a6),d0                   	| [$4a0b: ld   a,($8907)]
 	btst.b	#0,d0                           	| [$4a0e: bit  0,a]
 	bne.b	0f                               	| [...]
 	rts                                    	| [$4a10: ret  z] [...]
 0:
-	move.b	l_8902(a6),d0                   	| [$4a11: ld   a,($8902)]
+	move.b	nb_wolves_pushing_rock_8902(a6),d0                   	| [$4a11: ld   a,($8902)]
 	move.b	d0,l_8D43(a6)                   	| [$4a14: ld   ($8D43),a]
-	move.b	d0,l_8934(a6)                   	| [$4a17: ld   ($8934),a]
-	tst.b	d0                               	| [$4a1a: and  a]
-	jne	l_4a2c                             	| [$4a1b: jr   nz,$4A2C]
+	move.b	d0,nb_wolves_pushing_rock_8934(a6)                   	| [$4a17: ld   ($8934),a]
+	                               	| [$4a1a: and  a]
+	jne	write_pushing_wolf_tiles_4a2c                             	| [$4a1b: jr   nz,$4A2C]
 	lea	l_86E3(a6),a0                      	| [$4a1d: ld   hl,$86E3]
 	STORE_RAM_POINTER	a0,rock_tile_video_ram_pointer_8932(a6)            	| [$4a20: ld   ($8932),hl]
 	
@@ -9616,7 +9631,8 @@ l_4a0b:
 	LOAD_ROM	0x2754,a1                          	| [$4a25: ld   de,$2754]
 	jbsr	update_4x4_block_3307                            	| [$4a28: call $3307]
 	rts                                    	| [$4a2b: ret]
-l_4a2c:
+	
+write_pushing_wolf_tiles_4a2c:
 	move.b	d0,d1                           	| [$4a2c: ld   b,a]
 	lea	l_86A3(a6),a0                      	| [$4a2d: ld   hl,$86A3]
 	STORE_RAM_POINTER	a0,rock_tile_video_ram_pointer_8932(a6)            	| [$4a30: ld   ($8932),hl]
@@ -9624,13 +9640,17 @@ l_4a2c:
 	add.w	#0x20,a0                        	| [$4a33: ld   l,$C3]
 	move.w	#0xFFDF,d3                          	| [$4a35: ld   de,$FFDF]
 l_4a38:
-	move.b	#0xDA,(a0)+                      	| [$4a38: ld   (hl),$DA]
-	                           	| [$4a3a: inc  hl]
-	move.b	#0xDB,(a0)                      	| [$4a3b: ld   (hl),$DB]
+	move.b	#0xDA,d0                      	| [$4a38: ld   (hl),$DA]
+	jbsr	osd_w_videoram                           	| [$4a3a: inc  hl]
+	addq	#1,a0
+	move.b	#0xDB,d0                      	| [$4a3b: ld   (hl),$DB]
+	jbsr	osd_w_videoram                           	| [$4a3a: inc  hl]
 	add.w	d3,a0                            	| [$4a3d: add  hl,de]
-	move.b	#0xD8,(a0)+                      	| [$4a3e: ld   (hl),$D8]
-	                           	| [$4a40: inc  hl]
-	move.b	#0xD9,(a0)                      	| [$4a41: ld   (hl),$D9]
+	move.b	#0xD8,d0                      	| [$4a3e: ld   (hl),$D8]
+	jbsr	osd_w_videoram                           	| [$4a3a: inc  hl]
+	addq	#1,a0                           	| [$4a40: inc  hl]
+	move.b	#0xD9,d0                      	| [$4a41: ld   (hl),$D9]
+	jbsr	osd_w_videoram                           	| [$4a3a: inc  hl]
 	add.w	d3,a0                            	| [$4a43: add  hl,de]
 	subq.b	#1,d1                           	| [...]
 	jne	l_4a38                             	| [$4a44: djnz $4A38]
@@ -10904,7 +10924,7 @@ l_5c14:
 
 	* special case once in a while: wolf avoids arrow with upper balloon shield
 	LOAD_ROM	0x5C80,a1                          	| [$5c18: ld   de,$5C80]
-	btst.b	#1,(unknown_07,a2)                    	| [$5c1b: bit  1,(ix+$07)]
+	btst.b	#1,(copy_of_control_bits_07,a2)                    	| [$5c1b: bit  1,(ix+$07)]
 	jeq	l_5c24                             	| [$5c1f: jr   z,$5C24]
 	LOAD_ROM	0x5C89,a1                          	| [$5c21: ld   de,$5C89]
 l_5c24:
@@ -11085,8 +11105,8 @@ l_5df7:
 	beq.b	0f                               	| [...]
 	rts                                    	| [$5dfb: ret  nz] [...]
 0:
-	move.b	l_8F08(a6),d0                   	| [$5dfc: ld   a,($8F08)]
-	lea	l_8F24(a6),a0                      	| [$5dff: ld   hl,$8F24]
+	move.b	rock_dropped_sub_state_8F08(a6),d0                   	| [$5dfc: ld   a,($8F08)]
+	lea	big_rock_hits_player_8F24(a6),a0                      	| [$5dff: ld   hl,$8F24]
 	or.b	(a0),d0                           	| [$5e02: or   (hl)]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$5e03: ret  nz] [...]
@@ -12788,6 +12808,7 @@ l_6931:
 	jbsr	update_88A0_0038                            	| [$6986: rst  $38]
 	lea	l_863B(a6),a0                      	| [$6987: ld   hl,$863B]
 	move.b	l_8903(a6),d0                   	| [$698a: ld   a,($8903)]
+	moveq	#0,d1
 	move.b	d0,d1                           	| [$698d: ld   b,a]
 	subq	#1,d1		| for dbf
 	CLEAR_XC_FLAGS                         	| [$698e: xor  a]
@@ -13322,9 +13343,9 @@ l_6cab:
 	beq.b	0f                               	| [...]
 	rts                                    	| [$6cb4: ret  nz] [...]
 0:
-	move.b	l_8F24(a6),d0                   	| [$6cb5: ld   a,($8F24)]
-	                               	| [$6cb8: and  a]
 	lea	l_8A87(a6),a0                      	| [$6cb9: ld   hl,$8A87]
+	move.b	big_rock_hits_player_8F24(a6),d0                   	| [$6cb5: ld   a,($8F24)]
+	                               	| [$6cb8: and  a]
 	jeq	l_6cc1                             	| [$6cbc: jr   z,$6CC1]
 	clr.b	d0                               	| [$6cbe: xor  a]
 	move.b	d0,(a0)                         	| [$6cbf: ld   (hl),a]
@@ -13595,7 +13616,7 @@ l_6e02:
 l_6e59:
 	jbsr	l_1583                            	| [$6e59: call $1583]
 	jbsr	l_6e75                            	| [$6e5c: call $6E75]
-	jbsr	l_1e55                            	| [$6e5f: call $1E55]
+	jbsr	read_controls_1e55                            	| [$6e5f: call $1E55]
 	jbsr	l_20d4                            	| [$6e62: call $20D4]
 	jbsr	update_sprite_shadows_02EF        	| [$6e65: call update_sprite_shadows_02EF]
 	jbsr	handle_extra_life_award_18da                            	| [$6e68: call $18DA]
