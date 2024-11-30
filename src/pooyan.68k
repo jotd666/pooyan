@@ -3598,10 +3598,10 @@ in_game_159B:
 	.long	main_game_sequence_18af
 	.long	level_completed_19ee
 	.long	prepare_next_round_1a01
-	.long	l_1a64
+	.long	player_died_1A64
 	.long	l_1b43
 	.long	l_1b8c
-	.long	l_1bab
+	.long	switch_players_if_needed_1bab
 	.long	l_1bcc
 	.long	l_1c03
 	.long	move_pigs_to_left_game_start_1c53
@@ -4305,7 +4305,7 @@ l_1a5d:
 	clr.b	d0                               	| [$1a5f: xor  a]
 	move.b	d0,in_game_sub_state_880A(a6)   	| [$1a60: ld   (in_game_sub_state_880A),a]
 	rts                                    	| [$1a63: ret]
-l_1a64:
+player_died_1A64:
 	move.b	is_bonus_stage_8F50(a6),d0                   	| [$1a64: ld   a,($8F50)]
 	                               	| [$1a67: and  a]
 	jne	prepare_next_round_1a01                             	| [$1a68: jr   nz,$1A01]
@@ -4490,7 +4490,7 @@ l_1b8c:
 	move.b	#0x60,d0                        	| [$1ba5: ld   a,$60]
 	move.b	d0,l_8808(a6)                   	| [$1ba7: ld   ($8808),a]
 	rts                                    	| [$1baa: ret]
-l_1bab:
+switch_players_if_needed_1bab:
 	move.b	two_player_mode_880E(a6),d0                   	| [$1bab: ld   a,($880E)]
 	                               	| [$1bae: and  a]
 	jeq	l_1bbc                             	| [$1baf: jr   z,$1BBC]
@@ -7331,11 +7331,11 @@ l_30e0:
 	and.b	#0x03,d0                         	| [$30e7: and  $03]
 	subq.b	#1,d0                           	| [$30e9: dec  a]
 	jbsr	jump_from_table_below_0028                            	| [$30ea: rst  $28]
-	.long	l_30f1
-	.long	l_316e
+	.long	rock_tilting_before_fall_30f1
+	.long	rock_falling_316e
 	.long	rom_checksum_3266
 
-l_30f1:
+rock_tilting_before_fall_30f1:
 	lea	tile_or_color_mode_8920(a6),a2                      	| [$30f1: ld   ix,$8920]
 	LOAD_ROM	0x3337,a0                          	| [$30f5: ld   hl,$3337]
 	move.b	#0x04,d1                        	| [$30f8: ld   b,$04]
@@ -7414,7 +7414,7 @@ l_3135:
 						| [$316b: ldir]
 					| [$316d: ret]
 	
-l_316e:
+rock_falling_316e:
 	lea	l_8928(a6),a0                      	| [$316e: ld   hl,$8928]
 	move.b	(a0),d0                         	| [$3171: ld   a,(hl)]
 	                               	| [$3172: and  a]
@@ -7722,8 +7722,8 @@ l_338a:
 	rts                                    	| [$3399: ret  nc] [...]
 0:
 	jbsr	jump_from_table_below_0028                            	| [$339a: rst  $28]
-	.long	l_33bd                                   | 0x00
-	.long	l_3423                                   | 0x01
+	.long	wolf_landing_on_top_ledge_33bd                                   | 0x00
+	.long	wolf_walking_on_top_ledge_3423                                   | 0x01
 	.long	wolf_shot_exploding_3536                 | 0x02
 	.long	update_walking_wolves_355b               | 0x03
 	.long	wolf_updates_balloon_3865                 | 0x04
@@ -7741,7 +7741,7 @@ l_338a:
 	.long	rom_check_3fe9                           | 0x10
 
 
-l_33bd:
+wolf_landing_on_top_ledge_33bd:
 	subq.b	#1,(character_timer_11,a2)                    	| [$33bd: dec  (ix+$11)]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$33c0: ret  nz] [...]
@@ -7802,7 +7802,7 @@ table_3418:
 	.byte	0x00
 	.byte	0x00
 	.align	2
-l_3423:
+wolf_walking_on_top_ledge_3423:
 	jbsr	auto_animate_sprite_ix_4006                            	| [$3423: call $4006]
 	btst.b	#0,(0x01,a2)                    	| [$3426: bit  0,(ix+$01)]
 	jeq	l_3437                             	| [$342a: jr   z,$3437]
@@ -9238,8 +9238,8 @@ l_40d0:
 	rts                                    	| [$40df: ret  nc] [...]
 0:
 	jbsr	jump_from_table_below_0028                            	| [$40e0: rst  $28]
-	.long	l_4103
-	.long	l_4137
+	.long	animate_loose_balloon_inflating_4103
+	.long	loose_balloon_rises_4137
 	.long	balloon_reaches_top_explodes_416f
 	.long	do_nothing_4179
 	.long	do_nothing_4179
@@ -9247,7 +9247,7 @@ l_40d0:
 	.long	do_nothing_4179
 	.long	do_nothing_4179
 	.long	pop_lonely_balloon_417a
-	.long	l_418d
+	.long	pop_lonely_balloon_418d
 	.long	do_nothing_4179
 	.long	l_4221
 	.long	l_4350
@@ -9256,7 +9256,7 @@ l_40d0:
 	.long	do_nothing_4378
 	.long	do_nothing_4378
 
-l_4103:
+animate_loose_balloon_inflating_4103:
 	jbsr	auto_animate_sprite_ix_4006                            	| [$4103: call $4006]
 	subq.b	#1,(character_timer_11,a2)                    	| [$4106: dec  (ix+$11)]
 	beq.b	0f                               	| [...]
@@ -9300,7 +9300,7 @@ l_4103:
 										| [$4135: inc  (hl)]
 	                                    	| [$4136: ret]
 
-l_4137:
+loose_balloon_rises_4137:
 	jbsr	auto_animate_sprite_ix_4006                            	| [$4137: call $4006]
 	move.b	(character_speed_0a,a2),d0                    	| [$413a: ld   a,(ix+$0a)]
 	neg.b	d0                               	| [$413d: neg]
@@ -9345,7 +9345,7 @@ pop_lonely_balloon_417a:
 	jbsr	store_de_in_struct_381e                            	| [$4183: call $381E]
 	move.b	#0x30,(character_timer_11,a2)                 	| [$4186: ld   (ix+$11),$30]
 	addq.b	#1,(character_state_02,a2)                    	| [$418a: inc  (ix+$02)]
-l_418d:
+pop_lonely_balloon_418d:
 	jbsr	auto_animate_sprite_ix_4006                            	| [$418d: call $4006]
 	subq.b	#1,(character_timer_11,a2)                    	| [$4190: dec  (ix+$11)]
 	beq.b	0f                               	| [...]
