@@ -1,18 +1,17 @@
 
-- bottom row trashed on level 2 at some point
 - level 2: at some point no collision detection, no more ability to shoot arrows
-- same: wolf climbs ladder: wrong chars, impossible to shoot
-- regression: no wolf on ladder when a wolf passes
-- victory wolves: tile should be symmetric!!! check memory
-- rock kills player: player keeps on falling and falling
+- level 1: wolf climbs ladder: wrong chars, impossible to shoot
+- level 1: no wolf on ladder when a wolf passes/wolves on ladder animation lock up
+- rock kills player: player doesn't fall from basket when ground is hit: break on 3302 then watch who
+  reads player_killed_flag_8D32 (in MAME, then in Amiga)
 - crash on game over HH and back-trace
 - wolves should be HW sprites if possible
+- meat doesn't hit balloons
 - continue to rip sounds & music
 - during tutorial, one character is off before "400"
 - demo: wrong timing/data (? but still seems coherent)
 - capture screenshot memory dumps to filter out unused tiles/cluts
   to save A LOT OF memory
-- meat seems to miss wolves at times
 - level 2 music becomes more dramatic when wolves are about to push rock
 
 converter: don't warn about flags on ld with i or r as target
