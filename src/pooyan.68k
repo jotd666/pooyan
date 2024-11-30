@@ -6336,7 +6336,7 @@ l_28df:
 	move.b	(character_state_02,a2),d0                    	| [$28eb: ld   a,(ix+$02)]
 	and.b	#0x07,d0                         	| [$28ee: and  $07]
 	jbsr	jump_from_table_below_0028                            	| [$28f0: rst  $28]
-	.long	l_2901
+	.long	l_player_basket_goes_to_ground_2901
 	.long	l_29a0
 	.long	l_2a01
 	.long	l_2a32
@@ -6345,8 +6345,8 @@ l_28df:
 	.long	l_2ab3
 	.long	l_2ae8
 
-l_2901:
-	move.b	#0x01,(character_timer_11,a2)                 	| [$2901: ld  (ix+$11),$01]
+l_player_basket_goes_to_ground_2901:
+	move.b	#0x01,(character_timer_11,a2)                 	| [$player_basket_goes_to_ground_2901: ld  (ix+$11),$01]
 	addq.b	#1,(y_pos_04,a2)                    	| [$2905: inc  (ix+$04)]
 	move.b	(y_pos_04,a2),d0                    	| [$2908: ld   a,(ix+$04)]
 	cmp.b	#0xDC,d0                         	| [$290b: cp   $DC]
@@ -6443,7 +6443,7 @@ l_29bc:
 						
 										| [$29f3: ld   a,(de)]
 										| [$29f4: cp   (hl)]
-										| [$29f5: jp   nz,$2901]
+										| [$29f5: jp   nz,$player_basket_goes_to_ground_2901]
 										| [$29f8: inc  hl]
 										| [$29f9: inc  de]
 										| [...]
@@ -7725,13 +7725,13 @@ l_338a:
 	.long	wolf_landing_on_top_ledge_33bd                                   | 0x00
 	.long	wolf_walking_on_top_ledge_3423                                   | 0x01
 	.long	wolf_shot_exploding_3536                 | 0x02
-	.long	update_walking_wolves_355b               | 0x03
-	.long	wolf_updates_balloon_3865                 | 0x04
+	.long	wolf_walking_below_355b                  | 0x03  level 2: below
+	.long	wolf_updates_balloon_3865                | 0x04
 	.long	wolf_vertical_movement_39af              | 0x05
 	.long	wolf_walking_to_ladders_3be3             | 0x06
 	.long	l_3c92                                   | 0x07
 	.long	wolf_hit_3d18                            | 0x08
-	.long	wolf_balloon_exploding_3d5c               | 0x09
+	.long	wolf_balloon_exploding_3d5c              | 0x09
 	.long	wolf_shot_by_arrow_falls_3d8f            | 0x0A
 	.long	flying_wolf_prepares_to_shoot_3e69       | 0x0B
 	.long	flying_wolf_shoots_3e9c                  | 0x0C
@@ -8004,7 +8004,7 @@ l_3553:
 	move.b	#0x17,d1                        	| [$3557: ld   b,$17]
 	jbsr	fill_area_0010                            	| [$3559: rst  $10]
 	rts                                    	| [$355a: ret]
-update_walking_wolves_355b:
+wolf_walking_below_355b:
 	jbsr	auto_animate_sprite_ix_4006                            	| [$355b: call $4006]
 	move.b	(0x08,a2),d0                    	| [$355e: ld   a,(ix+$08)]
 	                               	| [$3561: and  a]
@@ -8113,11 +8113,11 @@ l_364e:
 	jbsr	read_byte_a0_plus_d0_0020                            	| [$365b: rst  $20]
 	move.b	d0,(a1)                         	| [$365c: ld   (de),a]
 l_365d:
-	btst.b	#0,(0x0b,a2)                    	| [$365d: bit  0,(ix+$0b)]
+	btst.b	#0,(unknown_0b,a2)                    	| [$365d: bit  0,(ix+$0b)]
 	jeq	l_3677                             	| [$3661: jr   z,$3677]
 	lea	l_8AE2(a6),a0                      	| [$3663: ld   hl,$8AE2]
 	move.w	#0x0018,d3                      	| [$3666: ld   de,$0018] 24
-	move.b	d3,d2                           	| [$3669: ld   c,d]
+	moveq	#0,d2                           	| [$3669: ld   c,d]
 	move.b	#0x06,d1                        	| [$366a: ld   b,$06]
 l_366c:
 	move.b	(a0),d0                         	| [$366c: ld   a,(hl)]
@@ -8174,18 +8174,18 @@ l_36b2:
 	addq.b	#1,(a0)                         	| [$36b5: inc  (hl)]
 l_36b6:
 	move.b	(a0),d2                         	| [$36b6: ld   c,(hl)]
-	move.b	d2,(0x14,a2)                    	| [$36b7: ld   (ix+$14),c]
+	move.b	d2,(associated_object_id_14,a2)     | [$36b7: ld   (ix+$14),c]
 	LOAD_ROM	0x3988,a0                          	| [$36ba: ld   hl,$3988]
-	btst.b	#1,(0x07,a2)                    	| [$36bd: bit  1,(ix+$07)]
+	btst.b	#1,(copy_of_control_bits_07,a2)    	| [$36bd: bit  1,(ix+$07)]
 	jeq	l_36c6                             	| [$36c1: jr   z,$36C6]
 	LOAD_ROM	0x3994,a0                          	| [$36c3: ld   hl,$3994]
 l_36c6:
 	LOAD_D5D6_FROM_A0_ROM
 	move.b	d6,(animation_rom_pointer_lsb_0c,a2)                    	| [$36c6: ld   (ix+$0c),l]
 	move.b	d5,(animation_rom_pointer_msb_0d,a2)                    	| [$36c9: ld   (ix+$0d),h]
-	clr.b	(animation_timer_0e,a2)                        	| [$36cc: ld   (ix+$0e),$00]
-	move.b	#0x28,(character_timer_11,a2)                 	| [$36d0: ld   (ix+$11),$28]
-	move.b	#0x04,(character_state_02,a2)                 	| [$36d4: ld   (ix+$02),$04]
+	clr.b	(animation_timer_0e,a2)            | [$36cc: ld   (ix+$0e),$00]
+	move.b	#0x28,(character_timer_11,a2)      | [$36d0: ld   (ix+$11),$28]
+	move.b	#0x04,(character_state_02,a2)      | [$36d4: ld   (ix+$02),$04] wolf inflates baloon to get up
 	jbsr	l_36de                            	| [$36d8: call $36DE]
 	jra	copy_wolf_coords_in_balloon_379d                             	| [$36db: jp   $379D]
 l_36de:
@@ -15122,7 +15122,7 @@ l_7960:
 	move.w	#0x0609,d3                          	| [$7960: ld   de,$0609]
 	jbsr	update_88A0_0038                            	| [$7963: rst  $38]
 
-													| [$7964: ld   ix,$2901]
+													| [$7964: ld   ix,$player_basket_goes_to_ground_2901]
 											| [$7968: ld   hl,$0000] 0
 											| [$7968: ld   hl,$0000] 0
 											| [$796b: ld   e,l]

@@ -1,12 +1,10 @@
 
-break on all jump table entrypoints, figure them all out (end of level 2!!)
-
 - bottom row trashed on level 2 at some point
 - level 2: at some point no collision detection, no more ability to shoot arrows
+- same: wolf climbs ladder: wrong chars, impossible to shoot
 - regression: no wolf on ladder when a wolf passes
 - victory wolves: tile should be symmetric!!! check memory
 - rock kills player: player keeps on falling and falling
-- end of level 2: boss stays on the ground
 - crash on game over HH and back-trace
 - wolves should be HW sprites if possible
 - continue to rip sounds & music
