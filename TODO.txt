@@ -6,7 +6,6 @@
 - meat doesn't hit balloons
 - continue to rip sounds & music
 - during tutorial, one character is off before "400"
-- demo: wrong timing/data (? but still seems coherent)
 - capture screenshot memory dumps to filter out unused tiles/cluts
   to save A LOT OF memory
 - level 2 music becomes more dramatic when wolves are about to push rock
