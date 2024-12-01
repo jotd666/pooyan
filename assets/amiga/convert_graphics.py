@@ -123,7 +123,7 @@ colors_to_remove = {(104, 0, 251), (0, 255, 171)}
 sprite_names = {}
 sprite_cluts = [[] for _ in range(64)]
 
-baloon_cluts = [0,1,9,4,0xC,0xF]
+baloon_cluts = [0,1,9,4,0xC,0xF,0xB]
 wolf_cluts = [0,4]
 
 add_sprite(0,"small_rock")

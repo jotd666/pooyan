@@ -2697,7 +2697,7 @@ l_0eda:
 	move.b	#0x03,d0                        	| [$0edf: ld   a,$03]
 	jra	queue_sound_0eb3                             	| [$0ee1: jr   $0EB3]
 l_0ee3:
-	move.b	big_rock_hits_player_8F24(a6),d0                   	| [$0ee3: ld   a,($8F24)]
+	move.b	big_rock_hits_player_state_8F24(a6),d0                   	| [$0ee3: ld   a,($8F24)]
 	                               	| [$0ee6: and  a]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$0ee7: ret  nz] [...]
@@ -2905,7 +2905,7 @@ l_1042:
 	move.b	(character_state_02,a2),d0                    	| [$104f: ld   a,(ix+$02)]
 	                               	| [$1052: and  a]
 	jne	l_1078                             	| [$1053: jr   nz,$1078]
-	move.b	big_rock_hits_player_8F24(a6),d0                   	| [$1055: ld   a,($8F24)]
+	move.b	big_rock_hits_player_state_8F24(a6),d0                   	| [$1055: ld   a,($8F24)]
 	lea	l_8F57(a6),a0                      	| [$1058: ld   hl,$8F57]
 	or.b	(a0),d0                           	| [$105b: or   (hl)]
 	jne	l_1078                             	| [$105c: jr   nz,$1078]
@@ -4189,7 +4189,7 @@ l_19a0:
 	beq.b	0f                               	| [...]
 	rts                                    	| [$19a4: ret  nz] [...]
 0:
-	move.b	big_rock_hits_player_8F24(a6),d0                   	| [$19a5: ld   a,($8F24)]
+	move.b	big_rock_hits_player_state_8F24(a6),d0                   	| [$19a5: ld   a,($8F24)]
 	                               	| [$19a8: and  a]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$19a9: ret  nz] [...]
@@ -4912,11 +4912,11 @@ read_controls_1e55:
 	lea	arrow_structure_array_8C90(a6),a3     	| [$1e6b: ld   iy,$8C90] useful??
 	move.b	(character_state_02,a2),d0                    	| [$1e6f: ld   a,(ix+$02)]
 	                               	| [$1e72: and  a]
-	jne	l_1ea2                             	| [$1e73: jr   nz,$1EA2]
-	move.b	big_rock_hits_player_8F24(a6),d0                   	| [$1e75: ld   a,($8F24)]
+	jne	skip_input_read_1ea2                             	| [$1e73: jr   nz,$1EA2]
+	move.b	big_rock_hits_player_state_8F24(a6),d0                   	| [$1e75: ld   a,($8F24)]
 	lea	l_8F57(a6),a0                      	| [$1e78: ld   hl,$8F57]
 	or.b	(a0),d0                           	| [$1e7b: or   (hl)]
-	jne	l_1ea2                             	| [$1e7c: jr   nz,$1EA2]
+	jne	skip_input_read_1ea2                             	| [$1e7c: jr   nz,$1EA2]
 	                   	| [$1e7e: ld   a,($881F)]
 	                               	| [$1e81: and  a]
 	jbsr	osd_read_inputs_1              	| [$1e82: ld   a,(in1_a0a0)]
@@ -4942,7 +4942,7 @@ l_1e8a:
 0:
 	bclr.b	#4,(copy_of_control_bits_07,a2)                    	| [$1e9d: res  4,(ix+$07)]
 	rts                                    	| [$1ea1: ret]
-l_1ea2:
+skip_input_read_1ea2:
 	clr.b	(copy_of_control_bits_07,a2)                        	| [$1ea2: ld   (ix+$07),$00]
 	rts                                    	| [$1ea6: ret]
 
@@ -5213,10 +5213,10 @@ l_20d4:
                        	| [$20e5: jr   nz,$20EA]
                         	| [$20e7: ld   l,b]
 l_20e8:
-                        	| [$20e8: ld   a,(hl)]
+    tst.b	(a0)                    | [$20e8: ld   a,(hl)]	check if player killed
 	                               	| [$20e9: and  a]
-l_20ea:
-	                             	| [$20ea: jp   nz,$241E] bogus jump!
+
+	jne		l_241e                             	| [$20ea: jp   nz,$241E]
 	lea	player_bow_structure_8A80(a6),a2      	| [$20ed: ld   ix,player_bow_structure_8A80]
 	jbsr	l_2329                            	| [$20f1: call $2329]
 	jbsr	l_2101                            	| [$20f4: call $2101]
@@ -5752,7 +5752,7 @@ init_player_hit_2442:
 	move.b	d0,(y_pos_04,a2)                    	| [$2461: ld   (ix+$04),a]
 	LOAD_ROM	0x26BD,a0                          	| [$2464: ld   hl,$26BD]
 	jbsr	l_250f                            	| [$2467: call $250F]
-	move.b	big_rock_hits_player_8F24(a6),d0                   	| [$246a: ld   a,($8F24)]
+	move.b	big_rock_hits_player_state_8F24(a6),d0                   	| [$246a: ld   a,($8F24)]
 	                               	| [$246d: and  a]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$246e: ret  nz] [...]
@@ -7262,7 +7262,7 @@ check_attacking_ladder_wolf_collision_305f:
 	bcs.b	0f                               	| [...]
 	rts                                    	| [$3074: ret  nc] [...]
 0:
-	lea	big_rock_hits_player_8F24(a6),a0                      	| [$3075: ld   hl,$8F24]
+	lea	big_rock_hits_player_state_8F24(a6),a0                      	| [$3075: ld   hl,$8F24]
 	move.b	rock_dropped_sub_state_8F08(a6),d0                   	| [$3078: ld   a,($8F08)]
 	or.b	(a0),d0                           	| [$307b: or   (hl)]
 	beq.b	0f                               	| [...]
@@ -7469,7 +7469,7 @@ l_31ac:
 	cmp.b	d2,d0                            	| [$31c1: cp   c]
 	jcc	l_31e5                             	| [$31c2: jr   nc,$31E5]
 	move.b	#0x01,d0                        	| [$31c4: ld   a,$01]
-	move.b	d0,big_rock_hits_player_8F24(a6)                   	| [$31c6: ld   ($8F24),a]
+	move.b	d0,big_rock_hits_player_state_8F24(a6)                   	| [$31c6: ld   ($8F24),a]
 	move.b	d0,ram_or_rom_pointer_8f4a(a6)                   	| [$31c9: ld   ($8F4A),a]
 	LOAD_ROM	0x3348,a0                          	| [$31cc: ld   hl,$3348]
 	STORE_ROM_POINTER	a0,rom_pointer_8f48(a6)            	| [$31cf: ld   ($8F4B),hl]
@@ -7597,7 +7597,7 @@ rom_checksum_3266:
       	| [$32b6: jp   $3829]
 
 continue_rock_falling_32bd:
-	move.b	big_rock_hits_player_8F24(a6),d0                   	| [$32bd: ld   a,($8F24)]
+	move.b	big_rock_hits_player_state_8F24(a6),d0                   	| [$32bd: ld   a,($8F24)]
 	                               	| [$32c0: and  a]
 	bne.b	0f                               	| [...]
 	rts                                    	| [$32c1: ret  z] [...]
@@ -7605,6 +7605,7 @@ continue_rock_falling_32bd:
 	cmp.b	#0x02,d0                         	| [$32c2: cp   $02]
 	jeq	player_basket_falls_32e8                             	| [$32c4: jr   z,$32E8]
 	bcs.b	0f                               	| [...]
+	* D0 > 2 (basket has hit the ground)
 	rts                                    	| [$32c6: ret  nc] [...]
 0:
 	clr.b	d0                               	| [$32c7: xor  a]
@@ -7613,7 +7614,7 @@ continue_rock_falling_32bd:
 										| [$32cc: inc  hl]
 	move.b	#0x20,(a0)                      	| [$32cd: ld   (hl),$20]
 	jbsr	l_0fad                            	| [$32cf: call $0FAD]
-	lea	big_rock_hits_player_8F24(a6),a0                      	| [$32d2: ld   hl,$8F24]
+	lea	big_rock_hits_player_state_8F24(a6),a0                      	| [$32d2: ld   hl,$8F24]
 	addq.b	#1,(a0)                         	| [$32d5: inc  (hl)]
 												| [$32d6: ld   hl,$0779]
 												| [$32d9: ld   bc,$2000]
@@ -7645,7 +7646,7 @@ player_basket_crashed_32f6:
 
 	addq.b	#1,d0                           	| [$32fe: inc  a]
 	move.b	d0,player_killed_flag_8D32(a6)                   	| [$32ff: ld   ($8D32),a]
-	lea	big_rock_hits_player_8F24(a6),a0                      	| [$3302: ld   hl,$8F24]
+	lea	big_rock_hits_player_state_8F24(a6),a0                      	| [$3302: ld   hl,$8F24]
 	addq.b	#1,(a0)                         	| [$3305: inc  (hl)]
 	rts                                    	| [$3306: ret]
 	
@@ -11103,7 +11104,7 @@ l_5df7:
 	rts                                    	| [$5dfb: ret  nz] [...]
 0:
 	move.b	rock_dropped_sub_state_8F08(a6),d0                   	| [$5dfc: ld   a,($8F08)]
-	lea	big_rock_hits_player_8F24(a6),a0                      	| [$5dff: ld   hl,$8F24]
+	lea	big_rock_hits_player_state_8F24(a6),a0                      	| [$5dff: ld   hl,$8F24]
 	or.b	(a0),d0                           	| [$5e02: or   (hl)]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$5e03: ret  nz] [...]
@@ -13340,7 +13341,7 @@ l_6cab:
 	rts                                    	| [$6cb4: ret  nz] [...]
 0:
 	lea	l_8A87(a6),a0                      	| [$6cb9: ld   hl,$8A87]
-	move.b	big_rock_hits_player_8F24(a6),d0                   	| [$6cb5: ld   a,($8F24)]
+	move.b	big_rock_hits_player_state_8F24(a6),d0                   	| [$6cb5: ld   a,($8F24)]
 	                               	| [$6cb8: and  a]
 	jeq	l_6cc1                             	| [$6cbc: jr   z,$6CC1]
 	clr.b	d0                               	| [$6cbe: xor  a]

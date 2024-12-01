@@ -1,10 +1,7 @@
-
-- level 2: at some point no collision detection, no more ability to shoot arrows
-- level 1: wolf climbs ladder: wrong chars, impossible to shoot
-- level 1: no wolf on ladder when a wolf passes/wolves on ladder animation lock up
-- rock kills player: player doesn't fall from basket when ground is hit: break on 3302 then watch who
-  reads player_killed_flag_8D32 (in MAME, then in Amiga)
-- crash on game over HH and back-trace
+- level 2: at some point no collision detection, no more ability to shoot arrows (could it be a missed checksum???)
+- level 1: wolf climbs ladder: wrong chars, impossible to shoot (could it be a missed checksum???)
+- level 1: no wolf on ladder when a wolf passes/wolves on ladder animation lock up (could it be a missed checksum???)
+- crash on game over if high score: check .whdlregister!
 - wolves should be HW sprites if possible
 - meat doesn't hit balloons
 - continue to rip sounds & music
