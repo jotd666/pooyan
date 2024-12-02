@@ -881,7 +881,7 @@ clear_3_chars_02b1:
 	add.w	d3,a0                            	| [$02b6: add  hl,de]
 	jbsr	osd_w_videoram                         	| [$02b7: ld   (hl),a]
 	rts                                    	| [$02b8: ret]
-l_02b9:
+erase_sprite_shadow_ram_02b9:
 	lea	sprite_shadow_ram_8840(a6),a0      	| [$02b9: ld   hl,sprite_shadow_ram_8840]
 	move.b	#0x60,d1                        	| [$02bc: ld   b,$60]
 	clr.b	d0                               	| [$02be: xor  a]
@@ -894,7 +894,7 @@ l_02b9:
 	rts                                    	| [$02c8: ret]
 
 erase_a_column_02c9:
-	jbsr	l_02b9                            	| [$02c9: call $02B9]
+	jbsr	erase_sprite_shadow_ram_02b9                            	| [$02c9: call $02B9]
 	move.b	#0x1D,d1                        	| [$02cc: ld   b,$1D]
 erase_a_column_02ce:
 	move.b	#0x20,d0                        	| [$02ce: ld   a,$20]
@@ -1761,7 +1761,7 @@ l_08b3:
 l_08de:
 	clr.b	d0                               	| [$08de: xor  a]
 	move.b	d0,game_in_play_8806(a6)                   	| [$08df: ld   ($8806),a]
-	jbsr	l_02b9                            	| [$08e2: call $02B9]
+	jbsr	erase_sprite_shadow_ram_02b9                            	| [$08e2: call $02B9]
 	jbsr	l_1d0d                            	| [$08e5: call $1D0D]
 	rts                                    	| [$08e8: ret]
 
@@ -1773,29 +1773,29 @@ l_08e9:
 	rts                                    	| [$08ee: ret  nz] [...]
 0:
 	jbsr	l_02e3                            	| [$08ef: call $02E3]
-l_08f2:
-	LOAD_ROM	0x0859,a0                          	| [$08f2: ld   hl,$0859]
-	move.b	#0x1F,d1                        	| [$08f5: ld   b,$1F]
-	move.b	(a0),d0                         	| [$08f7: ld   a,(hl)]
-l_08f8:
-	addq.w	#1,a0                           	| [$08f8: inc  hl]
-	add.b	(a0),d0                          	| [$08f9: add  a,(hl)]
-	subq.b	#1,d1                           	| [...]
-	jne	l_08f8                             	| [$08fa: djnz $08F8]
-	cmp.b	#0x63,d0                         	| [$08fc: cp   $63]
-	jne	l_08f2                             	| [$08fe: jr   nz,$08F2]
+	* another ROM checksum...
+          	| [$08f2: ld   hl,$0859]
+   	| [$08f5: ld   b,$1F]
+   	| [$08f7: ld   a,(hl)]
+
+   	| [$08f8: inc  hl]
+    	| [$08f9: add  a,(hl)]
+   	| [...]
+  	| [$08fa: djnz $08F8]
+    	| [$08fc: cp   $63]
+  	| [$08fe: jr   nz,$08F2]
 	LOAD_ROM	0x0859,a4                          	| [$0900: ld   bc,$0859]
 	jbsr	apply_color_075d                            	| [$0903: call $075D]
-	LOAD_ROM	0x0831,a0                          	| [$0906: ld   hl,$0831]
-	move.b	#0x08,d1                        	| [$0909: ld   b,$08]
-	move.b	(a0),d0                         	| [$090b: ld   a,(hl)]
-l_090c:
-	addq.w	#1,a0                           	| [$090c: inc  hl]
-	add.b	(a0),d0                          	| [$090d: add  a,(hl)]
-	subq.b	#1,d1                           	| [...]
-	jne	l_090c                             	| [$090e: djnz $090C]
-	cmp.b	#0xAA,d0                         	| [$0910: cp   $AA]
-	jne	l_08f2                             	| [$0912: jr   nz,$08F2]
+	* another ROM checksum...						| [$0906: ld   hl,$0831]
+								| [$0909: ld   b,$08]
+								| [$090b: ld   a,(hl)]
+					
+								| [$090c: inc  hl]
+								| [$090d: add  a,(hl)]
+								| [...]
+								| [$090e: djnz $090C]
+								| [$0910: cp   $AA]
+								| [$0912: jr   nz,$08F2]
 	jbsr	l_0e54                            	| [$0914: call $0E54]
 	move.w	#0x0611,d3                          	| [$0917: ld   de,$0611]
 	jbsr	update_88A0_0038                            	| [$091a: rst  $38]
@@ -1823,7 +1823,7 @@ l_092e:
 	* next title state (after title has displayed)
 	lea	title_sub_state_8E51(a6),a0        	| [$0935: ld   hl,title_sub_state_8E51]
 	addq.b	#1,(a0)                         	| [$0938: inc  (hl)]
-	jbsr	l_02b9                            	| [$0939: call $02B9]
+	jbsr	erase_sprite_shadow_ram_02b9                            	| [$0939: call $02B9]
 												| [$093c: ld   hl,$07F5]
 												| [$093f: ld   a,$11]
 							
@@ -1867,7 +1867,7 @@ wait_while_score_table_shown_0986:
 	beq.b	0f                               	| [...]
 	rts                                    	| [$098a: ret  nz] [...]
 0:
-	jbsr	l_02b9                            	| [$098b: call $02B9]
+	jbsr	erase_sprite_shadow_ram_02b9                            	| [$098b: call $02B9]
 	jbsr	l_02e3                            	| [$098e: call $02E3]
 	lea	title_sub_state_8E51(a6),a0        	| [$0991: ld   hl,title_sub_state_8E51]
 	addq.b	#1,(a0)                         	| [$0994: inc  (hl)]
@@ -2303,7 +2303,7 @@ init_clear_screen_as_first_credit_inserted_0c5c:
 	move.b	#0x0F,(a0)+                      	| [$0c6f: ld   (hl),$0F]
 	                           	| [$0c71: inc  hl]
 	addq.b	#1,(a0)                         	| [$0c72: inc  (hl)]
-	jbsr	l_02b9                            	| [$0c73: call $02B9]
+	jbsr	erase_sprite_shadow_ram_02b9                            	| [$0c73: call $02B9]
 	rts                                    	| [$0c76: ret]
 
 clear_screen_as_first_credit_inserted_0c77:
@@ -3631,7 +3631,7 @@ continue_15D1:
 	lea	in_game_sub_state_880A(a6),a0                        	| [$15e8: ld   l,$0A]
 	clr.b	(a0)                             	| [$15ea: ld   (hl),$00]
 	jbsr	l_2527                            	| [$15ec: call $2527]
-	jbsr	l_02b9                            	| [$15ef: call $02B9]
+	jbsr	erase_sprite_shadow_ram_02b9                            	| [$15ef: call $02B9]
 	lea	round_text_address_855f(a6),a0                      	| [$15f2: ld   hl,$855F]
 	move.w    #-0x20,d3                          	| [$15f5: ld   de,$FFE0]
 	move.b	#0x08,d1                        	| [$15f8: ld   b,$08]
@@ -4351,6 +4351,7 @@ l_1aa3:
 	move.b	d0,rock_tile_video_ram_pointer_8932(a6)                   	| [$1aab: ld   ($8932),a]
 	jbsr	l_1ab2                            	| [$1aae: call $1AB2]
 	rts                                    	| [$1ab1: ret]
+
 l_1ab2:
 	move.w	#0x001E,d1                      	| [$1ab2: ld   bc,$001E] 30
 	moveq	#0,d6                           	| [$1ab5: ld   l,b]
@@ -4385,7 +4386,7 @@ l_1aea:
 	addq.b	#1,d0                           	| [$1aeb: inc  a]
 	move.b	d0,l_89FC(a6)                   	| [$1aec: ld   ($89FC),a]
 	subq.b	#1,d0                           	| [$1aef: dec  a]
-	movem.w	d1/d2,-(sp)                    	| [$1af0: push bc]
+	move.w	d1,d2                    	| [$1af0: push bc]
 	lea	l_8A1D(a6),a0                      	| [$1af1: ld   hl,$8A1D]
 	lea	l_8A20(a6),a1                      	| [$1af4: ld   de,$8A20]
 	jbsr	lddr                              	| [$1af7: lddr]
@@ -4397,7 +4398,7 @@ l_1aea:
 	move.b	(0x02,a2),d0                    	| [$1b06: ld   a,(ix+$02)]
 	move.b	d0,(0x02,a3)                    	| [$1b09: ld   (iy+$02),a]
 	                    	| [$1b0c: pop  bc]
-	                    	| [$1b0d: push bc]
+	move.w	d2,d1                    	| [$1b0d: push bc]
 	
 	lea	l_8A30(a6),a2                      	| [$1b0e: ld   ix,$8A30]
 	lea	l_89E1(a6),a0                      	| [$1b12: ld   hl,$89E1]
@@ -4416,7 +4417,7 @@ l_1b20:
 										| [$1b2d: dec  de]
 	move.b	(0x01,a2),d0                    	| [$1b2e: ld   a,(ix+$01)]
 	move.b	d0,-(a1)                         	| [$1b31: ld   (de),a]
-	movem.w	(sp)+,d1/d2                    	| [$1b32: pop  bc]
+	move.w	d2,d1                    	| [$1b32: pop  bc]
 	lea	l_8E1C(a6),a0                      	| [$1b33: ld   hl,$8E1C]
 	lea	ram_pointer_8e1f(a6),a1                      	| [$1b36: ld   de,$8E1F]
 	jbsr	lddr                              	| [$1b39: lddr]
@@ -4424,8 +4425,8 @@ l_1b20:
 	subq.w	#1,a0                           	| [$1b3c: dec  hl]
 	move.b	#0x10,d0                        	| [$1b3d: ld   a,$10]
 	move.b	#0x03,d1                        	| [$1b3f: ld   b,$03]
-	jbsr	fill_area_0010                            	| [$1b41: rst  $10]
-	rts                                    	| [$1b42: ret]
+	jbra	fill_area_0010                            	| [$1b41: rst  $10]
+	                                    	| [$1b42: ret]
 l_1b43:
 	jbsr	erase_a_column_02c9                            	| [$1b43: call $02C9]
 	beq.b	0f                               	| [...]
@@ -4658,21 +4659,21 @@ l_1ca4:
 	add.w	d3,a0                            	| [$1ca7: add  hl,de]
 	subq.b	#1,d1                           	| [...]
 	jne	l_1ca4                             	| [$1ca8: djnz $1CA4]
-	lea	l_82BC(a6),a0                      	| [$1caa: ld   hl,$82BC]
-	move.w    #-0x20,d3                          	| [$1cad: ld   de,$FFE0]
-	move.w	#0x0A00,d1                          	| [$1cb0: ld   bc,$0A00]
-	LOAD_D1D2_FROM_D1_16
-l_1cb3:
-	move.b	(a0),d0                         	| [$1cb3: ld   a,(hl)]
-	add.b	d2,d0                            	| [$1cb4: add  a,c]
-	move.b	d0,d2                           	| [$1cb5: ld   c,a]
-	add.w	d3,a0                            	| [$1cb6: add  hl,de]
-	subq.b	#1,d1                           	| [...]
-	jne	l_1cb3                             	| [$1cb7: djnz $1CB3]
-	move.b	d2,d0                           	| [$1cb9: ld   a,c]
-	cmp.b	#0xAA,d0                         	| [$1cba: cp   $AA]
-	beq.b	0f                               	| [...]
-	rts                                    	| [$1cbc: ret  nz] [...]
+	* a color RAM checksum					| [$1caa: ld   hl,$82BC]
+													| [$1cad: ld   de,$FFE0]
+												| [$1cb0: ld   bc,$0A00]
+									
+									
+											| [$1cb3: ld   a,(hl)]
+												| [$1cb4: add  a,c]
+											| [$1cb5: ld   c,a]
+												| [$1cb6: add  hl,de]
+											| [...]
+											| [$1cb7: djnz $1CB3]
+											| [$1cb9: ld   a,c]
+												| [$1cba: cp   $AA]
+												| [...]
+											| [$1cbc: ret  nz] [...]
 0:
 	clr.b	d0                               	| [$1cbd: xor  a]
 	move.b	d0,l_8E2A(a6)                   	| [$1cbe: ld   ($8E2A),a]
@@ -4756,7 +4757,7 @@ l_1d3c:
 	move.b	d0,game_state_8805(a6)          	| [$1d4d: ld   (game_state_8805),a]
 	move.b	d0,screen_straight_881F(a6)                   	| [$1d50: ld   ($881F),a]
 	move.b	d0,l_8F3F(a6)                   	| [$1d53: ld   ($8F3F),a]
-	jbsr	l_02b9                            	| [$1d56: call $02B9]
+	jbsr	erase_sprite_shadow_ram_02b9                            	| [$1d56: call $02B9]
 	jbsr	l_0ecf                            	| [$1d59: call $0ECF]
 	LOAD_ROM	0x1E4C,a1                          	| [$1d5c: ld   de,$1E4C]
 	lea	l_89F0(a6),a0                      	| [$1d5f: ld   hl,$89F0]
@@ -4771,7 +4772,7 @@ l_1d62:
 	addq.w	#1,a1                           	| [$1d69: inc  de]
 											| [$1d6a: inc  hl]
 	jra	l_1d62                             	| [$1d6b: jr   $1D62]
-	rts                                    	| [$1d6d: ret]
+	                                    	| [$1d6d: ret]
 l_1d6e:
 	lea	ram_or_rom_pointer_8f4a(a6),a0                      	| [$1d6e: ld   hl,$8F4A]
 	move.b	(a0),d0                         	| [$1d71: ld   a,(hl)]

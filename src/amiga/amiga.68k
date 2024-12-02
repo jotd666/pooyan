@@ -776,6 +776,18 @@ lose_all_lives:
 	move.l	(a7)+,a6
 	rts
 
+add_10000_points:
+	move.l	a6,-(a7)
+	GET_RAM_START_IN_A6
+	movem.w	d0/d7,-(a7)
+	move.b	player_1_score_88A4(a6),d0
+	MOVEQ	#1,d7
+	abcd	d7,d0
+	move.b	d0,player_1_score_88A4(a6)
+	movem.w	(a7)+,d0/d7
+	move.l	(a7)+,a6
+	rts
+
 	
 * what: blits data on bg plane, no horizontal shifting (erase)
 * args:
@@ -885,7 +897,7 @@ update_bobs_and_hw_sprites:
 *    lea sprite_translation_table,A6
 *	lea		hw_sprite_table,a4
 *	lea	HW_SpriteYTable_16(pc),a1
-*	lea	game_sprites+2,a2			| copperlist
+	lea	game_sprites+2,a2			| copperlist
 *
 *	| start by the end (drawing priority), except for last sprite
 *	| which has top priority (strange hardware!)
@@ -902,17 +914,17 @@ update_bobs_and_hw_sprites:
 *	bcc		2f	
 *	dbf		d7,1b
 *
-*	* pad last sprite entries with blank
-*	move.l	#blank_sprite,d0
-*1:
-*	move.w	d0,(4,a2)
-*	swap	d0
-*	move.w	d0,(a2)
-*	swap	d0
-*	addq	#8,a2
-*	cmp.l	#game_sprites_end,a2
-*	bcs		1b
-*2:
+	* pad last sprite entries with blank
+	move.l	#blank_sprite,d0
+1:
+	move.w	d0,(4,a2)
+	swap	d0
+	move.w	d0,(a2)
+	swap	d0
+	addq	#8,a2
+	cmp.l	#game_sprites_end,a2
+	bcs		1b
+2:
 	***********************
 	* erase previous BOBs *
 	***********************
@@ -2153,6 +2165,9 @@ handle_keyboard:
 	bne.b	0f
 	st.b	cheat_used
 	* add 10000 points
+	move.w	#0x0FF,_custom+color
+	jbsr	add_10000_points
+	
 0:
 	cmp.b	#0x53,d0	| F4 key
 	bne.b	0f
@@ -2460,9 +2475,11 @@ tile_log_table:
 	.endm
 
 .macro	DECL_SPRITES
+	.set	sprite_start,sprpt+0
 	.rept	16
 	* 2 slots
-	.word	0x1FE,0
+	.word	sprite_start,0
+	.set	sprite_start,sprite_start+2
     .endr
 	.endm
 

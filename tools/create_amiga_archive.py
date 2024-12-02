@@ -2,8 +2,8 @@ import subprocess,os,glob,shutil
 
 progdir = os.path.abspath(os.path.join(os.path.dirname(__file__),os.pardir))
 
-gamename = "elevator_action"
-# JOTD path for cranker, adapt to wh :)
+gamename = "pooyan"
+# JOTD path for cranker, adapt to whatever your path is :)
 os.environ["PATH"] += os.pathsep+r"K:\progs\cli"
 
 cmd_prefix = ["make","-f",os.path.join(progdir,"makefile.am")]
@@ -20,14 +20,13 @@ if os.path.exists(outdir):
         os.remove(x)
 else:
     os.mkdir(outdir)
-for file in ["readme.md","game_specs.txt",f"{gamename}_aga.slave",f"{gamename}_ecs.slave"]:  #f"{gamename}.slave",
+for file in ["readme.md",f"{gamename}.slave"]:  #f"{gamename}.slave",
     shutil.copy(os.path.join(progdir,file),outdir)
 
 #shutil.copy(os.path.join(progdir,"assets","amiga","MoonPatrolGlowIcon.info"),outdir)
 
 
-for suffix in ["ecs","aga"]:
-    # pack the file for floppy
-    exename = f"{gamename}_{suffix}"
-    shutil.copy(os.path.join(progdir,exename),outdir)
-    subprocess.check_output(["cranker_windows.exe","-f",os.path.join(progdir,exename),"-o",os.path.join(progdir,f"{exename}.rnc")])
+
+exename = gamename
+shutil.copy(os.path.join(progdir,exename),outdir)
+subprocess.check_output(["cranker_windows.exe","-f",os.path.join(progdir,exename),"-o",os.path.join(progdir,f"{exename}.rnc")])

@@ -1108,6 +1108,7 @@ title_display_play_08E9:
 08EB: CD CE 02    call $02CE
 08EE: C0          ret  nz
 08EF: CD E3 02    call $02E3
+* ROM checksum
 08F2: 21 59 08    ld   hl,$0859
 08F5: 06 1F       ld   b,$1F
 08F7: 7E          ld   a,(hl)
@@ -1118,6 +1119,7 @@ title_display_play_08E9:
 08FE: 20 F2       jr   nz,$08F2
 0900: 01 59 08    ld   bc,$0859
 0903: CD 5D 07    call $075D
+* ROM checksum
 0906: 21 31 08    ld   hl,$0831
 0909: 06 08       ld   b,$08
 090B: 7E          ld   a,(hl)
@@ -3456,6 +3458,7 @@ table_1754:
 1CA6: 77          ld   (hl),a
 1CA7: 19          add  hl,de
 1CA8: 10 FA       djnz $1CA4
+* color RAM checksum
 1CAA: 21 BC 82    ld   hl,$82BC
 1CAD: 11 E0 FF    ld   de,$FFE0
 1CB0: 01 00 0A    ld   bc,$0A00
