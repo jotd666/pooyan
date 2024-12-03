@@ -15577,14 +15577,14 @@ l_7e94:
 	move.b	d0,l_8E2A(a6)                   	| [$7ea4: ld   ($8E2A),a]
 	rts                                    	| [$7ea7: ret]
 l_7ea8:
-	move.b	l_8E26(a6),d0                   	| [$7ea8: ld   a,($8E26)]
+	move.b	high_score_state_8E26(a6),d0                   	| [$7ea8: ld   a,($8E26)]
 	jbsr	jump_from_table_below_0028                            	| [$7eab: rst  $28]
 jump_table_7EAC:
-	.long	l_7eb2
-	.long	l_7f0e
+	.long	high_score_entry_init_7eb2
+	.long	high_score_entry_update_7f0e
 	.long	l_7f5d
 
-l_7eb2:
+high_score_entry_init_7eb2:
 	lea	l_8565(a6),a0                      	| [$7eb2: ld   hl,$8565]
 	STORE_RAM_POINTER	a0,video_ram_pointer_8e27(a6)            	| [$7eb5: ld   ($8E27),hl]
 	
@@ -15633,11 +15633,11 @@ l_7ef5:
 	exg		a0,a1
 	move.b	d0,l_8E23(a6)                   	| [$7f00: ld   ($8E23),a]
 	move.b	#0x01,d0                        	| [$7f03: ld   a,$01]
-	move.b	d0,l_8E26(a6)                   	| [$7f05: ld   ($8E26),a]
+	move.b	d0,high_score_state_8E26(a6)                   	| [$7f05: ld   ($8E26),a]
 	move.b	#0x0C,d0                        	| [$7f08: ld   a,$0C]
 	move.b	d0,l_8E24(a6)                   	| [$7f0a: ld   ($8E24),a]
 	rts                                    	| [$7f0d: ret]
-l_7f0e:
+high_score_entry_update_7f0e:
 	LOAD_WORD	timer_16bit_8e2b(a6),d5             	| [$7f0e: ld   hl,($8E2B)]
 	subq.w	#1,d5                           	| [$7f11: dec  hl]
 	STORE_WORD	d5,timer_16bit_8e2b(a6)            	| [$7f12: ld   ($8E2B),hl]
@@ -15686,7 +15686,9 @@ l_7f42:
 l_7f57:
 	LOAD_RAM_POINTER	video_ram_pointer_8e27(a6),a4             	| [$7f57: ld   bc,($8E27)]
 	move.b	(a0),d0                         	| [$7f5b: ld   a,(hl)]
-	move.b	d0,(a4)                         	| [$7f5c: ld   (bc),a]
+	exg	a0,a4
+	jbsr	osd_w_videoram                         	| [$7f5c: ld   (bc),a]
+	exg	a0,a4
 l_7f5d:
 	LOAD_RAM_POINTER	ram_pointer_8e21(a6),a0             	| [$7f5d: ld   hl,($8E21)]
 	move.b	(a0),d0                         	| [$7f60: ld   a,(hl)]
@@ -15727,7 +15729,7 @@ l_7f5d:
 	move.b	#0x11,d0                        	| [$7f9a: ld   a,$11]
 	jbsr	osd_w_videoram                         	| [$7f9c: ld   (hl),a]
 	move.b	#0x01,d0                        	| [$7f9d: ld   a,$01]
-	move.b	d0,l_8E26(a6)                   	| [$7f9f: ld   ($8E26),a]
+	move.b	d0,high_score_state_8E26(a6)                   	| [$7f9f: ld   ($8E26),a]
 	move.b	#0x11,d0                        	| [$7fa2: ld   a,$11]
 	move.b	d0,l_8E23(a6)                   	| [$7fa4: ld   ($8E23),a]
 	rts                                    	| [$7fa7: ret]
@@ -15754,7 +15756,7 @@ l_7fc7:
 	lea	l_8808(a6),a0                      	| [$7fc7: ld   hl,$8808]
 	move.b	#0x80,(a0)                      	| [$7fca: ld   (hl),$80]
 	clr.b	d0                               	| [$7fcc: xor  a]
-	move.b	d0,l_8E26(a6)                   	| [$7fcd: ld   ($8E26),a]
+	move.b	d0,high_score_state_8E26(a6)                   	| [$7fcd: ld   ($8E26),a]
 	move.b	#0x01,d0                        	| [$7fd0: ld   a,$01]
 	move.b	d0,l_8E2A(a6)                   	| [$7fd2: ld   ($8E2A),a]
 	rts                                    	| [$7fd5: ret]
