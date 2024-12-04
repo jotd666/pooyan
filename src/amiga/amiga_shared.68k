@@ -180,7 +180,6 @@ osd_sound_start:
 
 	* music
 4:
-	jbsr	osd_break
 	* don't play if already playing
 	* (music_tick value is not important for looped tunes
 	* as long as it's not zero)
@@ -200,8 +199,8 @@ osd_sound_start:
 	bsr		force_sound_stop
     lea _custom,a6
  	movem.l	d0/a0,-(a7)
-   * lea	elevator_action_tunes,a0
-	illegal
+	lea	pooyan_tunes,a0
+
 	
 	move.b	d1,music_track_start_number
 	move.w	d1,d0

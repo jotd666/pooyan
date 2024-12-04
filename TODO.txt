@@ -2,8 +2,8 @@
 - wolves should be HW sprites if possible
 - meat doesn't hit balloons
 - continue to rip sounds
-- install no9 music & sounds
-- push start button: parasite chars between "PTS" strings
+- install no9 music & sounds: in progress, swapped/shifted!!
+- push start button: parasite chars between "PTS" strings sometimes
 - hit: fall sound should not end with crash sound, should be separated
 - highscore save
 - during tutorial, one character is off before "400"

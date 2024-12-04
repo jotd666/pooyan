@@ -35,7 +35,11 @@ def convert():
     "SHOT_BOUNCES_SND"             :{"index":0x11,"channel":2,"sample_rate":hq_sample_rate,"priority":5},
     "SHOOTING_ARROW_SND"             :{"index":0x1,"channel":2,"sample_rate":hq_sample_rate,"priority":5},
     "INFLATING_BALLOON_SND"             :{"index":0x4,"channel":3,"sample_rate":hq_sample_rate,"priority":5},
-    #"MAIN_THEME_SND"                :{"index":26,"pattern":3,"volume":13,'loops':True},
+    "INTRO_TUNE_SND"                :{"index":0x27,"pattern":1,"volume":32,'loops':False,"ticks":320},
+    "GAME_INTRO_TUNE_SND"                :{"index":0x1C,"pattern":2,"volume":32,'loops':False,"ticks":400},
+    "LEVEL_1_TUNE_SND"                :{"index":0x1A,"pattern":0xB,"volume":32,'loops':True},
+    "LEVEL_2_TUNE_SND"                :{"index":0x1B,"pattern":0xF,"volume":32,'loops':True},
+    "GAME_OVER_TUNE_SND"                :{"index":0x1D,"pattern":0x13,"volume":32,'loops':False,"ticks":140},
 
 
     }
@@ -132,7 +136,7 @@ def convert():
                 maxsigned = max(signed_data)
                 minsigned = min(signed_data)
 
-                amp_ratio = max(maxsigned,abs(minsigned))/32
+                amp_ratio = max(maxsigned,abs(minsigned))/128
                 wav = os.path.splitext(wav_name)[0]
                 if amp_ratio > 1:
                     print(f"{wav}: volume peaked {amp_ratio}")
@@ -168,9 +172,9 @@ def convert():
 
 
         # make sure next section will be aligned
-##        with open(os.path.join(sound_dir,f"{gamename}_conv.mod"),"rb") as f:
-##            contents = f.read()
-        contents = b""
+        with open(os.path.join(sound_dir,f"{gamename}_conv.mod"),"rb") as f:
+            contents = f.read()
+
         fw.write("{}:".format(music_module_label))
         write_asm(contents,fw)
         fw.write("\t.align\t8\n")
