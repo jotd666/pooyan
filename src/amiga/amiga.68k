@@ -851,13 +851,27 @@ blit_background:
 	movem.l	(a7)+,d2-d6/a0-a5
 	rts
 
-really_update_tiles:	
+* we're going to scan for dirty tiles (0x400 array)
+* an optimization is to also have flags for 0x20-size regions
+* if the value is 0, then no need to try to refresh the next
+* 0x20 tiles. If screen tiles don't change, we read 0x20 bytes
+* instead of 0x400 each frame.
+
+really_update_tiles:
 	WAIT_BLIT
-	lea		tiles_refresh_table(pc),a0
 	GET_RAM_START_IN_A6
 	lea		(0x400,a6),a5
-	move.w	#0x3FF,d2
-	moveq	#0,d7
+	lea		tiles_row_flags(pc),a1
+	moveq	#0,d3
+3:
+	tst.b	(a1)+
+	jeq		2f
+	lea		tiles_refresh_table(pc),a0
+	subq.b	#1,(-1,a1)
+	move.w	#0x1F,d2
+	move.w	d3,d7
+	lsl.w	#5,d7		| times 32, get offset for big dirty table
+	add.w	d7,a0
 0:
 	tst.b	(a0)+
 	jeq		1f
@@ -865,13 +879,16 @@ really_update_tiles:
 	* read tile & color codes from RAM
 	move.b	(a6,d7.w),d1
 	move.b	(a5,d7.w),d0
-	movem.l	d2/d7/a0/a5,-(a7)
+	movem.l	d2/d3/d7/a0/a1/a5,-(a7)
 	jbsr	update_bg_tile
-	movem.l	(a7)+,d2/d7/a0/a5
+	movem.l	(a7)+,d2/d3/d7/a0/a1/a5
 1:
 	addq	#1,d7
 	dbf	d2,0b
-	
+2:
+	addq	#1,d3
+	cmp.w	#0x20,d3
+	jne		3b
 	rts
 	
 	
@@ -1571,8 +1588,7 @@ osd_interrupt_control:
 
 
 osd_w_colorram:
-    .ifeq OPT_DISABLE_BG_LAYER
-	movem.l	d0-d7/a0-a5,-(a7)
+ 	movem.l	d0/d1/d7/a0/a1,-(a7)
 	move.l	a0,d7		| save address
 	sub.l	a6,d7
 	.ifndef	RELEASE
@@ -1600,18 +1616,25 @@ osd_w_colorram:
 3:
 	move.b	d0,(a0)	| update logical grid
 	sub.l	a6,a0
-	add.l	#tiles_refresh_table,a0
+mark_dirty:
+	move.w	a0,d0
+	lea		tiles_refresh_table(pc),a0
+	add.w	d0,a0
+	lsr.w	#5,d0	| divide by 32
+	lea		tiles_row_flags(pc),a1
+	add.w	d0,a1
 	* now a0 points on the tiles refresh table, mark it dirty
 	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
 	move.b	#2,(a0)
+	move.b	#2,(a1)
 	.else
 	move.b	#1,(a0)
+	move.b	#1,(a1)
 	.endif
 
 
 0:
-	movem.l	(a7)+,d0-d7/a0-a5
-    .endif | OPT_DISABLE_BG_LAYER
+	movem.l	(a7)+,d0/d1/d7/a0/a1
 	rts	
 	
 * a0=screen address (preserved), d0=tile (preserved)
@@ -1619,8 +1642,7 @@ osd_w_colorram:
 * should preserve all registers
 
 osd_w_videoram:
-    .ifeq OPT_DISABLE_BG_LAYER
-	movem.l	d0-d7/a0-a4,-(a7)
+	movem.l	d0/d1/d7/a0/a1,-(a7)
 	move.l	a0,d7		| save address
 	sub.l	a6,d7
 	.ifndef	RELEASE
@@ -1638,12 +1660,12 @@ osd_w_videoram:
 	lea		write_videoram_out_of_range_error(pc),a0
 	jbsr	osd_break
 	nop	
-	bra.b	0f
+	bra.b	0b
 	.endif
 1:	
 	move.b	(a0),d1
 	cmp.b	d1,d0
-	beq.b	0f		| already the proper value
+	beq.b	0b		| already the proper value
 3:
 	move.b	d0,(a0)	| update logical grid
 	* now set the flag for tile refresh in copper interrupt (so it doesn't
@@ -1651,19 +1673,9 @@ osd_w_videoram:
 	* as opposed to most games, so updating in real tile isn't an option and kills
 	* the smoothness even in double buffering mode)
 	sub.l	a6,a0
-	add.l	#tiles_refresh_table-(SCREEN_TILE_ADDRESS-0x8000),a0
-	* now a0 points on the tiles refresh table
-	.ifne	OPT_ENABLE_DOUBLE_BUFFERING
-	move.b	#2,(a0)
-	.else
-	move.b	#1,(a0)
-	.endif
+	sub.w	#0x400,a0
+	jra		mark_dirty
 
-
-0:
-	movem.l	(a7)+,d0-d7/a0-a4
-    .endif | OPT_DISABLE_BG_LAYER
-	rts
 
 * < D7: 0-0x400
 * > D0: 
@@ -2344,6 +2356,8 @@ interrupt_mode:
 pause_flag:
 	.word	0
 
+tiles_row_flags:
+	.skip	0x20
 tiles_refresh_table:
 	.skip	0x400
 	
