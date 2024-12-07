@@ -1,14 +1,22 @@
 - meat doesn't hit balloons
+- missing clut (second bonus stage: C3,1 19,C 4,8
+- game over music not playing anymore?
+- level 2 completed tune not playing
+- game over music playing instead of level 2 at first??
+- missing fruit shot sound
 - do a 25FPS version for 68000
-- insert coin: should stop intro music
 - wolves should be HW sprites if possible, so should be piglets (priority!!)
-- continue to rip sounds: missing meat taken
-- install no9 music & sounds: looped should be stopped by new music play, music should stop on level end
+- continue to rip sounds: missing wolf falling sound + crash
+- continue to rip sounds: missing end of level 1 music: sfx 0x1E
 - hit: fall sound should not end with crash sound, should be separated: rip when falling from very high
 - highscore save
+
+minor
+
 - during tutorial, one character is off before "400"
-- level 2 music becomes more dramatic when wolves are about to push rock
+- level 2 music should become more "dramatic" when wolves are about to push rock
 - push start button: parasite chars between "PTS" strings sometimes
+- insert coin: awards 2 credits immediately
 - TBC: level 2: at some point no collision detection, no more ability to shoot arrows (could it be a missed checksum???)
 - TBC: level 1: wolf climbs ladder: wrong chars, impossible to shoot (could it be a missed checksum???)
 - TBC: level 1: no wolf on ladder when a wolf passes/wolves on ladder animation lock up (could it be a missed checksum???)

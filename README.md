@@ -5,7 +5,7 @@ Requires a joystick, or the keyboard
 
 Features:
 
-- 60Hz/50 FPS for OCS,ECS and AGA amigas
+- 60Hz/50 FPS for OCS,ECS and AGA PAL amigas
 
 Credits:
 

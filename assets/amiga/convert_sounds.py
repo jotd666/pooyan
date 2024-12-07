@@ -30,6 +30,8 @@ def convert():
     EMPTY_SND = "EMPTY_SND"
     sound_dict = {
 
+    "MEAT_PICKED_SND"               :{"index":0xA,"channel":3,"sample_rate":hq_sample_rate,"priority":40},
+    "WOLF_ATTACKS_SND"               :{"index":0xC,"channel":2,"sample_rate":hq_sample_rate,"priority":40},
     "CREDIT_SND"               :{"index":0xB,"channel":0,"sample_rate":hq_sample_rate,"priority":20},
     "BALLOON_BURSTING_SND"       :{"index":0x5,"channel":3,"sample_rate":hq_sample_rate,"priority":20},
     "PLAYER_FALLING_SND"       :{"index":0x26,"channel":3,"sample_rate":hq_sample_rate,"priority":20},

@@ -175,7 +175,8 @@ start:
 		.global osd_read_inputs_1
 		.global osd_read_inputs_0
 
-	
+		.global	is_game_playing
+		
 	.include	"ReadJoypad.i"
 	.include	"whdload_funcs.i"
 		.text
@@ -616,7 +617,7 @@ _vblank:
 
 	move.w	d1,music_tick
 	bne.b	13f
-	jbsr		osd_sound_stop
+	jbsr		osd_music_stop
 13:
 	
 	* ack vbl twice (040/pistorm bug)
@@ -758,8 +759,7 @@ osd_update_sprites:
 
 	
 * 2 conditions I can think of:
-* - gfx set: game tiles
-* - not demo mode
+
 * Z: set if not playing
 is_game_playing:
 	movem.l	d0/a6,-(a7)
@@ -2384,13 +2384,6 @@ bg_screen_data_2:
 	.long	0
 	.endif
 	
-	.macro	 DYN_COLOR_ROW	hpos
-    .word    0x45+(\hpos<<8),0xFFFE
-    .word    color,0xB8F		| purple
-    .word    0xB5+(\hpos<<8),0xFFFE
-    .word    color,0	| black
- 	.word	 0x01+((\hpos+1)<<8),0xFFFE
-  	.endm
 	
 
 playfield_drawed_screen_ptr:

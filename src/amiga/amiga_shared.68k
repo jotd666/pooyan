@@ -4,7 +4,7 @@
 		.global	save_highscores
 		.global update_elevator_sound
 		.global osd_sound_start
-		.global osd_sound_stop
+		.global osd_music_stop
 		.global music_tick
 		
 
@@ -121,7 +121,7 @@ save_highscores:
     rts
     
 
-osd_sound_stop:
+osd_music_stop:
 *	movem.l	d0/a0/a6,-(a7)
 *	lea		_custom,a6
 *	move.w	#3,d0
@@ -134,7 +134,7 @@ osd_sound_stop:
 rts
 
 force_sound_stop:
-	movem.l	d0/a0/a6,-(a7)
+	movem.l	d0-d1/a0/a6,-(a7)
 	lea		_custom,a6
 	move.b	#-1,music_track_start_number
     clr.w   music_tick   | not playing anymore
@@ -142,13 +142,26 @@ force_sound_stop:
 	clr.b	looped_sound_enabled
     jsr		_mt_end
 0:
-	movem.l	(a7)+,d0/a0/a6
+	movem.l	(a7)+,d0-d1/a0/a6
 	rts
 	
 osd_sound_start:
 	movem.l	d0/d1/a0/a6,-(a7)
 	lea		_custom,a6
+	* original sound stop commands have bit 7 set. But if we follow them, they'll kill the
+	* ongoing sfx when killing the music, so we have to ignore them and use a hack
 	and.w	#0x3F,d0
+	jbsr		is_game_playing
+	jne		1f
+	cmp.b	#CREDIT_SND,d0
+	jne		1f
+	jbsr	osd_music_stop
+1:
+	cmp.b	#PLAYER_FALLING_SND,d0
+	jne		1f
+	jbsr	osd_music_stop
+1:
+
 	lsl.w	#3,d0
 	lea		sound_table,a0
 
@@ -182,8 +195,9 @@ osd_sound_start:
 	* as long as it's not zero)
 
 
-	tst.w	music_tick
-	bne.b	1b
+	* here we allow music to override another looping music
+	*tst.w	music_tick
+	*bne.b	1b
 	* play the proper module pattern
 	* load up the countdown if loop
 	
@@ -231,7 +245,7 @@ osd_sound_start:
 *	clr.b	looped_sound_enabled
 *	jbsr	_mt_stopfx
 *	jra	1b
-	bsr		osd_sound_stop
+	bsr		osd_music_stop
 	jra	1b
 
 	
