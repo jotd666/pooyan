@@ -124,11 +124,11 @@ sprite_names = {}
 sprite_cluts = [[] for _ in range(64)]
 
 baloon_cluts = [0,1,9,4,0xC,0xF,0xB]
-wolf_cluts = [0,4]
+wolf_cluts = [0,4,0xC]
 
 add_sprite(0,"small_rock")
 add_sprite(1,"upside_down_wolf",wolf_cluts)
-add_sprite([3,4,9],"pooyan",cluts=[0,0xF])
+add_sprite([3,4,9],"pooyan",cluts=[0,1,8,0xF])
 add_sprite([6,0x1D,0xB],"falling_wolf",wolf_cluts)
 add_sprite(7,"basket_bottom")
 #add_sprite_range(8,10,"pig")
