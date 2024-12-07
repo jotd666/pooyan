@@ -146,12 +146,9 @@ force_sound_stop:
 	rts
 	
 osd_sound_start:
-	
 	movem.l	d0/d1/a0/a6,-(a7)
 	lea		_custom,a6
 	and.w	#0x3F,d0
-	jeq	7f		| should stop the sound
-0:
 	lsl.w	#3,d0
 	lea		sound_table,a0
 
@@ -189,6 +186,7 @@ osd_sound_start:
 	bne.b	1b
 	* play the proper module pattern
 	* load up the countdown if loop
+	
 	move.w	(2,a0,d0.w),d1	| pattern number in .mod file
 	* since it's not zero, next vbl tick will play the music
 	
@@ -229,10 +227,10 @@ osd_sound_start:
 
 	
 7:
-	move.w	#3,d0			| channel where loops play
-	clr.b	looped_sound_enabled
-	jbsr	_mt_stopfx
-	jra	1b
+*	move.w	#3,d0			| channel where loops play
+*	clr.b	looped_sound_enabled
+*	jbsr	_mt_stopfx
+*	jra	1b
 	bsr		osd_sound_stop
 	jra	1b
 

@@ -31,15 +31,16 @@ def convert():
     sound_dict = {
 
     "CREDIT_SND"               :{"index":0xB,"channel":0,"sample_rate":hq_sample_rate,"priority":20},
+    "BALLOON_BURSTING_SND"       :{"index":0x5,"channel":3,"sample_rate":hq_sample_rate,"priority":20},
     "PLAYER_FALLING_SND"       :{"index":0x26,"channel":3,"sample_rate":hq_sample_rate,"priority":20},
     "SHOT_BOUNCES_SND"             :{"index":0x11,"channel":2,"sample_rate":hq_sample_rate,"priority":5},
-    "SHOOTING_ARROW_SND"             :{"index":0x1,"channel":2,"sample_rate":hq_sample_rate,"priority":5},
-    "INFLATING_BALLOON_SND"             :{"index":0x4,"channel":3,"sample_rate":hq_sample_rate,"priority":5},
-    "INTRO_TUNE_SND"                :{"index":0x27,"pattern":1,"volume":32,'loops':False,"ticks":320},
-    "GAME_INTRO_TUNE_SND"                :{"index":0x1C,"pattern":2,"volume":32,'loops':False,"ticks":400},
+    "SHOOTING_ARROW_SND"             :{"index":0x1,"channel":3,"sample_rate":hq_sample_rate,"priority":5},
+    "INFLATING_BALLOON_SND"             :{"index":0x4,"channel":3,"sample_rate":hq_sample_rate,"priority":10},
+    "INTRO_TUNE_SND"                :{"index":0x27,"pattern":1,"volume":32,'loops':False,"ticks":360},
+    "GAME_INTRO_TUNE_SND"                :{"index":0x1C,"pattern":2,"volume":32,'loops':False,"ticks":520},
     "LEVEL_1_TUNE_SND"                :{"index":0x1A,"pattern":0xB,"volume":32,'loops':True},
     "LEVEL_2_TUNE_SND"                :{"index":0x1B,"pattern":0xF,"volume":32,'loops':True},
-    "GAME_OVER_TUNE_SND"                :{"index":0x1D,"pattern":0x13,"volume":32,'loops':False,"ticks":140},
+    "GAME_OVER_TUNE_SND"                :{"index":0x1D,"pattern":0x13,"volume":32,'loops':False,"ticks":180},
 
 
     }
@@ -111,7 +112,7 @@ def convert():
             if channel is None:
                 # if music loops, ticks are set to 1 so sound orders only can happen once (else music is started 50 times per second!!)
 
-                sound_table_set_1[sound_index] = "\t.word\t{},{},{}\n\t.byte\t{},{}".format(2,details["pattern"]+1,details.get("ticks",0),details["volume"],int(details["loops"]))
+                sound_table_set_1[sound_index] = "\t.word\t{},{},{}\n\t.byte\t{},{}".format(2,details["pattern"],details.get("ticks",0),details["volume"],int(details["loops"]))
             else:
                 wav_name = os.path.basename(wav_entry).lower()[:-4]
                 wav_file = os.path.join(sound_dir,wav_name+".wav")
