@@ -2553,7 +2553,7 @@ intreq_block_game:
 
 	* pal limit
     .word  0xFFDF,0xFFFE       | PAL wait
-	.word	0x1001,0xFFFE
+	.word	0x0E01,0xFFFE
 
 	| no bobs from now on, get a LOT of drawing time
 	.word	 intreq,0x8010
