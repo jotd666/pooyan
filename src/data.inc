@@ -99,7 +99,7 @@ l_8815 = 0x0815
 l_8816 = 0x0816
 l_8819 = 0x0819
 checksum_failed_881E = 0x081e
-screen_straight_881F = 0x081f
+
 difficulty_8820 = 0x0820
 demo_sounds_on_8821 = 0x0821
 l_8824 = 0x0824
@@ -203,7 +203,7 @@ checksum_failed_8A3C = 0x0a3c
 rom_pointer_8A40 = 0x0a40
 sound_slot_index_8A41 = 0x0a41
 l_8A42 = 0x0a42
-l_8A43 = 0x0a43
+sound_queue_buffer_8A43 = 0x0a43
 main_timer_2_8A5F = 0x0a5f
 player_bow_structure_8A80 = 0x0a80
 l_8A81 = 0x0a81

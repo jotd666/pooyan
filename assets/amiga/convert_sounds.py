@@ -35,6 +35,7 @@ def convert():
     "CREDIT_SND"               :{"index":0xB,"channel":0,"sample_rate":hq_sample_rate,"priority":20},
     "BALLOON_BURSTING_SND"       :{"index":0x5,"channel":3,"sample_rate":hq_sample_rate,"priority":20},
     "PLAYER_FALLING_SND"       :{"index":0x26,"channel":3,"sample_rate":hq_sample_rate,"priority":20},
+    "PIGLETS_JUMP_SND"       :{"index":0x12,"channel":3,"sample_rate":hq_sample_rate,"priority":20},
     "SHOT_BOUNCES_SND"             :{"index":0x11,"channel":2,"sample_rate":hq_sample_rate,"priority":5},
     "SHOOTING_ARROW_SND"             :{"index":0x1,"channel":3,"sample_rate":hq_sample_rate,"priority":5},
     "INFLATING_BALLOON_SND"             :{"index":0x4,"channel":3,"sample_rate":hq_sample_rate,"priority":10},
@@ -42,7 +43,11 @@ def convert():
     "GAME_INTRO_TUNE_SND"                :{"index":0x1C,"pattern":2,"volume":32,'loops':False,"ticks":520},
     "LEVEL_1_TUNE_SND"                :{"index":0x1A,"pattern":0xB,"volume":32,'loops':True},
     "LEVEL_2_TUNE_SND"                :{"index":0x1B,"pattern":0xF,"volume":32,'loops':True},
+    "LEVEL_1_COMPLETED_TUNE_SND"                :{"index":0x1E,"pattern":0x14,"volume":32,"loops":False,"ticks":480},
+    "LEVEL_2_COMPLETED_TUNE_SND"                :{"index":0x22,"pattern":0x7,"volume":32,"loops":False,"ticks":520},
+    #"LEVEL_2_COMPLETED_2_TUNE_SND"                :{"index":0x22,"pattern":0x7,"volume":32,"loops":False,"ticks":520},
     "GAME_OVER_TUNE_SND"                :{"index":0x1D,"pattern":0x13,"volume":32,'loops':False,"ticks":180},
+    #"BONUS_STAGE_TUNE_SND"                :{"index":0x28,"pattern":1,"volume":32,'loops':False,"ticks":360},
 
 
     }

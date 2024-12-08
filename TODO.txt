@@ -1,15 +1,18 @@
-- meat doesn't hit balloons
-- missing clut (second bonus stage): C3,1 19,C 4,8: to test
-- game over music not playing anymore?
-- level 2 completed tune not playing
-- add level 1 completed new tune
-- game over music playing instead of level 2 at first??
-- do a 25FPS version for 68000
+- is_bonus_stage_8F50: probably just "is_real_play_8F50" ???
+- meat doesn't hit balloons: debug arcade see what causes wolf fall with meat when aiming balloon
 - sfx/music completely off after first game!!!!
+- parasite credit sound when starting the game
+- missing clut (second bonus stage): C3,1 19,C 4,8: to test
+- level 2 completed tune not playing
+- do a 25FPS version for 68000
+
 - wolves should be HW sprites if possible, so should be piglets (priority!!)
 - continue to rip sounds: missing wolf falling sound + crash
 - continue to rip sounds: missing fruit shot sound
 - continue to rip sounds: missing end of level 1 music: sfx 0x1E
+- capture "pigs jump" sound at the end of level 2: 0x12
+- capture suzannah music the second time (level 2)
+- capture bonus music
 - hit: fall sound should not end with crash sound, should be separated: rip when falling from very high
 - highscore save
 

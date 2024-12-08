@@ -145,6 +145,7 @@ force_sound_stop:
 	movem.l	(a7)+,d0-d1/a0/a6
 	rts
 	
+* tunes sounds are: sound index followed by 0x15,0x16,0x17 (that we ignore!)
 osd_sound_start:
 	movem.l	d0/d1/a0/a6,-(a7)
 	lea		_custom,a6
