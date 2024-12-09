@@ -31,10 +31,12 @@ def convert():
     sound_dict = {
 
     "MEAT_PICKED_SND"               :{"index":0xA,"channel":3,"sample_rate":hq_sample_rate,"priority":40},
-    "WOLF_ATTACKS_SND"               :{"index":0xC,"channel":2,"sample_rate":hq_sample_rate,"priority":40},
+    "WOLF_FALLING_SND"               :{"index":0x2,"channel":2,"sample_rate":hq_sample_rate,"priority":40},  # loops!!!!
+    "WOLF_ATTACKS_SND"               :{"index":0x14,"channel":2,"sample_rate":hq_sample_rate,"priority":40},
     "CREDIT_SND"               :{"index":0xB,"channel":0,"sample_rate":hq_sample_rate,"priority":20},
     "BALLOON_BURSTING_SND"       :{"index":0x5,"channel":3,"sample_rate":hq_sample_rate,"priority":20},
     "PLAYER_FALLING_SND"       :{"index":0x26,"channel":3,"sample_rate":hq_sample_rate,"priority":20},
+    "PLAYER_CRASHING_SND"       :{"index":0x10,"channel":3,"sample_rate":hq_sample_rate,"priority":20},
     "PIGLETS_JUMP_SND"       :{"index":0x12,"channel":3,"sample_rate":hq_sample_rate,"priority":20},
     "SHOT_BOUNCES_SND"             :{"index":0x11,"channel":2,"sample_rate":hq_sample_rate,"priority":5},
     "SHOOTING_ARROW_SND"             :{"index":0x1,"channel":3,"sample_rate":hq_sample_rate,"priority":5},
@@ -47,18 +49,31 @@ def convert():
     "LEVEL_2_COMPLETED_TUNE_SND"                :{"index":0x22,"pattern":0x7,"volume":32,"loops":False,"ticks":520},
     #"LEVEL_2_COMPLETED_2_TUNE_SND"                :{"index":0x22,"pattern":0x7,"volume":32,"loops":False,"ticks":520},
     "GAME_OVER_TUNE_SND"                :{"index":0x1D,"pattern":0x13,"volume":32,'loops':False,"ticks":180},
-    #"BONUS_STAGE_TUNE_SND"                :{"index":0x28,"pattern":1,"volume":32,'loops':False,"ticks":360},
+    "BONUS_STAGE_TUNE_SND"                :{"index":0x28,"pattern":0x000000B,"volume":32,'loops':False,"ticks":360},  # wrong pattern
 
 
     }
 
-
+    valid_sounds = [None]*128
+    valid_sounds[0x15] = "music_start"
+    valid_sounds[0x16] = "music_start"
+    valid_sounds[0x17] = "music_start"
+    valid_sounds[0x2] = "bogus"
+    valid_sounds[0x4B] = "bogus"
+    for k,v in sound_dict.items():
+        valid_sounds[v["index"]] = k
+    with open(os.path.join(this_dir,"valid_sound_table.68k"),"w") as f:
+        for i,v in enumerate(valid_sounds):
+            if v:
+                f.write("\t.byte    1\t| {:02x}: {}\n".format(i,v))
+            else:
+                f.write("\t.byte    0\t| {:02x}\n".format(i))
 
     with open(os.path.join(src_dir,"..","sounds.inc"),"w") as f:
         for k,v in sorted(sound_dict.items(),key = lambda x:x[1]["index"]):
             f.write(f"\t.equ\t{k},  0x{v['index']:x}\n")
 
-    max_sound = 0x40  # max(x["index"] for x in sound_dict.values())+1
+    max_sound = 0x80  # max(x["index"] for x in sound_dict.values())+1
     sound_table = [""]*max_sound
     sound_table_set_1 = ["\t.long\t0,0"]*max_sound
 
