@@ -2671,7 +2671,7 @@ queue_sound_0eb3:
 	tst.b	(a0,d3.w)
 	jne		0f
 	lea		invalid_sound_error_msg(pc),a0
-	jbsr	osd_break
+	**jbsr	osd_break
 	jra		l_0ecb
 0:
 	.endif
@@ -2703,28 +2703,28 @@ l_0ecb:
 valid_sound_table:
 	.byte    0	| 00
 	.byte    1	| 01: SHOOTING_ARROW_SND
-	.byte    1	| 02
+	.byte    1	| 02: WOLF_FALLING_SND
 	.byte    0	| 03
 	.byte    1	| 04: INFLATING_BALLOON_SND
-	.byte    1	| 05: BALLOON_BURSTING_SND
-	.byte    0	| 06
+	.byte    1	| 05: BALLOON_POPPED_SND
+	.byte    1	| 06: WOLF_SHOT_DESTROYED_SND
 	.byte    0	| 07
-	.byte    0	| 08
+	.byte    1	| 08: BALLOON_BURST_SND
 	.byte    0	| 09
 	.byte    1	| 0a: MEAT_PICKED_SND
 	.byte    1	| 0b: CREDIT_SND
-	.byte    1	| 0c: WOLF_ATTACKS_SND
+	.byte    1	| 0c: WOLF_ATTACKS_2_SND
 	.byte    0	| 0d
 	.byte    0	| 0e
 	.byte    0	| 0f
-	.byte    0	| 10
+	.byte    1	| 10: PLAYER_CRASHING_SND
 	.byte    1	| 11: SHOT_BOUNCES_SND
 	.byte    1	| 12: PIGLETS_JUMP_SND
 	.byte    0	| 13
-	.byte    0	| 14
-	.byte    1	| 15
-	.byte    1	| 16
-	.byte    1	| 17
+	.byte    1	| 14: WOLF_ATTACKS_SND
+	.byte    1	| 15: music_start
+	.byte    1	| 16: music_start
+	.byte    1	| 17: music_start
 	.byte    0	| 18
 	.byte    0	| 19
 	.byte    1	| 1a: LEVEL_1_TUNE_SND
@@ -2741,7 +2741,7 @@ valid_sound_table:
 	.byte    0	| 25
 	.byte    1	| 26: PLAYER_FALLING_SND
 	.byte    1	| 27: INTRO_TUNE_SND
-	.byte    0	| 28
+	.byte    1	| 28: BONUS_STAGE_TUNE_SND
 	.byte    0	| 29
 	.byte    0	| 2a
 	.byte    0	| 2b
@@ -2776,9 +2776,9 @@ valid_sound_table:
 	.byte    0	| 48
 	.byte    0	| 49
 	.byte    0	| 4a
-	.byte    1	| 4b
+	.byte    0	| 4b
 	.byte    0	| 4c
-	.byte    0	| 4d
+	.byte    1	| 4d: bogus
 	.byte    0	| 4e
 	.byte    0	| 4f
 	.byte    0	| 50
@@ -2794,7 +2794,7 @@ valid_sound_table:
 	.byte    0	| 5a
 	.byte    0	| 5b
 	.byte    0	| 5c
-	.byte    0	| 5d
+	.byte    1	| 5d
 	.byte    0	| 5e
 	.byte    0	| 5f
 	.byte    0	| 60
@@ -2829,6 +2829,7 @@ valid_sound_table:
 	.byte    0	| 7d
 	.byte    0	| 7e
 	.byte    0	| 7f
+
 	.endif
 		
 l_0ecf:
@@ -2838,10 +2839,10 @@ l_0ed2:
 	move.b	#SHOOTING_ARROW_SND,d0                        	| [$0ed2: ld   a,$01]
 	jra	queue_sound_if_game_plays_0ea2                             	| [$0ed4: jr   $0EA2]
 l_0ed6:
-	move.b	#0x02,d0                        	| [$0ed6: ld   a,$02]
+	move.b	#WOLF_FALLING_SND,d0                        	| [$0ed6: ld   a,$02]
 	jra	queue_sound_0eb3                             	| [$0ed8: jr   $0EB3]
 l_0eda:
-	move.b	#0x82,d0                        	| [$0eda: ld   a,$82]
+	move.b	#0x80+WOLF_FALLING_SND,d0                        	| [$0eda: ld   a,$82] stop loop
 	jbsr	queue_sound_0eb3                            	| [$0edc: call $0EB3]
 	move.b	#0x03,d0                        	| [$0edf: ld   a,$03]
 	jra	queue_sound_0eb3                             	| [$0ee1: jr   $0EB3]
@@ -2858,17 +2859,17 @@ l_0ee3:
 0:
 	move.b	#INFLATING_BALLOON_SND,d0                        	| [$0eed: ld   a,$04]
 	jra	queue_sound_if_game_plays_0ea2                             	| [$0eef: jr   $0EA2]
-play_balloon_bursting_sound_0ef1:
-	move.b	#BALLOON_BURSTING_SND,d0                        	| [$0ef1: ld   a,$05]
+play_balloon_popping_sound_0ef1:
+	move.b	#BALLOON_POPPED_SND,d0                        	| [$0ef1: ld   a,$05]
 	jra	queue_sound_0eb3                             	| [$0ef3: jr   $0EB3]
-l_0ef5:
-	move.b	#0x06,d0                        	| [$0ef5: ld   a,$06]
+play_wolf_shot_destroyed_sound_0ef5:
+	move.b	#WOLF_SHOT_DESTROYED_SND,d0                        	| [$0ef5: ld   a,$06]
 	jra	queue_sound_if_game_plays_0ea2                             	| [$0ef7: jr   $0EA2]
 l_0ef9:
 	move.b	#0x07,d0                        	| [$0ef9: ld   a,$07]
 	jra	queue_sound_if_game_plays_0ea2                             	| [$0efb: jr   $0EA2]
-l_0efd:
-	move.b	#0x08,d0                        	| [$0efd: ld   a,$08]
+play_balloon_burst_sound_0efd:
+	move.b	#BALLOON_BURST_SND,d0                        	| [$0efd: ld   a,$08]
 	jra	queue_sound_if_game_plays_0ea2                             	| [$0eff: jr   $0EA2]
 l_0f01:
 	move.b	#0x09,d0                        	| [$0f01: ld   a,$09]
@@ -2879,16 +2880,16 @@ play_meat_picked_sound_0f05:
 play_credit_sound_0f09:
 	move.b	#CREDIT_SND,d0                        	| [$0f09: ld   a,$0B]
 	jra	play_sound_0E8F                    	| [$0f0b: jr   play_sound_0E8F]
-play_credit_sound_0f0d:
-	move.b	#CREDIT_SND,d0                        	| [$0f0d: ld   a,$0B]
+play_extra_life_sound_0f0d:
+	move.b	#CREDIT_SND,d0                        	| [$0f0d: ld   a,$0B]  same as credit sound!! only queued
 	jra	queue_sound_if_game_plays_0ea2                             	| [$0f0f: jr   $0EA2]
-l_0f11:
-	move.b	#0x0C,d0                        	| [$0f11: ld   a,$0C]
+play_wolf_attacks_sound_2_0f11:
+	move.b	#WOLF_ATTACKS_2_SND,d0                        	| [$0f11: ld   a,$0C]  ??? does nothing useful, no real sound
 	jra	queue_sound_if_game_plays_0ea2                             	| [$0f13: jr   $0EA2]
-l_0f15:
+play_player_kill_blow_sound_0f15:
 	move.b	#0x0D,d0                        	| [$0f15: ld   a,$0D]
 	jra	queue_sound_if_game_plays_0ea2                             	| [$0f17: jr   $0EA2]
-l_0f19:
+play_push_rock_sound_0f19:
 	move.b	#0x0E,d0                        	| [$0f19: ld   a,$0E]
 	jra	queue_sound_if_game_plays_0ea2                             	| [$0f1b: jr   $0EA2]
 l_0f1d:
@@ -2897,7 +2898,7 @@ l_0f1d:
 play_mama_crashing_sound_0f21:
 	move.b	#0x95,d0                        	| [$0f21: ld   a,$95]
 	jbsr	queue_sound_if_game_plays_0ea2                            	| [$0f23: call $0EA2]
-	move.b	#0x10,d0                        	| [$0f26: ld   a,$10]
+	move.b	#PLAYER_CRASHING_SND,d0                        	| [$0f26: ld   a,$10]
 	jra	queue_sound_if_game_plays_0ea2                             	| [$0f28: jp   $0EA2]
 l_0f2b:
 	move.b	#SHOT_BOUNCES_SND,d0                        	| [$0f2b: ld   a,$11]
@@ -2916,7 +2917,7 @@ l_0f44:
 	move.b	#0x13,d0                        	| [$0f44: ld   a,$13]
 	jra	queue_sound_if_game_plays_0ea2                             	| [$0f46: jp   $0EA2]
 l_0f49:
-	move.b	#WOLF_ATTACKS,d0                        	| [$0f49: ld   a,$14]
+	move.b	#WOLF_ATTACKS_SND,d0                        	| [$0f49: ld   a,$14]
 	jra	queue_sound_if_game_plays_0ea2                             	| [$0f4b: jp   $0EA2]
 stop_falling_wolf_sound_loop_0f4e:
 	move.b	#0x82,d0                        	| [$0f4e: ld   a,$82]
@@ -4232,8 +4233,8 @@ l_1902:
 	abcd	d2,d0                            	| [$1902: add  a,c] + daa
 	move.b	d0,next_extra_life_score_8909(a6)                   	| [$1904: ld   ($8909),a]
 	jbsr	display_nb_lives_03c2                            	| [$1907: call $03C2]
-	jbsr	play_credit_sound_0f0d                            	| [$190a: call $0F0D]
-	rts                                    	| [$190d: ret]
+	jbra	play_extra_life_sound_0f0d                            	| [$190a: call $0F0D]
+	                                    	| [$190d: ret]
 
 l_190e:
 	                               	| [$1911: and  a]
@@ -6173,8 +6174,8 @@ l_2625:
 	lea		(0x41,a2),a0                 	| [$2629: ld   (ix+$41),$10]
 	jbsr	osd_w_videoram
 	move.l	(a7)+,a0
-	jbsr	l_0f19                            	| [$262d: call $0F19]
-	jbsr	l_0f11                            	| [$2630: call $0F11]
+	jbsr	play_push_rock_sound_0f19                            	| [$262d: call $0F19]
+	jbsr	play_wolf_attacks_sound_2_0f11         	| [$2630: call $0F11]
 	jra	l_2678                             	| [$2633: jr   $2678]
 l_2635:
 	move.b	l_8F0A(a6),d0                   	| [$2635: ld   a,($8F0A)]
@@ -7260,7 +7261,7 @@ l_2e8a:
 	jbsr	compute_screen_address_2e52                            	| [$2eba: call $2E52]
 	LOAD_ROM	0x2DFE,a1                          	| [$2ebd: ld   de,$2DFE]
 	jbsr	write_4x4_tile_block_3325         	| [$2ec0: call write_4x4_tile_block_3325]
-	jbsr	l_0f11                            	| [$2ec3: call $0F11]
+	jbsr	play_wolf_attacks_sound_2_0f11                            	| [$2ec3: call $0F11]
 	rts                                    	| [$2ec6: ret]
 	                         	| [$2ec7: jr   $2EDD]
 	                          	| [...]
@@ -7419,7 +7420,7 @@ check_attacking_ladder_wolf_collision_305f:
 0:
 	move.b	#0x01,d0                        	| [$307d: ld   a,$01]
 	move.b	d0,player_killed_flag_8D32(a6)                   	| [$307f: ld   ($8D32),a]
-	jbsr	l_0f15                            	| [$3082: call $0F15]
+	jbsr	play_player_kill_blow_sound_0f15                            	| [$3082: call $0F15]
 	addq	#4,a7                        	| [$3085: pop  af]
 	rts                                    	| [$3086: ret]
 										| [...]
@@ -7532,7 +7533,7 @@ l_3135:
 	LOAD_ROM	0x3370,a0                          	| [$313c: ld   hl,$3370]
 	STORE_ROM_POINTER	a0,rom_pointer_8f48(a6)            	| [$313f: ld   ($8F4B),hl]
 	
-	jbsr	l_0f19                            	| [$3142: call $0F19]
+	jbsr	play_push_rock_sound_0f19                            	| [$3142: call $0F19]
 	jbsr	l_323e                            	| [$3145: call $323E]
 	* skipping another ROM checksum
 												| [$3148: ld   de,$68AC]
@@ -11339,7 +11340,7 @@ l_5e54:
 	clr.b	(wolf_flying_00,a2)                        	| [$5e67: ld   (ix+$00),$00]
 	move.b	#0x01,(wolf_walking_01,a2)                 	| [$5e6b: ld   (ix+$01),$01]
 	move.b	#0x02,(character_state_02,a2)                 	| [$5e6f: ld   (ix+$02),$02]
-	jbsr	l_0f15                            	| [$5e73: call $0F15]
+	jbsr	play_player_kill_blow_sound_0f15                            	| [$5e73: call $0F15]
 	addq	#4,a7                        	| [$5e76: pop  af]
 	rts                                    	| [$5e77: ret]
 level_2_balloon_collision_5e78:
@@ -11421,7 +11422,7 @@ l_5ee6:
 	move.b	#0x17,d1                        	| [$5eff: ld   b,$17]
 	jbsr	fill_area_0010                            	| [$5f01: rst  $10]
 l_5f02:
-	jbsr	play_balloon_bursting_sound_0ef1                            	| [$5f02: call $0EF1]
+	jbsr	play_balloon_popping_sound_0ef1                            	| [$5f02: call $0EF1]
 	rts                                    	| [$5f05: ret]
 l_5f06:
 	move.w	#0x0004,d3                      	| [$5f06: ld   de,$0004] 4
@@ -11565,9 +11566,9 @@ l_5fdd:
 l_5fe7:
 	move.b	d0,d4                           	| [$5fe7: ld   e,a]
 	move.b	d2,d0                           	| [$5fe8: ld   a,c]
-	move.b	d4,d0                           	| [$5feb: ld   a,e]
 	cmp.b	#PROJECTILE_MEAT,d0                         	| [$5fe9: cp   $03]
 	jne	l_5ff4                             	| [$5fec: jr   nz,$5FF4]
+	move.b	d4,d0                           	| [$5feb: ld   a,e]
 	cmp.b	#0x12,d0                         	| [$5fee: cp   $12]
 	jcc	l_6018                             	| [$5ff0: jr   nc,$6018]
 	jra	l_5ff8                             	| [$5ff2: jr   $5FF8]
@@ -11776,8 +11777,9 @@ l_612a:
 	* meat: return
 	rts                                    	| [$6138: ret  z] [...]
 0:
-	jbsr	play_balloon_bursting_sound_0ef1                            	| [$6139: call $0EF1]
-	rts                                    	| [$613c: ret]
+	* only play balloon pop sound if arrow, else do nothing
+	jbra	play_balloon_popping_sound_0ef1                            	| [$6139: call $0EF1]
+	                                    	| [$613c: ret]
 	
 l_613d:
 	btst.b	#0,(wolf_flying_00,a3)                    	| [$613d: bit  0,(iy+$00)]
@@ -11811,7 +11813,7 @@ l_6166:
 	move.b	flying_projectile_type_8D44(a6),d0                   	| [$6180: ld   a,($8D44)]
 	cmp.b	#PROJECTILE_MEAT,d0                         	| [$6183: cp   $03]
 	jne	l_619a                             	| [$6185: jr   nz,$619A]
-	jbsr	l_0efd                            	| [$6187: call $0EFD]
+	jbsr	play_balloon_burst_sound_0efd                            	| [$6187: call $0EFD]
 l_618a:
 	clr.b	d0                               	| [$618a: xor  a]
 	move.b	d0,flying_projectile_type_8D44(a6)                   	| [$618b: ld   ($8D44),a]
@@ -11823,7 +11825,7 @@ l_6190:
 	move.b	#0xD0,(0x0A,a2)                 	| [$6194: ld   (ix+$0a),$D0]
 	jra	l_6166                             	| [$6198: jr   $6166]
 l_619a:
-	jbsr	play_balloon_bursting_sound_0ef1                            	| [$619a: call $0EF1]
+	jbsr	play_balloon_popping_sound_0ef1                            	| [$619a: call $0EF1]
 	jra	l_618a                             	| [$619d: jr   $618A]
 	
 related_to_burst_balloon_619f:
@@ -11963,7 +11965,7 @@ l_627e:
 	move.b	#0x18,d1                        	| [$627e: ld   b,$18]
 	clr.b	d0                               	| [$6280: xor  a]
 	jbsr	fill_area_0010                            	| [$6281: rst  $10]
-	jbsr	play_balloon_bursting_sound_0ef1                            	| [$6282: call $0EF1]
+	jbsr	play_balloon_popping_sound_0ef1                            	| [$6282: call $0EF1]
 	addq	#4,a7                        	| [$6285: pop  af]
 	rts                                    	| [$6286: ret]
 	
@@ -12243,7 +12245,7 @@ l_649f:
 	move.b	#0x01,(a0)                      	| [$649f: ld   (hl),$01]
 	LOAD_ROM	0x64DF,a1                          	| [$64a1: ld   de,$64DF]
 	jbsr	store_de_in_struct_381e                            	| [$64a4: call $381E]
-	jbsr	l_0ef5                            	| [$64a7: call $0EF5]
+	jbsr	play_wolf_shot_destroyed_sound_0ef5                            	| [$64a7: call $0EF5]
 	move.b	is_bonus_stage_8F50(a6),d0                   	| [$64aa: ld   a,($8F50)]
 	                               	| [$64ad: and  a]
 	jne	l_64b4                             	| [$64ae: jr   nz,$64B4]
@@ -14992,7 +14994,7 @@ l_7752:
 0:
 	addq.b	#1,(character_state_02,a2)                    	| [$7761: inc  (ix+$02)]
 	move.b	#0x18,(character_timer_11,a2)                 	| [$7764: ld   (ix+$11),$18]
-	jbsr	play_balloon_bursting_sound_0ef1                            	| [$7768: call $0EF1]
+	jbsr	play_balloon_popping_sound_0ef1                            	| [$7768: call $0EF1]
 	move.b	(pointer_msb_17,a2),d0                    	| [$776b: ld   a,(ix+$17)]
 	LOAD_ROM	0x41B1,a0                          	| [$776e: ld   hl,$41B1]
 	jbsr	load_16bit_rom_pointer_0c45                            	| [$7771: call $0C45]

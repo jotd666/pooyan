@@ -762,11 +762,10 @@ osd_update_sprites:
 
 * Z: set if not playing
 is_game_playing:
-	movem.l	d0/a6,-(a7)
+	move.l	a6,-(a7)
 	GET_RAM_START_IN_A6
 	tst.b	game_in_play_8806(a6)
-
-	movem.l	(a7)+,d0/a6
+	move.l	(a7)+,a6
 	rts
 	
 lose_all_lives:

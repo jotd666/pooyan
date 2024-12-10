@@ -1,7 +1,6 @@
 - insert coin adds 31 credits or 2...
-- identify/rip sounds 2,3,6,7,8,9,D,E,F,10,13,14,18
+- identify/rip sounds 2,3,7,9,D,E,F,10,13,14,18
 - is_bonus_stage_8F50: probably just "is_real_play_8F50" ???
-- meat doesn't hit balloons: debug arcade see what causes wolf fall with meat when aiming balloon
 - sfx/music completely off after first game!!!! queuing sounds????
 - missing clut (second bonus stage): C3,1 19,C 4,8: to test
 - level 2 completed tune not playing
@@ -10,7 +9,7 @@
 - wolves should be HW sprites if possible, so should be piglets (priority!!)
 - continue to rip sounds: missing wolf falling sound + crash
 - continue to rip sounds: missing fruit shot sound
-- hit: fall sound should not end with crash sound, should be separated: rip when falling from very high
+- up the volume of some sounds: check with no9, send the missing/low level sounds
 - highscore save
 
 minor

@@ -147,18 +147,26 @@ force_sound_stop:
 	
 * tunes sounds are: sound index followed by 0x15,0x16,0x17 (that we ignore!)
 osd_sound_start:
+	rts
+	
 	movem.l	d0/d1/a0/a6,-(a7)
 	lea		_custom,a6
 	* original sound stop commands have bit 7 set. But if we follow them, they'll kill the
+	btst	#7,d0
+	jeq		1f
+	clr.b	looped_sound_enabled
+	moveq	#2,d0		| the loop channel?
+	jbsr	_mt_stopfx
+	jra		10f
+1:
 	* ongoing sfx when killing the music, so we have to ignore them and use a hack
-	and.w	#0x3F,d0
 	jbsr		is_game_playing
 	jne		1f
 	cmp.b	#CREDIT_SND,d0
 	jne		1f
 	jbsr	osd_music_stop
 1:
-	cmp.b	#PLAYER_FALLING_SND,d0
+	cmp.b	#PLAYER_FALLING_SND,d0		| this is coded as a tune in the game not a sound
 	jne		1f
 	jbsr	osd_music_stop
 1:
@@ -167,7 +175,7 @@ osd_sound_start:
 	lea		sound_table,a0
 
 	move.w	(a0,d0.w),d1	| sound type
-	beq.b	1f		| no sound
+	beq.b	10f		| no sound
 
 2:
 	cmp.w	#1,d1
@@ -182,10 +190,10 @@ osd_sound_start:
 	* looped sound
 	st.b	looped_sound_enabled
 	jsr		_mt_loopfx
-	bra.b	1f
+	bra.b	10f
 3:
 	jsr		_mt_playfx
-1:
+10:
 	movem.l	(a7)+,d0/d1/a0/a6
 	rts
 
@@ -198,7 +206,7 @@ osd_sound_start:
 
 	* here we allow music to override another looping music
 	*tst.w	music_tick
-	*bne.b	1b
+	*bne.b	10b
 	* play the proper module pattern
 	* load up the countdown if loop
 	
@@ -206,7 +214,7 @@ osd_sound_start:
 	* since it's not zero, next vbl tick will play the music
 	
 	cmp.b	music_track_start_number(pc),d1
-	beq.b	1b		| same track, skip
+	beq.b	10b		| same track, skip
 
     movem.l d0-a6,-(a7)
 	bsr		force_sound_stop
@@ -238,16 +246,9 @@ osd_sound_start:
     movem.l (a7)+,d0-a6
 	
 6:
-	jra	1b
+	jra	10b
 
 	
-7:
-*	move.w	#3,d0			| channel where loops play
-*	clr.b	looped_sound_enabled
-*	jbsr	_mt_stopfx
-*	jra	1b
-	bsr		osd_music_stop
-	jra	1b
 
 	
 music_playing:

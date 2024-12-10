@@ -31,10 +31,13 @@ def convert():
     sound_dict = {
 
     "MEAT_PICKED_SND"               :{"index":0xA,"channel":3,"sample_rate":hq_sample_rate,"priority":40},
-    "WOLF_FALLING_SND"               :{"index":0x2,"channel":2,"sample_rate":hq_sample_rate,"priority":40},  # loops!!!!
+    "WOLF_FALLING_SND"               :{"index":0x2,"channel":2,"sample_rate":hq_sample_rate,"priority":40,"loops":True},
     "WOLF_ATTACKS_SND"               :{"index":0x14,"channel":2,"sample_rate":hq_sample_rate,"priority":40},
+    "WOLF_ATTACKS_2_SND"               :{"index":0xC,"channel":2,"sample_rate":hq_sample_rate,"priority":40},
     "CREDIT_SND"               :{"index":0xB,"channel":0,"sample_rate":hq_sample_rate,"priority":20},
-    "BALLOON_BURSTING_SND"       :{"index":0x5,"channel":3,"sample_rate":hq_sample_rate,"priority":20},
+    "BALLOON_POPPED_SND"       :{"index":0x5,"channel":3,"sample_rate":hq_sample_rate,"priority":20},
+    "WOLF_SHOT_DESTROYED_SND"       :{"index":0x6,"channel":3,"sample_rate":hq_sample_rate,"priority":20},
+    "BALLOON_BURST_SND"       :{"index":0x8,"channel":3,"sample_rate":hq_sample_rate,"priority":20},
     "PLAYER_FALLING_SND"       :{"index":0x26,"channel":3,"sample_rate":hq_sample_rate,"priority":20},
     "PLAYER_CRASHING_SND"       :{"index":0x10,"channel":3,"sample_rate":hq_sample_rate,"priority":20},
     "PIGLETS_JUMP_SND"       :{"index":0x12,"channel":3,"sample_rate":hq_sample_rate,"priority":20},
@@ -58,8 +61,9 @@ def convert():
     valid_sounds[0x15] = "music_start"
     valid_sounds[0x16] = "music_start"
     valid_sounds[0x17] = "music_start"
-    valid_sounds[0x2] = "bogus"
     valid_sounds[0x4B] = "bogus"
+    valid_sounds[0x4D] = "bogus"
+    valid_sounds[0x5D] = "bogus"
     for k,v in sound_dict.items():
         valid_sounds[v["index"]] = k
     with open(os.path.join(this_dir,"valid_sound_table.68k"),"w") as f:
