@@ -32,14 +32,17 @@ def convert():
 
     "MEAT_PICKED_SND"               :{"index":0xA,"channel":3,"sample_rate":hq_sample_rate,"priority":40},
     "WOLF_FALLING_SND"               :{"index":0x2,"channel":2,"sample_rate":hq_sample_rate,"priority":40,"loops":True},
+    "WOLF_CRASHES_SND"               :{"index":0x3,"channel":2,"sample_rate":hq_sample_rate,"priority":40},
     "WOLF_ATTACKS_SND"               :{"index":0x14,"channel":2,"sample_rate":hq_sample_rate,"priority":40},
     "WOLF_ATTACKS_2_SND"               :{"index":0xC,"channel":2,"sample_rate":hq_sample_rate,"priority":40},
+    "EXTRA_SOUND_WOLF_HIT_SND"               :{"index":0x7,"channel":2,"sample_rate":hq_sample_rate,"priority":40},
     "CREDIT_SND"               :{"index":0xB,"channel":0,"sample_rate":hq_sample_rate,"priority":20},
     "BALLOON_POPPED_SND"       :{"index":0x5,"channel":3,"sample_rate":hq_sample_rate,"priority":20},
     "WOLF_SHOT_DESTROYED_SND"       :{"index":0x6,"channel":3,"sample_rate":hq_sample_rate,"priority":20},
     "BALLOON_BURST_SND"       :{"index":0x8,"channel":3,"sample_rate":hq_sample_rate,"priority":20},
     "PLAYER_FALLING_SND"       :{"index":0x26,"channel":3,"sample_rate":hq_sample_rate,"priority":20},
     "PLAYER_CRASHING_SND"       :{"index":0x10,"channel":3,"sample_rate":hq_sample_rate,"priority":20},
+    "BONUS_STAGE_JINGLE_SND"       :{"index":0x13,"channel":3,"sample_rate":hq_sample_rate,"priority":20},
     "PIGLETS_JUMP_SND"       :{"index":0x12,"channel":3,"sample_rate":hq_sample_rate,"priority":20},
     "SHOT_BOUNCES_SND"             :{"index":0x11,"channel":2,"sample_rate":hq_sample_rate,"priority":5},
     "SHOOTING_ARROW_SND"             :{"index":0x1,"channel":3,"sample_rate":hq_sample_rate,"priority":5},
@@ -50,9 +53,9 @@ def convert():
     "LEVEL_2_TUNE_SND"                :{"index":0x1B,"pattern":0xF,"volume":32,'loops':True},
     "LEVEL_1_COMPLETED_TUNE_SND"                :{"index":0x1E,"pattern":0x14,"volume":32,"loops":False,"ticks":480},
     "LEVEL_2_COMPLETED_TUNE_SND"                :{"index":0x22,"pattern":0x7,"volume":32,"loops":False,"ticks":520},
-    #"LEVEL_2_COMPLETED_2_TUNE_SND"                :{"index":0x22,"pattern":0x7,"volume":32,"loops":False,"ticks":520},
+    "LEVEL_2_COMPLETED_2_TUNE_SND"                :{"index":0x23,"pattern":0x1B,"volume":32,"loops":False,"ticks":500},  # suzannah
     "GAME_OVER_TUNE_SND"                :{"index":0x1D,"pattern":0x13,"volume":32,'loops':False,"ticks":180},
-    "BONUS_STAGE_TUNE_SND"                :{"index":0x28,"pattern":0x000000B,"volume":32,'loops':False,"ticks":360},  # wrong pattern
+    "BONUS_STAGE_TUNE_SND"                :{"index":0x28,"pattern":0x15,"volume":32,'loops':True},
 
 
     }

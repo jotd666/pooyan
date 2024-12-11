@@ -628,7 +628,7 @@ bootup_0092:
 	move.b	#0x1C,d1                        	| [$0123: ld   b,$1C]
 	jbsr	fill_area_0010                            	| [$0125: rst  $10]
 	move.w	#0x4343,d5                          	| [$0126: ld   hl,$4343]
-	STORE_WORD	d5,sound_lsb_ram_pointer_8A40(a6)            	| [$0129: ld   ($8A40),hl]
+	STORE_WORD	d5,produced_sound_slot_index_8A40(a6)            	| [$0129: ld   ($8A40),hl]
 	
 	                	| [$012c: ld   (watchdog_a000),a]
 	                        	| [$012f: ld   a,$01]
@@ -1441,11 +1441,11 @@ display_credits_05EE:
 	move.b	#0x05,d0                        	| [$05ee: ld   a,$05]
 	jbsr	display_string_05b2                            	| [$05f0: call $05B2]
 	move.b	nb_credits_8802(a6),d0          	| [$05f3: ld   a,(nb_credits_8802)]
-	cmp.b	#0x63,d0                         	| [$05f6: cp   $63]
+	cmp.b	#99,d0                         	| [$05f6: cp   $63]
 	jcs	l_05fc                             	| [$05f8: jr   c,$05FC]
-	move.b	#0x63,d0                        	| [$05fa: ld   a,$63]
+	move.b	#99,d0                        	| [$05fa: ld   a,$63] max credits 99
 l_05fc:
-	jbsr	l_062a                            	| [$05fc: call $062A]
+	jbsr	convert_to_bcd_062a                 | [$05fc: call $062A]
 	move.b	d0,d1                           	| [$05ff: ld   b,a]
 	and.b	#0xF0,d0                         	| [$0600: and  $F0]
 	jeq	l_060b                             	| [$0602: jr   z,$060B]
@@ -1482,13 +1482,17 @@ l_060b:
   	| [$0628: inc  (hl)] changes 8a3c when checksum fails
  	| [$0629: ret]
 
-l_062a:
+* convert credit number from normal to BCD
+* a bunch of X clear were inserted to make computation OK
+convert_to_bcd_062a:
+	CLEAR_XC_FLAGS
 	move.b	d0,d1                           	| [$062a: ld   b,a]
 	and.b	#0x0F,d0                         	| [$062b: and  $0F]
 	moveq	#0,d7
 	abcd	d7,d0                        	| [$062d: add  a,$00] + daa
 	move.b	d0,d2                           	| [$0630: ld   c,a]
 	move.b	d1,d0                           	| [$0631: ld   a,b]
+	CLEAR_XC_FLAGS
 	and.b	#0xF0,d0                         	| [$0632: and  $F0]
 	jeq	l_0641                             	| [$0634: jr   z,$0641]
 	ror.b	#4,d0                            	| [$0636: rrca] * 4
@@ -2221,7 +2225,7 @@ l_0bfc:
 	move.b	copy_of_inputs_8810(a6),d0                   	| [$0c03: ld   a,($8810)]
 	btst.b	#3,d0                           	| [$0c06: bit  3,a]
 	jeq	l_0c13                             	| [$0c08: jr   z,$0C13]
-	jbsr	l_0ecf                            	| [$0c0a: call $0ECF]
+	jbsr	play_null_sound_0ecf                            	| [$0c0a: call $0ECF]
 	move.w	#0x0000,d5                      	| [$0c0d: ld   hl,$0000] 0
 	jra	l_0dab                             	| [$0c10: jp   $0DAB]
 l_0c13:
@@ -2229,7 +2233,7 @@ l_0c13:
 	bne.b	0f                               	| [...]
 	rts                                    	| [$0c15: ret  z] [...]
 0:
-	jbsr	l_0ecf                            	| [$0c16: call $0ECF]
+	jbsr	play_null_sound_0ecf                            	| [$0c16: call $0ECF]
 	jra	l_0da8                             	| [$0c19: jp   $0DA8]
 l_0c1c:
 	move.b	nb_credits_8802(a6),d0          	| [$0c1c: ld   a,(nb_credits_8802)]
@@ -2596,37 +2600,40 @@ l_0e63:
 	rts                                    	| [$0e63: ret]
 	
 handle_queued_sounds_0e64:
-	lea	sound_slot_index_8A41(a6),a1            | [$0e64: ld   de,$8A41]
+	* jotd: sounds are not queued anymore: played directly
+	rts
+	
+	lea	consumed_sound_slot_index_8A41(a6),a1            | [$0e64: ld   de,$8A41]
+	moveq	#0,d0
 	move.b	(a1),d0                         	| [$0e67: ld   a,(de)]
-	move.b	d0,d6                           	| [$0e68: ld   l,a]
-	move.b	#0x8A,d5                        	| [$0e69: ld   h,$8A]
-	LOAD_A0_FROM_D5D6
-	move.b	(a0),d0                         	| [$0e6b: ld   a,(hl)]
+	lea	l_8A00(a6),a0							| [$0e69: ld   h,$8A]
+	add.w	d0,a0                           	| [$0e68: ld   l,a]
+	move.b	(a0),d0                         	| [$0e6b: ld   a,(hl)] sound to play
 	cmp.b	#0xFF,d0                         	| [$0e6c: cp   $FF]
 	bne.b	0f                               	| [...]
 	rts                                    	| [$0e6e: ret  z] [...]
 0:
 	move.b	d0,d1                           	| [$0e6f: ld   b,a]
-	move.b	demo_sounds_on_8821(a6),d0                   	| [$0e70: ld   a,($8821)]
+	tst.b	demo_sounds_on_8821(a6)                   	| [$0e70: ld   a,($8821)]
 											| [$0e73: and  $01]
 	jne	l_0e7d                             	| [$0e75: jr   nz,$0E7D]
-	move.b	game_in_play_8806(a6),d0                   	| [$0e77: ld   a,($8806)]
+	tst.b	game_in_play_8806(a6)                   	| [$0e77: ld   a,($8806)]
 	                               	| [$0e7a: and  a]
-	jeq	l_0e81                             	| [$0e7b: jr   z,$0E81]
+	jeq	l_0e81                             	| [$0e7b: jr   z,$0E81] sound doesn't play if no game in play
 l_0e7d:
 	move.b	d1,d0                           	| [$0e7d: ld   a,b]
 	jbsr	play_sound_0E8F                   	| [$0e7e: call play_sound_0E8F]
 l_0e81:
-	st.b	(a0)                      	| [$0e81: ld   (hl),$FF]
+	st.b	(a0)                      	        | [$0e81: ld   (hl),$FF] ack sound: sound is now played
 	LOAD_D5D6_FROM_A0_RAM
 	move.b	d6,d0                           	| [$0e83: ld   a,l]
-	cmp.b	#0x5E,d0                         	| [$0e84: cp   $5E] sound_slot_index_8A41
+	cmp.b	#0x5E,d0                         	| [$0e84: cp   $5E] consumed_sound_slot_index_8A41
 	jeq	reset_sount_slot_0e8b                             	| [$0e86: jr   z,$0E8B]
-	addq.b	#1,d0                           	| [$0e88: inc  a]
+	addq.b	#1,d0                           	| [$0e88: inc  a] next slot
 	move.b	d0,(a1)                         	| [$0e89: ld   (de),a]
 	rts                                    	| [$0e8a: ret]
 reset_sount_slot_0e8b:
-	move.b	#0x43,d0                        	| [$0e8b: ld   a,$43] sound_slot_index_8A41
+	move.b	#0x43,d0                        	| [$0e8b: ld   a,$43] wrap around consumed_sound_slot_index_8A41
 	move.b	d0,(a1)                         	| [$0e8d: ld   (de),a] 
 	rts                                    	| [$0e8e: ret]
 
@@ -2647,54 +2654,58 @@ play_sound_0E8F:
 	rts                                    	| [$0ea1: ret]
 	
 queue_sound_if_game_plays_0ea2:
-	move.b	d0,l_8D20(a6)                   	| [$0ea2: ld   ($8D20),a]
-	move.b	game_in_play_8806(a6),d0                   	| [$0ea5: ld   a,($8806)]
+	move.b	d0,sound_to_play_8D20(a6)                   	| [$0ea2: ld   ($8D20),a]
+	tst.b	game_in_play_8806(a6)                   	| [$0ea5: ld   a,($8806)]
 	                               	| [$0ea8: and  a]
 	jne	l_0eb0                             	| [$0ea9: jr   nz,$0EB0]
-	tst.b	is_bonus_stage_8F50(a6)                   	| [$0eab: ld   a,($8F50)]
+	tst.b	is_bonus_stage_8F50(a6)         | [$0eab: ld   a,($8F50)] is this test useful?
 	                               	| [$0eae: and  a]
-	bne.b	0f                               	| [...]
+	bne.b	l_0eb0                               	| [...]
 	rts                                    	| [$0eaf: ret  z] [...]
-0:
 l_0eb0:
-	move.b	l_8D20(a6),d0                   	| [$0eb0: ld   a,($8D20)]
+	move.b	sound_to_play_8D20(a6),d0                   	| [$0eb0: ld   a,($8D20)]
 queue_sound_0eb3:
+	* jotd: simplified this sound queue stuff that was giving me headaches for nothing
+	* now instead of queuing the sound, just play it. We have the CPU to do so.
+	jbra	osd_sound_start
+	
 	                    	                    | [$0eb3: push bc]
-	movem.w	d1/d3/d4,-(sp)                    	| [$0eb4: push de]
-	move.l	a1,-(sp)                        	| [$0eb4: push de]
-	move.l	a0,-(sp)                        	| [$0eb5: push hl]
-	.ifndef	RELEASE
-	moveq	#0,d3
-	move.b	d0,d3
-	bclr	#7,d3
-	lea		valid_sound_table(pc),a0
-	tst.b	(a0,d3.w)
-	jne		0f
-	lea		invalid_sound_error_msg(pc),a0
-	**jbsr	osd_break
-	jra		l_0ecb
-0:
-	.endif
-	move.b	d0,d1                           	| [$0eb6: ld   b,a]
-	lea	sound_lsb_ram_pointer_8A40(a6),a1                      	| [$0eb7: ld   de,$8A40]
-	move.b	(a1),d0                         	| [$0eba: ld   a,(de)]
-	move.b	d0,D6                           	| [$0ebb: ld   l,a]
-	move.b	#0x8A,D5                        	| [$0ebc: ld   h,$8A]
-	LOAD_A0_FROM_D5D6
-	move.b	d1,(a0)                         	| [$0ebe: ld   (hl),b]
-	move.b	D6,d0                           	| [$0ebf: ld   a,l]
-	cmp.b	#0x5E,d0                         	| [$0ec0: cp   $5E] max slot
-	jeq	l_0ec8                             	| [$0ec2: jr   z,$0EC8]
-	addq.b	#1,d0                           	| [$0ec4: inc  a]
-	move.b	d0,(a1)                         	| [$0ec5: ld   (de),a]
-	jra	l_0ecb                             	| [$0ec6: jr   $0ECB]
-l_0ec8:
-	move.b	#0x43,d0                        	| [$0ec8: ld   a,$43] min sound slot
-	move.b	d0,(a1)                         	| [$0eca: ld   (de),a]
-l_0ecb:
-	move.l	(sp)+,a0                        	| [$0ecb: pop  hl]
-	move.l	(sp)+,a1                        	| [$0ecc: pop  de]
-	movem.w	(sp)+,d1/D3/D4                    	| [$0ecc: pop  de]
+*	movem.w	d1/d3/d4,-(sp)                    	| [$0eb4: push de]
+*	move.l	a1,-(sp)                        	| [$0eb4: push de]
+*	move.l	a0,-(sp)                        	| [$0eb5: push hl]
+*	.ifndef	RELEASE
+*	moveq	#0,d3
+*	move.b	d0,d3
+*	bclr	#7,d3
+*	lea		valid_sound_table(pc),a0
+*	tst.b	(a0,d3.w)
+*	jne		0f
+*	lea		invalid_sound_error_msg(pc),a0
+*	**jbsr	osd_break
+*	jra		l_0ecb
+*0:
+*	.endif
+*	move.b	d0,d1                           	| [$0eb6: ld   b,a]
+*	lea	produced_sound_slot_index_8A40(a6),a1       | [$0eb7: ld   de,$8A40]
+*	lea	l_8A00(a6),a0							| [$0ebc: ld   h,$8A]
+*	moveq	#0,d0
+*	move.b	(a1),d0                         	| [$0eba: ld   a,(de)]
+*	add.w	d0,a0                           	| [$0ebb: ld   l,a]	                        	
+*	move.b	d1,(a0)                         	| [$0ebe: ld   (hl),b]
+*	LOAD_D5D6_FROM_A0_RAM
+*	move.b	D6,d0                           	| [$0ebf: ld   a,l]
+*	cmp.b	#0x5E,d0                         	| [$0ec0: cp   $5E] max slot
+*	jeq	l_0ec8                             	| [$0ec2: jr   z,$0EC8]
+*	addq.b	#1,d0                           	| [$0ec4: inc  a]
+*	move.b	d0,(a1)                         	| [$0ec5: ld   (de),a]
+*	jra	l_0ecb                             	| [$0ec6: jr   $0ECB]
+*l_0ec8:
+*	move.b	#0x43,d0                        	| [$0ec8: ld   a,$43] min sound slot
+*	move.b	d0,(a1)                         	| [$0eca: ld   (de),a]
+*l_0ecb:
+*	move.l	(sp)+,a0                        	| [$0ecb: pop  hl]
+*	move.l	(sp)+,a1                        	| [$0ecc: pop  de]
+*	movem.w	(sp)+,d1/D3/D4                    	| [$0ecc: pop  de]
 	                    	| [$0ecd: pop  bc]
 	rts                                    	| [$0ece: ret]
 	
@@ -2704,11 +2715,11 @@ valid_sound_table:
 	.byte    0	| 00
 	.byte    1	| 01: SHOOTING_ARROW_SND
 	.byte    1	| 02: WOLF_FALLING_SND
-	.byte    0	| 03
+	.byte    1	| 03: WOLF_CRASHES_SND
 	.byte    1	| 04: INFLATING_BALLOON_SND
 	.byte    1	| 05: BALLOON_POPPED_SND
 	.byte    1	| 06: WOLF_SHOT_DESTROYED_SND
-	.byte    0	| 07
+	.byte    1	| 07: EXTRA_SOUND_WOLF_HIT_SND
 	.byte    1	| 08: BALLOON_BURST_SND
 	.byte    0	| 09
 	.byte    1	| 0a: MEAT_PICKED_SND
@@ -2720,7 +2731,7 @@ valid_sound_table:
 	.byte    1	| 10: PLAYER_CRASHING_SND
 	.byte    1	| 11: SHOT_BOUNCES_SND
 	.byte    1	| 12: PIGLETS_JUMP_SND
-	.byte    0	| 13
+	.byte    1	| 13
 	.byte    1	| 14: WOLF_ATTACKS_SND
 	.byte    1	| 15: music_start
 	.byte    1	| 16: music_start
@@ -2832,20 +2843,20 @@ valid_sound_table:
 
 	.endif
 		
-l_0ecf:
+play_null_sound_0ecf:
 	clr.b	d0                               	| [$0ecf: xor  a]
 	jra	queue_sound_0eb3                             	| [$0ed0: jr   $0EB3]
-l_0ed2:
+play_shooting_arrow_sound_0ed2:
 	move.b	#SHOOTING_ARROW_SND,d0                        	| [$0ed2: ld   a,$01]
 	jra	queue_sound_if_game_plays_0ea2                             	| [$0ed4: jr   $0EA2]
-l_0ed6:
+play_wolf_falling_sound_0ed6:
 	move.b	#WOLF_FALLING_SND,d0                        	| [$0ed6: ld   a,$02]
 	jra	queue_sound_0eb3                             	| [$0ed8: jr   $0EB3]
-l_0eda:
+play_wolf_crashed_on_ground_sound_0eda:
 	move.b	#0x80+WOLF_FALLING_SND,d0                        	| [$0eda: ld   a,$82] stop loop
 	jbsr	queue_sound_0eb3                            	| [$0edc: call $0EB3]
-	move.b	#0x03,d0                        	| [$0edf: ld   a,$03]
-	jra	queue_sound_0eb3                             	| [$0ee1: jr   $0EB3]
+	moveq	#WOLF_CRASHES_SND,d0										| [$0edf: ld   a,$03]
+	jra		queue_sound_0eb3						| [$0ee1: jr   $0EB3]
 l_0ee3:
 	move.b	big_rock_hits_player_state_8F24(a6),d0                   	| [$0ee3: ld   a,($8F24)]
 	                               	| [$0ee6: and  a]
@@ -2865,8 +2876,8 @@ play_balloon_popping_sound_0ef1:
 play_wolf_shot_destroyed_sound_0ef5:
 	move.b	#WOLF_SHOT_DESTROYED_SND,d0                        	| [$0ef5: ld   a,$06]
 	jra	queue_sound_if_game_plays_0ea2                             	| [$0ef7: jr   $0EA2]
-l_0ef9:
-	move.b	#0x07,d0                        	| [$0ef9: ld   a,$07]
+play_extra_sound_wolf_hit_0ef9:
+	move.b	#EXTRA_SOUND_WOLF_HIT_SND,d0                        	| [$0ef9: ld   a,$07] not really sure why it plays...
 	jra	queue_sound_if_game_plays_0ea2                             	| [$0efb: jr   $0EA2]
 play_balloon_burst_sound_0efd:
 	move.b	#BALLOON_BURST_SND,d0                        	| [$0efd: ld   a,$08]
@@ -2913,8 +2924,8 @@ l_0f30:
 l_0f3f:
 	move.b	#PIGLETS_JUMP_SND,d0                        	| [$0f3f: ld   a,$12]
 	jra	queue_sound_if_game_plays_0ea2                             	| [$0f41: jp   $0EA2]
-l_0f44:
-	move.b	#0x13,d0                        	| [$0f44: ld   a,$13]
+play_bonus_stage_jingle_0f44:
+	move.b	#BONUS_STAGE_JINGLE_SND,d0                        	| [$0f44: ld   a,$13]
 	jra	queue_sound_if_game_plays_0ea2                             	| [$0f46: jp   $0EA2]
 l_0f49:
 	move.b	#WOLF_ATTACKS_SND,d0                        	| [$0f49: ld   a,$14]
@@ -2939,8 +2950,8 @@ l_0f6c:
 	move.b	#0x15,d0                        	| [$0f71: ld   a,$15]
 	jra	queue_sound_0eb3                             	| [$0f73: jp   $0EB3]
 l_0f76:
-	move.b	l_8D68(a6),d0                   	| [$0f76: ld   a,($8D68)]
-	or.b	d0,d0                             	| [$0f79: or   a]
+	tst.b	l_8D68(a6)                   	| [$0f76: ld   a,($8D68)]
+												| [$0f79: or   a]
 	beq.b	0f                               	| [...]
 	rts                                    	| [$0f7a: ret  nz] [...]
 0:
@@ -2949,27 +2960,27 @@ l_0f76:
 	add.b	#LEVEL_1_TUNE_SND,d0                         	| [$0f80: add  a,$1A]
 	jbsr	queue_sound_if_game_plays_0ea2                            	| [$0f82: call $0EA2]
 	jra	play_tune_0fc3                             	| [$0f85: jp   $0FC3]
-l_0f88:
+play_game_intro_tune_0f88:
 	move.b	#0x82,d0                        	| [$0f88: ld   a,$82]
 	jbsr	queue_sound_if_game_plays_0ea2                            	| [$0f8a: call $0EA2]
 	move.b	#GAME_INTRO_TUNE_SND,d0                        	| [$0f8d: ld   a,$1C]
 	jra	play_tune_0fc3                             	| [$0f8f: jp   $0FC3]
-l_0f92:
+play_game_over_tune_0f92:
 	move.b	#GAME_OVER_TUNE_SND,d0                        	| [$0f92: ld   a,$1D]
 	jra	play_tune_0fc3                             	| [$0f94: jp   $0FC3]
-play_level_completed_tune_0f97:
+play_level_1_completed_tune_0f97:
 	move.b	round_number_8907(a6),d0                   	| [$0f97: ld   a,($8907)]
 	ror.b	#1,d0                            	| [$0f9a: rrca]
 	and.b	#0x03,d0                         	| [$0f9b: and  $03]
 	add.b	#LEVEL_1_COMPLETED_TUNE_SND,d0                         	| [$0f9d: add  a,$1E]
 	jra	play_tune_0fc3                             	| [$0f9f: jp   $0FC3]
-l_0fa2:
+play_level_2_completed_tune_0fa2:
 	move.b	round_number_8907(a6),d0                   	| [$0fa2: ld   a,($8907)]
 	ror.b	#1,d0                            	| [$0fa5: rrca]
 	and.b	#0x03,d0                         	| [$0fa6: and  $03]
 	add.b	#LEVEL_2_COMPLETED_TUNE_SND,d0                         	| [$0fa8: add  a,$22]
 	jra	play_tune_0fc3                             	| [$0faa: jp   $0FC3]
-l_0fad:
+play_player_falling_sound_0fad:
 	move.b	#PLAYER_FALLING_SND,d0                        	| [$0fad: ld   a,$26]
 	jra	play_tune_0fc3                             	| [$0faf: jp   $0FC3]
 play_intro_tune_0fb2:
@@ -2977,7 +2988,7 @@ play_intro_tune_0fb2:
 	jbsr	queue_sound_0eb3                            	| [$0fb4: call $0EB3]
 	move.b	#0x15,d0                        	| [$0fb7: ld   a,$15]
 	jra	queue_sound_0eb3                             	| [$0fb9: jp   $0EB3]
-l_0fbc:
+play_bonus_stage_tune_0fbc:
 	move.b	#BONUS_STAGE_TUNE_SND,d0                        	| [$0fbc: ld   a,$28]
 	jra	play_tune_0fc3                             	| [$0fbe: jp   $0FC3]
 l_0fc1:
@@ -3020,7 +3031,7 @@ l_0FEF:
 	move.b	d0,l_8F61(a6)                   	| [$1000: ld   ($8F61),a]
 	move.b	d0,l_8F3F(a6)                   	| [$1003: ld   ($8F3F),a]
 	move.b	d0,l_8F5C(a6)                   	| [$1006: ld   ($8F5C),a]
-	jbsr	l_0fbc                            	| [$1009: call $0FBC]
+	jbsr	play_bonus_stage_tune_0fbc                            	| [$1009: call $0FBC]
 												| [$100c: ld   hl,$8A38]
 									| [$100f: ld   a,(hl)]
 									| [$1010: inc  hl]
@@ -3170,7 +3181,7 @@ l_110a:
 l_1111:
 	lea	l_8F5C(a6),a0                      	| [$1111: ld   hl,$8F5C]
 	addq.b	#1,(a0)                         	| [$1114: inc  (hl)]
-	jbsr	l_0f44                            	| [$1115: call $0F44]
+	jbsr	play_bonus_stage_jingle_0f44                            	| [$1115: call $0F44]
 	rts                                    	| [$1118: ret]
 
 * < d0: value
@@ -3234,7 +3245,7 @@ l_1158:
 	lea	l_8F5B(a6),a0                        	| [$1159: ld   l,$5B]
 	move.b	#0x09,d1                        	| [$115b: ld   b,$09]
 	jbsr	fill_area_0010                            	| [$115d: rst  $10]
-	jbsr	l_0ecf                            	| [$115e: call $0ECF]
+	jbsr	play_null_sound_0ecf                            	| [$115e: call $0ECF]
 	* reaches here after the bonus stage
 	move.b	#0x06,d0                        	| [$1161: ld   a,$06]
 	move.b	d0,in_game_sub_state_880A(a6)   	| [$1163: ld   (in_game_sub_state_880A),a]
@@ -3936,7 +3947,7 @@ l_16cf:
 	clr.b	d0                               	| [$16cf: xor  a]
 	move.b	d0,written_column_index_88B7(a6)                   	| [$16d0: ld   ($88B7),a]
 	jbsr	display_nb_lives_03c2                            	| [$16d3: call $03C2]
-	move.b	is_bonus_stage_8F50(a6),d0                   	| [$16d6: ld   a,($8F50)]
+	tst.b	is_bonus_stage_8F50(a6)                   	| [$16d6: ld   a,($8F50)]
 	                               	| [$16d9: and  a]
 	jeq	l_16f3                             	| [$16da: jr   z,$16F3]
 	move.b	round_number_8907(a6),d0                   	| [$16dc: ld   a,($8907)]
@@ -4021,7 +4032,7 @@ l_1770:
 0:
 	clr.b	d0                               	| [$1771: xor  a]
 	move.b	d0,(a0)                         	| [$1772: ld   (hl),a]
-	move.b	is_bonus_stage_8F50(a6),d0                   	| [$1773: ld   a,($8F50)]
+	tst.b	is_bonus_stage_8F50(a6)                   	| [$1773: ld   a,($8F50)]
 	                               	| [$1776: and  a]
 	jne	l_17bb                             	| [$1777: jr   nz,$17BB]
 	move.b	l_8904(a6),d0                   	| [$1779: ld   a,($8904)]
@@ -4062,9 +4073,9 @@ l_17bb:
 
 init_level_logic_17c1:
 	lea	player_bow_structure_8A80(a6),a2      	| [$17c1: ld   ix,player_bow_structure_8A80]
-	move.b	is_bonus_stage_8F50(a6),d0                   	| [$17c5: ld   a,($8F50)]
-	                               	| [$17c8: and  a]
 	lea	l_84F6(a6),a1                      	| [$17c9: ld   de,$84F6]
+	tst.b	is_bonus_stage_8F50(a6)                   	| [$17c5: ld   a,($8F50)]
+	                               	| [$17c8: and  a]
 	jne	l_17d8                             	| [$17cc: jr   nz,$17D8]
 	move.b	round_number_8907(a6),d0                   	| [$17ce: ld   a,($8907)]
 	LOAD_ROM	0x1E2C,a0                          	| [$17d3: ld   hl,$1E2C]
@@ -4099,13 +4110,13 @@ l_1808:
 	STORE_ROM_POINTER	a0,rom_pointer_8f00(a6)            	| [$180b: ld   ($8F00),hl]
 	
 	jbsr	animate_bow_22b1                            	| [$180e: call $22B1]
-	move.b	is_bonus_stage_8F50(a6),d0                   	| [$1811: ld   a,($8F50)]
+	tst.b	is_bonus_stage_8F50(a6)                   	| [$1811: ld   a,($8F50)]
 	                               	| [$1814: and  a]
 	jne	l_1848                             	| [$1815: jr   nz,$1848]
-	move.b	game_in_play_8806(a6),d0                   	| [$1817: ld   a,($8806)]
+	tst.b	game_in_play_8806(a6)                   	| [$1817: ld   a,($8806)]
 	                               	| [$181a: and  a]
 	jne	l_1829                             	| [$181b: jr   nz,$1829]
-	move.b	l_8F3F(a6),d0                   	| [$181d: ld   a,($8F3F)]
+	tst.b	l_8F3F(a6)                   	| [$181d: ld   a,($8F3F)]
 	                               	| [$1820: and  a]
 	jeq	l_1829                             	| [$1821: jr   z,$1829]
 	lea	in_game_sub_state_880A(a6),a0      	| [$1823: ld   hl,in_game_sub_state_880A]
@@ -4419,7 +4430,7 @@ l_1a15:
 	move.b	game_in_play_8806(a6),d0                   	| [$1a21: ld   a,($8806)]
 	                               	| [$1a24: and  a]
 	jeq	l_1d3c                             	| [$1a25: jp   z,$1D3C]
-	move.b	is_bonus_stage_8F50(a6),d0                   	| [$1a28: ld   a,($8F50)]
+	tst.b	is_bonus_stage_8F50(a6)                   	| [$1a28: ld   a,($8F50)]
 	                               	| [$1a2b: and  a]
 	jne	l_1a3e                             	| [$1a2c: jr   nz,$1A3E]
 	subq.b	#1,(a0)                         	| [$1a2e: dec  (hl)]
@@ -4486,7 +4497,7 @@ l_1a91:
 	move.b	d0,in_game_sub_state_880A(a6)   	| [$1a92: ld   (in_game_sub_state_880A),a]
 	rts                                    	| [$1a95: ret]
 l_1a96:
-	jbsr	l_0f92                            	| [$1a96: call $0F92]
+	jbsr	play_game_over_tune_0f92                            	| [$1a96: call $0F92]
 	lea	in_game_sub_state_880A(a6),a0      	| [$1a99: ld   hl,in_game_sub_state_880A]
 	move.b	current_player_is_p2_880D(a6),d0                   	| [$1a9c: ld   a,($880D)]
 	                               	| [$1a9f: and  a]
@@ -4907,7 +4918,7 @@ l_1d3c:
 												| [$1d50: ld   (screen_straight_881F),a]
 	move.b	d0,l_8F3F(a6)                   	| [$1d53: ld   ($8F3F),a]
 	jbsr	erase_sprite_shadow_ram_02b9                            	| [$1d56: call $02B9]
-	jbsr	l_0ecf                            	| [$1d59: call $0ECF]
+	jbsr	play_null_sound_0ecf                            	| [$1d59: call $0ECF]
 	LOAD_ROM	0x1E4C,a1                          	| [$1d5c: ld   de,$1E4C]
 	lea	l_89F0(a6),a0                      	| [$1d5f: ld   hl,$89F0]
 l_1d62:
@@ -4931,7 +4942,7 @@ l_1d6e:
 	*jbsr	rom_check_79e9                            	| [$1d77: call $79E9]
 	move.w	#0x0626,d3                          	| [$1d7a: ld   de,$0626]
 	jbsr	update_88A0_0038                            	| [$1d7d: rst  $38]
-	jbsr	l_0f44                            	| [$1d7e: call $0F44]
+	jbsr	play_bonus_stage_jingle_0f44                            	| [$1d7e: call $0F44]
 	rts                                    	| [$1d81: ret]
 l_1d82:
 	tst.b	d0                               	| [$1d82: and  a]
@@ -5350,7 +5361,7 @@ display_nb_lives_2065:		| exact code copy!
 
 l_20d4:
 	lea	player_killed_flag_8D32(a6),a0                      	| [$20d4: ld   hl,$8D32]
-	move.b	is_bonus_stage_8F50(a6),d0                   	| [$20d7: ld   a,($8F50)]
+	tst.b	is_bonus_stage_8F50(a6)                   	| [$20d7: ld   a,($8F50)]
 	                               	| [$20da: and  a]
 	jeq	l_20e8                             	| [$20db: jr   z,$20E8]
 	clr.b	(a0)                             	| [$20dd: ld   (hl),$00]
@@ -5497,7 +5508,7 @@ move_arrow_21cf:
 	                               	| [$21d8: and  a]
 	jne	l_21e1                             	| [$21d9: jr   nz,$21E1]
 	addq.b	#1,(0x12,a3)                    	| [$21db: inc  (iy+$12)]
-	jbsr	l_0ed2                            	| [$21de: call $0ED2]
+	jbsr	play_shooting_arrow_sound_0ed2                            	| [$21de: call $0ED2]
 l_21e1:
 	btst.b	#1,(0x00,a3)                    	| [$21e1: bit  1,(iy+$00)]
 	jne	l_2226                             	| [$21e5: jr   nz,$2226]
@@ -5907,7 +5918,7 @@ init_player_hit_2442:
 	beq.b	0f                               	| [...]
 	rts                                    	| [$246e: ret  nz] [...]
 0:
-	jbsr	l_0fad                            	| [$246f: call $0FAD]
+	jbsr	play_player_falling_sound_0fad                            	| [$246f: call $0FAD]
 	rts                                    	| [$2472: ret]
 
 player_hit_starts_falling_2473:
@@ -6545,7 +6556,7 @@ l_291e:
 												| [$2955: inc  hl]
 												| [...]
 												| [$2956: djnz $294F]
-	jbsr	l_0fa2                            	| [$2958: call $0FA2]
+	jbsr	play_level_2_completed_tune_0fa2                            	| [$2958: call $0FA2]
 	rts                                    	| [$295b: ret]
 
 l_29a0:
@@ -7763,7 +7774,7 @@ continue_rock_falling_32bd:
 	move.b	d0,(a0)+                         	| [$32cb: ld   (hl),a]
 										| [$32cc: inc  hl]
 	move.b	#0x20,(a0)                      	| [$32cd: ld   (hl),$20]
-	jbsr	l_0fad                            	| [$32cf: call $0FAD]
+	jbsr	play_player_falling_sound_0fad                            	| [$32cf: call $0FAD]
 	lea	big_rock_hits_player_state_8F24(a6),a0                      	| [$32d2: ld   hl,$8F24]
 	addq.b	#1,(a0)                         	| [$32d5: inc  (hl)]
 												| [$32d6: ld   hl,$0779]
@@ -9041,7 +9052,7 @@ l_3d99:
 	jbsr	store_de_in_struct_381e                            	| [$3da5: call $381E]
 	move.b	#0x40,(character_speed_09,a2)                 	| [$3da8: ld   (ix+$09),$40]
 	move.b	#0x0F,(character_state_02,a2)                 	| [$3dac: ld   (ix+$02),$0F]
-	jra	l_0ed6                             	| [$3db0: jp   $0ED6]
+	jra	play_wolf_falling_sound_0ed6                             	| [$3db0: jp   $0ED6]
 
 
 flying_wolf_prepares_to_shoot_3e69:
@@ -9213,7 +9224,7 @@ wolf_falling_3f7c:
 	jbsr	store_de_in_struct_381e                            	| [$3f8f: call $381E]
 	move.b	#0x02,(character_state_02,a2)                 	| [$3f92: ld   (ix+$02),$02]
 	move.b	#0x20,(character_timer_11,a2)                 	| [$3f96: ld   (ix+$11),$20]
-	jbsr	l_0eda                            	| [$3f9a: call $0EDA]
+	jbsr	play_wolf_crashed_on_ground_sound_0eda                            	| [$3f9a: call $0EDA]
 	lea	l_8D40(a6),a0                      	| [$3f9d: ld   hl,$8D40]
 	subq.b	#1,(a0)                         	| [$3fa0: dec  (hl)]
 	lea	nb_wolves_8901(a6),a0              	| [$3fa1: ld   hl,nb_wolves_8901]
@@ -10681,7 +10692,7 @@ l_59e8:
 	jbsr	l_5a56                            	| [$59f7: call $5A56]
 	jbsr	l_5a1f                            	| [$59fa: call $5A1F]
 	jbsr	l_5a9c                            	| [$59fd: call $5A9C]
-	*jbsr	perform_rom_checksum_7e6d                            	| [$5a00: call $7E6D]
+												| [$5a00: call $7E6D] perform_rom_checksum
 	jra	l_5ac0                             	| [$5a03: jp   $5AC0]
 l_5a06:
 	move.b	copy_of_inputs_8810(a6),d0                   	| [$5a06: ld   a,($8810)]
@@ -10745,7 +10756,7 @@ l_5a1f:
 	jra	l_5a8a                             	| [$5a54: jr   $5A8A]
 l_5a56:
 	move.b	copy_of_inputs_8810(a6),d0                   	| [$5a56: ld   a,($8810)]
-	lea	l_882A(a6),a0                      	| [$5a59: ld   hl,$882A]
+	lea	coin_inserted_bit_variable_882A(a6),a0       | [$5a59: ld   hl,$882A]
 	ror.b	#1,d0                            	| [$5a5c: rrca]
 	SET_X_FROM_C
 	move.b	(a0),d7
@@ -10759,7 +10770,7 @@ l_5a56:
 0:
 	exg	a1,a0                              	| [$5a65: ex   de,hl]
 	jbsr	play_credit_sound_0f09                            	| [$5a66: call $0F09]
-	lea	l_8824(a6),a0                      	| [$5a69: ld   hl,$8824]
+	lea	coin_inserted_timer_8824(a6),a0                      	| [$5a69: ld   hl,$8824]
 	addq.b	#1,(a0)                         	| [$5a6c: inc  (hl)]
 	exg	a1,a0                              	| [$5a6d: ex   de,hl]
 	addq.w	#1,a0                           	| [$5a6e: inc  hl]
@@ -10800,7 +10811,7 @@ l_5a97:
 	jbsr	update_88A0_0038                            	| [$5a9a: rst  $38]
 	rts                                    	| [$5a9b: ret]
 l_5a9c:
-	move.b	l_8824(a6),d0                   	| [$5a9c: ld   a,($8824)]
+	move.b	coin_inserted_timer_8824(a6),d0                   	| [$5a9c: ld   a,($8824)]
 	                               	| [$5a9f: and  a]
 	bne.b	0f                               	| [...]
 	rts                                    	| [$5aa0: ret  z] [...]
@@ -10821,12 +10832,11 @@ l_5aaf:
 	beq.b	0f                               	| [...]
 	rts                                    	| [$5ab5: ret  nz] [...]
 0:
-	CLEAR_XC_FLAGS                         	| [$5ab6: xor  a]
 	clr.b	d0                               	| [$5ab6: xor  a]
 	*move.b	d0,l_A183                       	| [$5ab7: ld   ($A183),a]
 	rts                                    	| [$5aba: ret]
 l_5abb:
-	lea	l_8824(a6),a0                      	| [$5abb: ld   hl,$8824]
+	lea	coin_inserted_timer_8824(a6),a0                      	| [$5abb: ld   hl,$8824]
 	subq.b	#1,(a0)                         	| [$5abe: dec  (hl)]
 	rts                                    	| [$5abf: ret]
 l_5ac0:
@@ -12139,7 +12149,7 @@ l_63de:
 	move.b	#0x01,(a0)                      	| [$63de: ld   (hl),$01]
 	LOAD_ROM	0x63FB,a1                          	| [$63e0: ld   de,$63FB]
 	jbsr	store_de_in_struct_381e                            	| [$63e3: call $381E]
-	jbsr	l_0ef9                            	| [$63e6: call $0EF9]
+	jbsr	play_extra_sound_wolf_hit_0ef9                            	| [$63e6: call $0EF9]
 	move.w	#0x0315,d3                          	| [$63e9: ld   de,$0315]
 	jbsr	update_88A0_0038                            	| [$63ec: rst  $38]
 	addq	#4,a7                        	| [$63ed: pop  af]
@@ -12310,7 +12320,7 @@ l_6513:
 	add.w	d3,a2                            	| [$651b: add  ix,de]
 	subq.b	#1,d1                           	| [...]
 	jne	l_6513                             	| [$651d: djnz $6513]
-	jbsr	l_0f88                            	| [$651f: call $0F88]
+	jbsr	play_game_intro_tune_0f88                            	| [$651f: call $0F88]
 	rts                                    	| [$6522: ret]
 l_6523:
 	move.b	(0x00,a2),d0                    	| [$6523: ld   a,(ix+$00)]
@@ -12978,7 +12988,7 @@ l_698f:
 	move.b	d4,d0                           	| [$69a0: ld   a,e]
 	and.b	#0x0F,d0                         	| [$69a1: and  $0F]
 	jbsr	osd_w_videoram                         	| [$69a3: ld   (hl),a]
-	jbsr	play_level_completed_tune_0f97                            	| [$69a4: call $0F97]
+	jbsr	play_level_1_completed_tune_0f97                            	| [$69a4: call $0F97]
 l_69a7:
 	lea	l_892D(a6),a0                      	| [$69a7: ld   hl,$892D]
 	addq.b	#1,(a0)                         	| [$69aa: inc  (hl)]
@@ -13658,7 +13668,7 @@ jump_table_6DAA:
 
 
 l_6db8:
-	jbsr	l_0fbc                            	| [$6db8: call $0FBC]
+	jbsr	play_bonus_stage_tune_0fbc                            	| [$6db8: call $0FBC]
 	move.b	round_number_8907(a6),d0                   	| [$6dbb: ld   a,($8907)]
 	lsr.b	#2,d0                            	| [$6dbe: srl  a] * 2
 	cmp.b	#0x07,d0                         	| [$6dc2: cp   $07]
@@ -14011,7 +14021,7 @@ l_6fb2:
 											| [$6fd7: inc  hl]
 											| [...]
 											| [$6fd8: djnz $6FC8]
-	jbsr	l_0f44                            	| [$6fda: call $0F44]
+	jbsr	play_bonus_stage_jingle_0f44                            	| [$6fda: call $0F44]
 	move.w	#0x0627,d3                          	| [$6fdd: ld   de,$0627]
 	jbsr	update_88A0_0038                            	| [$6fe0: rst  $38]
 	rts                                    	| [$6fe1: ret]
@@ -14118,7 +14128,7 @@ l_705f:
 	beq.b	0f                               	| [...]
 	rts                                    	| [$7063: ret  nz] [...]
 0:
-	jbsr	l_0ecf                            	| [$7064: call $0ECF]
+	jbsr	play_null_sound_0ecf                            	| [$7064: call $0ECF]
 	CLEAR_XC_FLAGS                         	| [$7067: xor  a]
 	clr.b	d0                               	| [$7067: xor  a]
 	move.b	d0,l_8F52(a6)                   	| [$7068: ld   ($8F52),a]
@@ -15888,7 +15898,7 @@ l_7f5d:
 	move.b	d0,l_8E23(a6)                   	| [$7fa4: ld   ($8E23),a]
 	rts                                    	| [$7fa7: ret]
 l_7fa8:
-	jbsr	l_0ecf                            	| [$7fa8: call $0ECF]
+	jbsr	play_null_sound_0ecf                            	| [$7fa8: call $0ECF]
 	move.b	l_8E25(a6),d0                   	| [$7fab: ld   a,($8E25)]
 	                               	| [$7fae: and  a]
 	jeq	l_7fc7                             	| [$7faf: jr   z,$7FC7]
@@ -15944,7 +15954,7 @@ l_7fef:
 	bne.b	0f                               	| [...]
 	rts                                    	| [$7ff8: ret  z] [...]
 0:
-	jbsr	l_0ecf                            	| [$7ff9: call $0ECF]
+	jbsr	play_null_sound_0ecf                            	| [$7ff9: call $0ECF]
 	jra	continue_0d78                             	| [$7ffc: jp   $0D78]
 
 

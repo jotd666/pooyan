@@ -147,10 +147,9 @@ force_sound_stop:
 	
 * tunes sounds are: sound index followed by 0x15,0x16,0x17 (that we ignore!)
 osd_sound_start:
-	rts
-	
 	movem.l	d0/d1/a0/a6,-(a7)
 	lea		_custom,a6
+	and.w	#0xFF,d0
 	* original sound stop commands have bit 7 set. But if we follow them, they'll kill the
 	btst	#7,d0
 	jeq		1f

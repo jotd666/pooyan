@@ -1,10 +1,9 @@
-- insert coin adds 31 credits or 2...
-- identify/rip sounds 2,3,7,9,D,E,F,10,13,14,18
-- is_bonus_stage_8F50: probably just "is_real_play_8F50" ???
-- sfx/music completely off after first game!!!! queuing sounds????
-- missing clut (second bonus stage): C3,1 19,C 4,8: to test
-- level 2 completed tune not playing
+- identify/rip sounds 9,D,E,F,14,18
 - do a 25FPS version for 68000
+- suzannah plays on round 2, nothing plays on round 4
+- round 3: drum music not played on level completion
+- strange sounds issued
+- ask no9 to normalize more faint sounds
 
 - wolves should be HW sprites if possible, so should be piglets (priority!!)
 - continue to rip sounds: missing wolf falling sound + crash
