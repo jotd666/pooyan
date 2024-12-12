@@ -67,9 +67,9 @@ DECL_VERSION:MACRO
 	ENDM
 _data   dc.b    0
 _name	dc.b	'Pooyan',0
-_copy	dc.b	'202x JOTD',0
+_copy	dc.b	'2024 JOTD',0
 _info
-    ;dc.b    "Music by no9",0
+    dc.b    "Music by no9",0
 	dc.b	0
 _kickname   dc.b    0
 ;--- version id

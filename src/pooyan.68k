@@ -698,7 +698,7 @@ l_0186:
 	jbsr	play_sound_0E8F                   	| [$01ab: call play_sound_0E8F]
 	move.b	#0x01,d0                        	| [$01ae: ld   a,$01]
 	jbsr	osd_interrupt_control               	| [$01b0: ld   (mainlatch_a180),a]
-	lea	l_8A00(a6),a0                      	| [$01b3: ld   hl,$8A00]
+	lea	high_score_table_8A00(a6),a0                      	| [$01b3: ld   hl,$8A00]
 	move.b	#0x0A,d1                        	| [$01b6: ld   b,$0A]
 l_01b8:
 	clr.b	(a0)+                             	| [$01b8: ld   (hl),$00]
@@ -712,7 +712,7 @@ l_01b8:
 	lea	high_score_88AA(a6),a0                      	| [$01c3: ld   hl,$88AA]
 	move.b	#0x01,(a0)                      	| [$01c6: ld   (hl),$01]
 	                	| [$01c8: ld   (watchdog_a000),a]
-	lea	l_89C0(a6),a0                      	| [$01cb: ld   hl,$89C0]
+	lea	play_time_table_89C0(a6),a0                      	| [$01cb: ld   hl,$89C0]
 	clr.b	d0                               	| [$01ce: xor  a]
 	move.b	#0x1E,d1                        	| [$01cf: ld   b,$1E]
 	jbsr	fill_area_0010                            	| [$01d1: rst  $10]
@@ -1109,6 +1109,7 @@ l_03e3:
 	subq.b	#1,d1                           	| [...]
 	jne	l_03e3                             	| [$03e6: djnz $03E3]
 	rts                                    	| [$03e8: ret]
+	
 display_high_scores_table_03E9:
 	* score/ranking, then 1ST, 2ND ...
 	move.b	#0x1A,d0                        	| [$03e9: ld   a,$1A]
@@ -1125,7 +1126,7 @@ l_03ed:
 	lea	l_85C7(a6),a0                      	| [$03f7: ld   hl,$85C7]
 	move.w	#0x0020,d3                      	| [$03fa: ld   de,$0020] 32
 	move.b	#0x0A,d1                        	| [$03fd: ld   b,$0A]
-	lea	l_8A00(a6),a2                      	| [$03ff: ld   ix,$8A00]
+	lea	high_score_table_8A00(a6),a2                      	| [$03ff: ld   ix,$8A00]
 l_0403:
 	jbsr	write_to_screen_0429                            	| [$0403: call $0429]
 	jbsr	osd_w_videoram                         	| [$0406: ld   (hl),a]
@@ -1145,8 +1146,8 @@ l_0417:
 	addq.w	#1,a2                           	| [$041e: inc  ix]
 	subq.b	#1,d1                           	| [...]
 	jne	l_0403                             	| [$0420: djnz $0403]
-	jbsr	l_0439                            	| [$0422: call $0439]
-	jbsr	l_0460                            	| [$0425: call $0460]
+	jbsr	display_best_times_0439                            	| [$0422: call $0439]
+	jbsr	display_best_names_0460                            	| [$0425: call $0460]
 	rts                                    	| [$0428: ret]
 write_to_screen_0429:
 	move.b	(0x00,a2),d0                    	| [$0429: ld   a,(ix+$00)]
@@ -1158,8 +1159,8 @@ write_to_screen_0429:
 	ror.b	#4,d0                            	| [$0432: rrca] * 4
 	and.b	#0x0F,d0                         	| [$0436: and  $0F]
 	rts                                    	| [$0438: ret]
-l_0439:
-	lea	l_89C0(a6),a2                      	| [$0439: ld   ix,$89C0]
+display_best_times_0439:
+	lea	play_time_table_89C0(a6),a2                      	| [$0439: ld   ix,$89C0]
 	lea	l_8467(a6),a0                      	| [$043d: ld   hl,$8467]
 	move.b	#0x0A,d1                        	| [$0440: ld   b,$0A]
 l_0442:
@@ -1182,8 +1183,8 @@ l_0457:
 	subq.b	#1,d1                           	| [...]
 	jne	l_0442                             	| [$045d: djnz $0442]
 	rts                                    	| [$045f: ret]
-l_0460:
-	lea	l_8E00(a6),a2                      	| [$0460: ld   ix,$8E00]
+display_best_names_0460:
+	lea	high_score_names_8E00(a6),a2                      	| [$0460: ld   ix,$8E00] up to 81E8 included
 	lea	l_8567(a6),a0                      	| [$0464: ld   hl,$8567]
 	move.b	#0x0A,d1                        	| [$0467: ld   b,$0A]
 l_0469:
@@ -2606,7 +2607,7 @@ handle_queued_sounds_0e64:
 	lea	consumed_sound_slot_index_8A41(a6),a1            | [$0e64: ld   de,$8A41]
 	moveq	#0,d0
 	move.b	(a1),d0                         	| [$0e67: ld   a,(de)]
-	lea	l_8A00(a6),a0							| [$0e69: ld   h,$8A]
+	lea	high_score_table_8A00(a6),a0							| [$0e69: ld   h,$8A]
 	add.w	d0,a0                           	| [$0e68: ld   l,a]
 	move.b	(a0),d0                         	| [$0e6b: ld   a,(hl)] sound to play
 	cmp.b	#0xFF,d0                         	| [$0e6c: cp   $FF]
@@ -2687,7 +2688,7 @@ queue_sound_0eb3:
 *	.endif
 *	move.b	d0,d1                           	| [$0eb6: ld   b,a]
 *	lea	produced_sound_slot_index_8A40(a6),a1       | [$0eb7: ld   de,$8A40]
-*	lea	l_8A00(a6),a0							| [$0ebc: ld   h,$8A]
+*	lea	high_score_table_8A00(a6),a0							| [$0ebc: ld   h,$8A]
 *	moveq	#0,d0
 *	move.b	(a1),d0                         	| [$0eba: ld   a,(de)]
 *	add.w	d0,a0                           	| [$0ebb: ld   l,a]	                        	
@@ -4522,7 +4523,7 @@ l_1ab2:
 	jcc	l_1ac5                             	| [$1ac1: jr   nc,$1AC5]
 	add.w	d3,a2                            	| [$1ac3: add  ix,de]
 l_1ac5:
-	lea	l_8A00(a6),a3                      	| [$1ac5: ld   iy,$8A00]
+	lea	high_score_table_8A00(a6),a3                      	| [$1ac5: ld   iy,$8A00]
 l_1ac9:
 	move.b	(0x02,a2),d0                    	| [$1ac9: ld   a,(ix+$02)]
 	cmp.b	(0x02,a3),d0                     	| [$1acc: cp   (iy+$02)]

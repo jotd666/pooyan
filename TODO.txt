@@ -4,10 +4,9 @@
 - round 3: drum music not played on level completion
 - strange sounds issued
 - ask no9 to normalize more faint sounds
+- maybe remove wolf loop fall sound, cuts off the music
 
-- wolves should be HW sprites if possible, so should be piglets (priority!!)
-- continue to rip sounds: missing wolf falling sound + crash
-- continue to rip sounds: missing fruit shot sound
+- HW sprites for mama+basket, meat and arrows, using standard "allocate sprite" method
 - up the volume of some sounds: check with no9, send the missing/low level sounds
 - highscore save
 
@@ -16,15 +15,10 @@ minor
 - during tutorial, one character is off before "400"
 - level 2 music should become more "dramatic" when wolves are about to push rock
 - push start button: parasite chars between "PTS" strings sometimes
-- insert coin: awards 2 credits immediately
 - capture screenshot memory dumps to filter out unused tiles/cluts
   to save memory
 
 maybe fixed:
-
-- level 2: at some point no collision detection, no more ability to shoot arrows (could it be a missed checksum???)
-- level 1: wolf climbs ladder: wrong chars, impossible to shoot (could it be a missed checksum???)
-- level 1: no wolf on ladder when a wolf passes/wolves on ladder animation lock up (could it be a missed checksum???)
 
 converter: don't warn about flags on ld with i or r as target
 converter: lf address >= 0xFC00 consider as negative data

@@ -10,7 +10,7 @@ sprite_names = dict()
 NB_TILES = 256
 NB_SPRITES = 64
 
-dump_it = True
+dump_it = False
 dump_dir = os.path.join(this_dir,"dumps")
 
 if dump_it:
@@ -229,12 +229,18 @@ def read_tileset(img_set_list,img_set,palette,plane_orientation_flags,cache,is_b
 
                 for b,(plane_name,plane_func) in zip(plane_orientation_flags,plane_orientations):
                     if b:
+
                         actual_nb_planes = nb_planes
                         wtile = plane_func(tile)
+
                         if is_bob:
+                            y_start,wtile = bitplanelib.autocrop_y(wtile)
+                            height = wtile.size[1]
                             actual_nb_planes += 1
                             bitplane_data = bitplanelib.palette_image2raw(wtile,None,palette,generate_mask=True,blit_pad=True)
                         else:
+                            height = 8
+                            y_start = 0
                             bitplane_data = bitplanelib.palette_image2raw(wtile,None,palette)
 
                         plane_size = len(bitplane_data) // actual_nb_planes
@@ -253,7 +259,7 @@ def read_tileset(img_set_list,img_set,palette,plane_orientation_flags,cache,is_b
                                     next_cache_id += 1
                                 else:
                                     bitplane_plane_ids.append(0)  # blank
-                        entry[plane_name] = bitplane_plane_ids
+                        entry[plane_name] = {"height":height,"y_start":y_start,"bitplanes":bitplane_plane_ids}
 
             tile_entry.append(entry)
 
@@ -313,7 +319,8 @@ with open(os.path.join(src_dir,"graphics.68k"),"w") as f:
                     for orientation,_ in plane_orientations:
                         f.write("* {}\n".format(orientation))
                         if orientation in t:
-                            for bitplane_id in t[orientation]:
+                            data = t[orientation]
+                            for bitplane_id in data["bitplanes"]:
                                 f.write("\t.long\t")
                                 if bitplane_id:
                                     f.write(f"tile_plane_{bitplane_id:02d}")
@@ -365,15 +372,21 @@ with open(os.path.join(src_dir,"graphics.68k"),"w") as f:
                     name = f"{prefix}_{i:02x}_{j:02x}"
 
                     f.write(f"{name}:\n")
-                    # TODO: adjust
-                    height = 16
+                    height = 0
                     width = 4
                     offset = 0
+                    for orientation,_ in plane_orientations:
+                        if orientation in t:
+                            height = t[orientation]["height"]
+                            offset = t[orientation]["y_start"]
+                            break
+                    else:
+                        raise Exception(f"height not found for {name}!!")
                     for orientation,_ in plane_orientations:
                         f.write("* {}\n".format(orientation))
                         f.write(f"\t.word\t{height},{width},{offset}\n")
                         if orientation in t:
-                            for bitplane_id in t[orientation]:
+                            for bitplane_id in t[orientation]["bitplanes"]:
                                 f.write("\t.long\t")
                                 if bitplane_id:
                                     f.write(f"bob_plane_{bitplane_id:02d}")
