@@ -5,10 +5,10 @@
 - strange sounds issued
 - ask no9 to normalize more faint sounds
 - maybe remove wolf loop fall sound, cuts off the music
-
+- rip highscore music & identify index
 - HW sprites for mama+basket, meat and arrows, using standard "allocate sprite" method
 - up the volume of some sounds: check with no9, send the missing/low level sounds
-- highscore save
+- highscore save: to test!!
 
 minor
 

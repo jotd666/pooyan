@@ -177,14 +177,13 @@ start:
 		.global osd_read_inputs_1
 		.global osd_read_inputs_0
 
+
 		.global	is_game_playing
 		
 	.include	"ReadJoypad.i"
 	.include	"whdload_funcs.i"
 		.text
 
-
-.list
 
 	.ifne	OPT_ENABLE_PROFILING
 	* init profiling if enabled
@@ -406,13 +405,7 @@ _user:
 
 	jra		demo_game
 
-start_floor_table:
-	dc.b	0
-	dc.b	3,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
-	dc.b	21,22,23,24,25,26,27,28,29
-	dc.b	0,0,0,0,0,0,0
-	.align  2
-	
+
 	
 * < D0: bcpl string (with leading size byte)
 * < A1: dest C string
@@ -1680,8 +1673,8 @@ load_palette:
 	
 
 
-
-
+	
+	
 
 * 60Hz VBLANK interrupt (also keyboard)
 * only called at bootup, not from interrupts (at least!!)

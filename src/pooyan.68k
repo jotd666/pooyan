@@ -698,6 +698,7 @@ l_0186:
 	jbsr	play_sound_0E8F                   	| [$01ab: call play_sound_0E8F]
 	move.b	#0x01,d0                        	| [$01ae: ld   a,$01]
 	jbsr	osd_interrupt_control               	| [$01b0: ld   (mainlatch_a180),a]
+	* set 10000 for highscores
 	lea	high_score_table_8A00(a6),a0                      	| [$01b3: ld   hl,$8A00]
 	move.b	#0x0A,d1                        	| [$01b6: ld   b,$0A]
 l_01b8:
@@ -709,30 +710,33 @@ l_01b8:
 	                           	| [$01c0: inc  l]
 	subq.b	#1,d1                           	| [...]
 	jne	l_01b8                             	| [$01c1: djnz $01B8]
-	lea	high_score_88AA(a6),a0                      	| [$01c3: ld   hl,$88AA]
+	lea	high_score_88A8+2(a6),a0                      	| [$01c3: ld   hl,$88AA]
 	move.b	#0x01,(a0)                      	| [$01c6: ld   (hl),$01]
 	                	| [$01c8: ld   (watchdog_a000),a]
 	lea	play_time_table_89C0(a6),a0                      	| [$01cb: ld   hl,$89C0]
 	clr.b	d0                               	| [$01ce: xor  a]
 	move.b	#0x1E,d1                        	| [$01cf: ld   b,$1E]
 	jbsr	fill_area_0010                            	| [$01d1: rst  $10]
+	
+	* now is a good time to load highscores from disk
+	jbsr	osd_read_high_scores
 	jra	l_020f                             	| [$01d2: jp   $020F]
 						
 								| [$01d5: ld   (watchdog_a000),a]
 * unreached???													| [$01d8: jr   $01D5]
-l_01da:
-	subq.w	#1,a4                           	| [$01da: dec  bc]
-	                	| [$01db: ld   (watchdog_a000),a]
-	jbsr	osd_read_inputs_0                     	| [$01de: ld   a,(in0_a080)]
-	btst.b	#3,d0                           	| [$01e1: bit  3,a]
-	beq.b	0f                               	| [...]
-	rts                                    	| [$01e3: ret  nz] [...]
-0:
-	move.b	d1,d0                           	| [$01e4: ld   a,b]
-	or.b	d2,d0                             	| [$01e5: or   c]
-	jne	l_01da                             	| [$01e6: jr   nz,$01DA]
-	SET_XC_FLAGS                           	| [$01e8: scf]
-	rts                                    	| [$01e9: ret]
+
+           	| [$01da: dec  bc]
+              | [$01db: ld   (watchdog_a000),a]
+                 	| [$01de: ld   a,(in0_a080)]
+           	| [$01e1: bit  3,a]
+            	| [...]
+          	| [$01e3: ret  nz] [...]
+
+           	| [$01e4: ld   a,b]
+             	| [$01e5: or   c]
+          	| [$01e6: jr   nz,$01DA]
+          	| [$01e8: scf]
+          	| [$01e9: ret]
 	
 	
 fill_video_ram_and_sprites_01ea:
@@ -1217,6 +1221,7 @@ l_048c:
 	subq.b	#1,d1                           	| [...]
 	jne	l_0469                             	| [$0493: djnz $0469]
 	rts                                    	| [$0495: ret]
+	
 something_on_start_screen_0496:
 	move.b	d0,d2                           	| [$0496: ld   c,a]
 	move.b	game_in_play_8806(a6),d0                   	| [$0497: ld   a,($8806)]
@@ -1227,7 +1232,7 @@ something_on_start_screen_0496:
 	move.b	d2,d0                           	| [$049c: ld   a,c]
 	                               	| [$049d: and  a]
 	jeq	l_04e7                             	| [$049e: jr   z,$04E7]
-	jbsr	l_04f2                            	| [$04a0: call $04F2]
+	jbsr	load_current_player_score_04f2                            	| [$04a0: call $04F2]
 	add.b	d0,d0                            	| [$04a3: add  a,a]
 	add.b	d2,d0                            	| [$04a4: add  a,c]
 	clr.w	d1                               	| [$04a6: ld   b,$00]
@@ -1253,7 +1258,7 @@ l_04c0:
 	jbsr	display_score_056B                            	| [$04c0: call $056B]
 	move.l	(sp)+,a1                        	| [$04c3: pop  de]
 	subq.w	#1,a1                           	| [$04c4: dec  de]
-	lea	high_score_88AA(a6),a0                      	| [$04c5: ld   hl,$88AA]
+	lea	high_score_88A8+2(a6),a0                      	| [$04c5: ld   hl,$88AA]
 	move.b	#0x03,d1                        	| [$04c8: ld   b,$03]
 l_04ca:
 	move.b	(a1),d0                         	| [$04ca: ld   a,(de)]
@@ -1261,32 +1266,31 @@ l_04ca:
 	bcc.b	0f                               	| [...]
 	rts                                    	| [$04cc: ret  c] [...]
 0:
-	jne	l_04d4                             	| [$04cd: jr   nz,$04D4]
+	jne	update_high_score_04d4                             	| [$04cd: jr   nz,$04D4]
 	subq.w	#1,a1                           	| [$04cf: dec  de]
 	subq.w	#1,a0                           	| [$04d0: dec  hl]
 	subq.b	#1,d1                           	| [...]
 	jne	l_04ca                             	| [$04d1: djnz $04CA]
 	rts                                    	| [$04d3: ret]
-l_04d4:
-	jbsr	l_04f2                            	| [$04d4: call $04F2]
-	lea	l_88A8(a6),a0                      	| [$04d7: ld   hl,$88A8]
-	move.b	#0x03,d1                        	| [$04da: ld   b,$03]
+update_high_score_04d4:
+	jbsr	load_current_player_score_04f2                            	| [$04d4: call $04F2]
+	lea	high_score_88A8(a6),a0                      	| [$04d7: ld   hl,$88A8]
+	move.w	#0x02,d1                        	| [$04da: ld   b,$03]
 l_04dc:
-	move.b	(a1)+,d0                         	| [$04dc: ld   a,(de)]
-	move.b	d0,(a0)+                         	| [$04dd: ld   (hl),a]
+	move.b	(a1)+,(a0)+                         	| [$04dc: ld   a,(de)]
+	                         	| [$04dd: ld   (hl),a]
 	                           	| [$04de: inc  de]
 	                           	| [$04df: inc  hl]
-	subq.b	#1,d1                           	| [...]
-	jne	l_04dc                             	| [$04e0: djnz $04DC]
+	dbf	d1,l_04dc                             	| [$04e0: djnz $04DC]
 	move.b	#0x02,d0                        	| [$04e2: ld   a,$02]
 	jra	display_score_056B                             	| [$04e4: jp   $056B]
 l_04e7:
-	jbsr	l_04f2                            	| [$04e7: call $04F2]
+	jbsr	load_current_player_score_04f2                            	| [$04e7: call $04F2]
 	lea	l_88AB(a6),a0                      	| [$04ea: ld   hl,$88AB]
 	tst.b	d0                               	| [$04ed: and  a]
 	move.b	#0x03,d1                        	| [$04ee: ld   b,$03]
 	jra	l_04af                             	| [$04f0: jr   $04AF]
-l_04f2:
+load_current_player_score_04f2:
 	move.w	d0,-(sp)                        	| [$04f2: push af]
 	move.b	current_player_is_p2_880D(a6),d0                   	| [$04f3: ld   a,($880D)]
 	lea	l_88A2(a6),a1                      	| [$04f6: ld   de,$88A2]
@@ -1322,7 +1326,7 @@ display_score_056B:
 	lea	player_2_score_screen_address_8521(a6),a2                      	| [$0578: ld   ix,$8521]
 	subq.b	#1,d0                           	| [$057c: dec  a]
 	jeq	l_0586                             	| [$057d: jr   z,$0586]
-	lea	high_score_88AA(a6),a0                      	| [$057f: ld   hl,$88AA]
+	lea	high_score_88A8+2(a6),a0                      	| [$057f: ld   hl,$88AA]
 	lea	l_8641(a6),a2                      	| [$0582: ld   ix,$8641]
 l_0586:
 	move.w    #-0x20,d3                          	| [$0586: ld   de,$FFE0]
@@ -15524,7 +15528,7 @@ str_0f_7b8b:
 	.ascii	"DROP@GIANT@ROCK;;?"
 str_10_7bc8:
 	.byte	175,134	|	0x86af
-	.ascii	"@NICE@@SHOOT."
+	.ascii	"@NICE@@SHOT."
 	.byte	210,134	|	0x86d2
 	.ascii	"@BONUS@@POINT?"
 str_11_7be7:
@@ -15924,6 +15928,8 @@ l_7fc7:
 	move.b	d0,high_score_state_8E26(a6)                   	| [$7fcd: ld   ($8E26),a]
 	move.b	#0x01,d0                        	| [$7fd0: ld   a,$01]
 	move.b	d0,l_8E2A(a6)                   	| [$7fd2: ld   ($8E2A),a]
+	* entry complete: save high scores
+	jbsr	osd_write_high_scores
 	rts                                    	| [$7fd5: ret]
 	
 l_7fd6:
