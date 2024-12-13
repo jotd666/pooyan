@@ -147,7 +147,7 @@ def convert():
                 wav_file = os.path.join(sound_dir,wav_name+".wav")
 
                 def get_sox_cmd(sr,output):
-                    return [sox,"--volume","1.0",wav_file,"--channels","1","-D","--bits","8","-r",str(sr),"--encoding","signed-integer",output]
+                    return [sox,"--volume","0.8",wav_file,"--channels","1","-D","--bits","8","-r",str(sr),"--encoding","signed-integer",output]
 
 
                 used_sampling_rate = details["sample_rate"]
@@ -167,6 +167,10 @@ def convert():
                 minsigned = min(signed_data)
 
                 amp_ratio = max(maxsigned,abs(minsigned))/128
+
+                # JOTD: for that one, I'm using maxxed out sfx by no9, no amp
+                amp_ratio = 0
+
                 wav = os.path.splitext(wav_name)[0]
                 if amp_ratio > 1:
                     print(f"{wav}: volume peaked {amp_ratio}")
