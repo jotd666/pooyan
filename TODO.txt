@@ -1,14 +1,13 @@
 - identify/rip sounds 9,D,E,F,14,18
-- do a 25FPS version for 68000
 - suzannah plays on round 2, nothing plays on round 4
 - round 3: drum music not played on level completion
 - strange sounds issued
 - ask no9 to normalize more faint sounds
 - maybe remove wolf loop fall sound, cuts off the music
-- rip highscore music & identify index
-- HW sprites for mama+basket, meat and arrows, using standard "allocate sprite" method
+- highscore music index: 0x29
 - up the volume of some sounds: check with no9, send the missing/low level sounds
 - highscore save: to test!!
+- sometimes starts with credits=30 and score=13!!!
 
 minor
 
@@ -18,7 +17,7 @@ minor
 - capture screenshot memory dumps to filter out unused tiles/cluts
   to save memory
 
-turn off sfx: bpset E8F,,{PC=$79E8;g}
+turn off sfx: bpset E8F,A!=$15 && A!=$16,{PC=$79E8;g}
 
 maybe fixed:
 

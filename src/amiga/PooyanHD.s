@@ -42,12 +42,13 @@ _config
 	dc.b	"C1:X:invincible:0;"
 	dc.b	"C1:X:infinite lives:1;"
 	dc.b	"C1:X:cheat keys:4;"
-	;dc.b    "C2:L:start level color:default,2,3,4;"
 	dc.b	"C3:X:skip introduction:0;"
+	dc.b	"C3:X:25 Hz update:1;"
 	IFD		CHIP_ONLY
 	dc.b	"C3:X:break at startup:31;"
 	ENDC
-	dc.b	"C5:L:difficulty level:easiest,easy,normal,hard;"
+	dc.b	"C4:L:start lives:3,4,5;"
+	dc.b	"C5:L:difficulty level:1,2,3,4,5,6,7,8;"
 	dc.b	0
 
 	IFD BARFLY

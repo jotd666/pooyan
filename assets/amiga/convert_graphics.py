@@ -10,7 +10,7 @@ sprite_names = dict()
 NB_TILES = 256
 NB_SPRITES = 64
 
-dump_it = False
+dump_it = True
 dump_dir = os.path.join(this_dir,"dumps")
 
 if dump_it:
@@ -57,6 +57,7 @@ def load_tileset(image_name,palette_index,side,tileset_name,dumpdir,dump=False,n
         for i in range(nb_cols):
 
             if cluts and palette_index not in cluts[tile_number]:
+                # no clut declared for that tile
                 tileset_1.append(None)
             else:
 
@@ -107,6 +108,15 @@ def add_sprite(index,name,cluts=[0]):
         sprite_names[idx] = name
         sprite_cluts[idx] = cluts
 
+def add_hw_sprite(index,name,cluts=[0]):
+    if isinstance(index,range):
+        pass
+    elif not isinstance(index,(list,tuple)):
+        index = [index]
+    for idx in index:
+        sprite_names[idx] = name
+        hw_sprite_cluts[idx] = cluts
+
 # 24 bit colors that Marconelly reported as the only colors used, we'll see
 #actually_used_colors = ["ff00fb", "0000fb", "0000ab", "2147fb", "0068fb", "00defb",
 #"defffb", "00ff00", "009700", "97de00", "ffff00", "ffb800", "de9700", "b82100", "ff0000",
@@ -119,40 +129,40 @@ nb_colors = 1<<nb_planes
 colors_to_remove = {(104, 0, 251), (0, 255, 171)}
 
 
-
 sprite_names = {}
 sprite_cluts = [[] for _ in range(64)]
+hw_sprite_cluts = [[] for _ in range(64)]
 
-baloon_cluts = [0,1,9,4,0xC,0xF,0xB]
+balloon_cluts = [0,1,9,4,0xC,0xF,0xB]
 wolf_cluts = [0,4,0xC]
+
+add_sprite([0x14,0x1B],"arrow")
+add_sprite(0x10,"meat")
+add_sprite(0x1c,"fruit",[6,7]) # strawberry or apple!
+
+add_sprite([0x11,0x25],"player_in_basket_top")
+add_sprite([0x12,0x16],"player_in_basket_bottom")
+add_sprite(0xA,"basket_top")
+add_sprite([7,0xF],"basket_bottom")
+
 
 add_sprite(0,"small_rock")
 add_sprite(1,"upside_down_wolf",wolf_cluts)
 add_sprite([3,4,9],"pooyan",cluts=[0,1,8,0xF])
 add_sprite([6,0x1D,0xB],"falling_wolf",wolf_cluts)
-add_sprite(7,"basket_bottom")
-#add_sprite_range(8,10,"pig")
-add_sprite(0xA,"basket_top")
-add_sprite(0xF,"basket_bottom")
-add_sprite(0x10,"meat")
+
 add_sprite(0x3A,"points",[0xF])           # 1600
 add_sprite(0x37,"points",[8,2,3])  # 100, 200, 50
 add_sprite(0x39,"points",[3,2])  # 400, 800
 
 
 
-add_sprite(0x11,"player_in_basket_top")
-add_sprite(0x1c,"fruit",[6,7]) # strawberry or apple!
-add_sprite(0x12,"player_in_basket_bottom")
 add_sprite(0x2C,"facing_boss",[4])
-add_sprite([0x14,0x1B],"arrow")
 
-add_sprite(0x25,"player_in_basket_top")
-add_sprite(0x16,"player_in_basket_bottom")
 add_sprite(range(0x26,0x2A),"wolf",wolf_cluts)
-add_sprite(range(0x20,0x25),"baloon",baloon_cluts)  # 0: yellow
-add_sprite(range(0x3B,0x3F),"baloon",baloon_cluts)  # 0: yellow
-add_sprite([0x2,0x2d],"baloon",baloon_cluts)
+add_sprite(range(0x20,0x25),"balloon",balloon_cluts)  # 0: yellow
+add_sprite(range(0x3B,0x3F),"balloon",balloon_cluts)  # 0: yellow
+add_sprite([0x2,0x2d],"baloon",balloon_cluts)
 
 add_sprite([0x17,0x18,0x13],"bow")
 add_sprite([0x30,0x3F,0x35,0x38],"rock")
@@ -191,12 +201,19 @@ for i,tsd in tile_sheet_dict.items():
 
 sprite_palette = set()
 sprite_set_list = []
+hw_sprite_set_list = []
 
 for i,tsd in sprite_sheet_dict.items():
+    # BOBs
     cluts = sprite_cluts
     sp,sprite_set = load_tileset(tsd,i,16,"sprites",dump_dir,dump=dump_it,name_dict=sprite_names,cluts=cluts)
     sprite_set_list.append(sprite_set)
     sprite_palette.update(sp)
+    # Hardware sprites
+    cluts = hw_sprite_cluts
+    _,hw_sprite_set = load_tileset(tsd,i,16,"hw_sprites",dump_dir,dump=dump_it,name_dict=sprite_names,cluts=cluts)
+    hw_sprite_set_list.append(hw_sprite_set)
+
 
 full_palette = sorted(sprite_palette | tile_palette)[1:]
 
@@ -218,7 +235,7 @@ plane_orientations = [("standard",lambda x:x),
 ("mirror",ImageOps.mirror),
 ("flip_mirror",lambda x:ImageOps.flip(ImageOps.mirror(x)))]
 
-def read_tileset(img_set_list,img_set,palette,plane_orientation_flags,cache,is_bob):
+def read_tileset(img_set_list,palette,plane_orientation_flags,cache,is_bob):
     next_cache_id = 1
     tile_table = []
     for n,img_set in enumerate(img_set_list):
@@ -275,10 +292,10 @@ def read_tileset(img_set_list,img_set,palette,plane_orientation_flags,cache,is_b
     return new_tile_table
 
 tile_plane_cache = {}
-tile_table = read_tileset(tile_set_list,tile_set,full_palette,[True,False,False,False],cache=tile_plane_cache, is_bob=False)
+tile_table = read_tileset(tile_set_list,full_palette,[True,False,False,False],cache=tile_plane_cache, is_bob=False)
 
 bob_plane_cache = {}
-sprite_table = read_tileset(sprite_set_list,sprite_set,full_palette,[True,False,True,False],cache=bob_plane_cache, is_bob=True)
+sprite_table = read_tileset(sprite_set_list,full_palette,[True,False,True,False],cache=bob_plane_cache, is_bob=True)
 
 with open(os.path.join(src_dir,"palette.68k"),"w") as f:
     bitplanelib.palette_dump(full_palette,f,bitplanelib.PALETTE_FORMAT_ASMGNU)

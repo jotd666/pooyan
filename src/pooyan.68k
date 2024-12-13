@@ -666,21 +666,22 @@ bootup_0092:
 	ror.b	#1,d0                            	| [$0165: rrca]
 	move.b	d0,d1                           	| [$0166: ld   b,a]
 	and.b	#0x07,d0                         	| [$0167: and  $07]
-	move.b	d0,difficulty_8820(a6)                   	| [$0169: ld   ($8820),a]
+	move.b	d0,difficulty_8820(a6)              | [$0169: ld   ($8820),a] 0-7, 7=hardest
 	move.b	d1,d0                           	| [$016c: ld   a,b]
 	ror.b	#3,d0                            	| [$016d: rrca] * 3
 	move.b	d0,d1                           	| [$0170: ld   b,a]
-	move.b	#0x01,d0                         	| [$0171: and  $01]  JOTD: forcing demo sounds to "on"
+	and.b	#0x01,d0                         	| [$0171: and  $01]
+	*move.b	#0x01,d0                         	| JOTD: forcing demo sounds to "on"
 	move.b	d0,demo_sounds_on_8821(a6)                   	| [$0173: ld   ($8821),a]
 	jbsr	osd_read_dsw1                    	| [$0176: ld   a,(dsw1_a000)]
 	not.b	d0                               	| [$0179: cpl]
 	and.b	#0x03,d0                         	| [$017a: and  $03]
 	cmp.b	#0x03,d0                         	| [$017c: cp   $03]
-	jeq	l_0184                             	| [$017e: jr   z,$0184]
-	addq.b	#0x03,d0                        	| [$0180: add  a,$03]
+	jeq	dsw_cheat_0184                             	| [$017e: jr   z,$0184]
+	addq.b	#0x03,d0                        	| [$0180: add  a,$03] DSW = 0 => 3 lives, 1=>4, 2=>5
 	jra	l_0186                             	| [$0182: jr   $0186]
-l_0184:
-	st.b	d0                                	| [$0184: ld   a,$FF]
+dsw_cheat_0184:
+	st.b	d0                                	| [$0184: ld   a,$FF] DSW cheat enabled
 l_0186:
 	move.b	d0,start_nb_lives_8807(a6)                   	| [$0186: ld   ($8807),a]
 	jbsr	osd_read_dsw0                    	| [$0189: ld   a,(dsw0_a0e0)]
