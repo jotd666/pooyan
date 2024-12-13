@@ -18,6 +18,8 @@ minor
 - capture screenshot memory dumps to filter out unused tiles/cluts
   to save memory
 
+turn off sfx: bpset E8F,,{PC=$79E8;g}
+
 maybe fixed:
 
 converter: don't warn about flags on ld with i or r as target

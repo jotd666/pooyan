@@ -439,6 +439,9 @@ PROJECTILE_MEAT = 3
 PROJECTILE_NONE = 0
 PROJECTILE_ARROW = 1
 
+* originally 0x3A0, extended a bit
+HIGH_SCORE_TIMEOUT = 0x03A0+0x1000
+
 pooyan_reset:
 	clr.b	d0                               	| [$0000: xor  a]
 	jbsr	osd_interrupt_control               	| [$0001: ld   (mainlatch_a180),a]
@@ -15760,8 +15763,8 @@ high_score_entry_init_7eb2:
 	move.b	#0x03,d0                        	| [$7eb8: ld   a,$03]
 	move.b	d0,l_8E25(a6)                   	| [$7eba: ld   ($8E25),a]
 	move.b	l_89FC(a6),d0                   	| [$7ebd: ld   a,($89FC)]
-	move.w	#0x03A0,d5                          	| [$7ec0: ld   hl,$03A0]
-	STORE_WORD	d5,timer_16bit_8e2b(a6)            	| [$7ec3: ld   ($8E2B),hl]
+	move.w	#HIGH_SCORE_TIMEOUT,d5                          	| [$7ec0: ld   hl,$03A0]
+	STORE_WORD	d5,high_score_entry_timer_8e2b(a6)            	| [$7ec3: ld   ($8E2B),hl]
 	
 	lea	l_8DFD(a6),a2                      	| [$7ec6: ld   ix,$8DFD]
 	move.b	d0,d1                           	| [$7eca: ld   b,a]
@@ -15807,9 +15810,9 @@ l_7ef5:
 	move.b	d0,l_8E24(a6)                   	| [$7f0a: ld   ($8E24),a]
 	rts                                    	| [$7f0d: ret]
 high_score_entry_update_7f0e:
-	LOAD_WORD	timer_16bit_8e2b(a6),d5             	| [$7f0e: ld   hl,($8E2B)]
+	LOAD_WORD	high_score_entry_timer_8e2b(a6),d5             	| [$7f0e: ld   hl,($8E2B)]
 	subq.w	#1,d5                           	| [$7f11: dec  hl]
-	STORE_WORD	d5,timer_16bit_8e2b(a6)            	| [$7f12: ld   ($8E2B),hl]
+	STORE_WORD	d5,high_score_entry_timer_8e2b(a6)            	| [$7f12: ld   ($8E2B),hl]
 	
 	move.b	d5,d0                           	| [$7f15: ld   a,h]
 	                               	| [$7f16: and  a]
@@ -15873,8 +15876,8 @@ l_7f5d:
 	beq.b	0f                               	| [...]
 	rts                                    	| [$7f6f: ret  nz] [...]
 0:
-	move.w	#0x03A0,d5                          	| [$7f70: ld   hl,$03A0]
-	STORE_WORD	d5,timer_16bit_8e2b(a6)            	| [$7f73: ld   ($8E2B),hl]
+	move.w	#HIGH_SCORE_TIMEOUT,d5                          	| [$7f70: ld   hl,$03A0]
+	STORE_WORD	d5,high_score_entry_timer_8e2b(a6)            	| [$7f73: ld   ($8E2B),hl]
 	
 	move.b	l_8E23(a6),d0                   	| [$7f76: ld   a,($8E23)]
 	LOAD_RAM_POINTER	ram_pointer_8e1f(a6),a0             	| [$7f79: ld   hl,($8E1F)]
