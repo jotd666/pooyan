@@ -15640,7 +15640,7 @@ str_32_7dc4:
 	.byte	146,134	|	0x8692
 	.ascii	"@TWO@WOLVES."
 	.byte	116,134	|	0x8674
-	.ascii	"@@400"
+	.ascii	"@@400"
 	.byte	0x83		| '+'+0x30
 	.ascii 	"800@PTS?"
 str_33_7de2:
@@ -15651,7 +15651,7 @@ str_33_7de2:
 	.byte	0x83		| '+'+0x30
 	.ascii	"800@."
 	.byte	86,134	|	0x8656
-	.ascii	"@@@"
+	.ascii	"@@@"
 	.byte	0x83		| '+'+0x30
 	.ascii	"1600@PTS?"
 str_34_7e0d:

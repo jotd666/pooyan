@@ -38,9 +38,10 @@ rst_08:
 
 ; fill (hl) b times with a value
 rst_10:
+fill_area_0010:
 0010: 77          ld   (hl),a
 0011: 23          inc  hl
-0012: 10 FC       djnz $0010
+0012: 10 FC       djnz fill_area_0010
 0014: C9          ret
 
 ; fill area, unused
@@ -54,6 +55,7 @@ rst_18:
 
 ; read byte at hl+a into a
 rst_20:
+read_byte_a0_plus_d0_0020:
 0020: 85          add  a,l
 0021: 6F          ld   l,a
 0022: 3E 00       ld   a,$00
@@ -64,6 +66,7 @@ rst_20:
 
 ; jump to location using a jump table just after the rst call
 rst_28:
+jump_from_table_below_0028:
 0028: 87          add  a,a
 0029: E1          pop  hl
 002A: 5F          ld   e,a
@@ -76,6 +79,7 @@ rst_28:
 0032: E9          jp   (hl)
 
 rst_38:
+update_88A0_0038:
 0038: E5          push hl
 0039: 26 88       ld   h,$88
 003B: 3A A0 88    ld   a,($88A0)
@@ -230,9 +234,10 @@ bootup_0092:
 0179: 2F          cpl
 017A: E6 03       and  $03
 017C: FE 03       cp   $03
-017E: 28 04       jr   z,$0184
+017E: 28 04       jr   z,dsw_cheat_0184
 0180: C6 03       add  a,$03
 0182: 18 02       jr   $0186
+dsw_cheat_0184:
 0184: 3E FF       ld   a,$FF
 0186: 32 07 88    ld   ($8807),a
 0189: 3A E0 A0    ld   a,(dsw0_a0e0)
@@ -251,7 +256,7 @@ bootup_0092:
 01A0: E7          rst  $20
 01A1: 32 2C 88    ld   ($882C),a
 01A4: 32 00 A0    ld   (watchdog_a000),a
-01A7: CD EA 01    call $01EA
+01A7: CD EA 01    call fill_video_ram_and_sprites_01ea
 01AA: AF          xor  a
 01AB: CD 8F 0E    call audio_shit_0E8F
 01AE: 3E 01       ld   a,$01
@@ -285,6 +290,8 @@ bootup_0092:
 01E6: 20 F2       jr   nz,$01DA
 01E8: 37          scf
 01E9: C9          ret
+
+fill_video_ram_and_sprites_01ea:
 01EA: 21 10 94    ld   hl,$9410
 01ED: 06 30       ld   b,$30
 01EF: D7          rst  $10
@@ -338,14 +345,14 @@ bootup_0092:
 0241: E9          jp   (hl)
 jump_table_0242:
 	.word	$039B 
-	.word	$03C2 
-	.word	$03E9 
-	.word	$0496 
-	.word	$0552 
-	.word	$056B 
-	.word	$05B2 
-	.word	$05EE
-	.word	$0644
+	.word	display_nb_lives_03c2 
+	.word	display_high_scores_table_03E9 
+	.word	something_on_start_screen_0496 
+	.word	zero_and_display_highscores_0552 
+	.word	display_score_056B 
+	.word	display_string_05b2 
+	.word	display_credits_05EE
+	.word	rom_check_0644
 
 0254: 3A 3F 88    ld   a,($883F)         
 0257: 47          ld   b,a
@@ -362,9 +369,9 @@ jump_table_0242:
 026F: A7          and  a
 0270: 28 22       jr   z,$0294
 0272: 36 02       ld   (hl),$02
-0274: CD AA 02    call $02AA
+0274: CD AA 02    call write_up_02aa
 0277: 21 40 87    ld   hl,$8740
-027A: CD A8 02    call $02A8
+027A: CD A8 02    call write_1up_02a8
 027D: 3A 0D 88    ld   a,($880D)
 0280: A7          and  a
 0281: 21 40 87    ld   hl,$8740
@@ -375,20 +382,24 @@ jump_table_0242:
 028C: 3A 06 88    ld   a,($8806)
 028F: 0F          rrca
 0290: D0          ret  nc
-0291: C3 B1 02    jp   $02B1
+0291: C3 B1 02    jp   clear_3_chars_02b1
 0294: 21 E0 84    ld   hl,$84E0
-0297: CD B1 02    call $02B1
+0297: CD B1 02    call clear_3_chars_02b1
 029A: 21 21 85    ld   hl,$8521
-029D: CD B1 02    call $02B1
-02A0: CD B1 02    call $02B1
-02A3: CD B1 02    call $02B1
+029D: CD B1 02    call clear_3_chars_02b1
+02A0: CD B1 02    call clear_3_chars_02b1
+02A3: CD B1 02    call clear_3_chars_02b1
 02A6: 18 CF       jr   $0277
+write_1up_02a8:
 02A8: 36 01       ld   (hl),$01
+write_up_02aa:
 02AA: 19          add  hl,de
 02AB: 36 25       ld   (hl),$25
 02AD: 19          add  hl,de
 02AE: 36 20       ld   (hl),$20
 02B0: C9          ret
+
+clear_3_chars_02b1:
 02B1: 3E 10       ld   a,$10
 02B3: 77          ld   (hl),a
 02B4: 19          add  hl,de
@@ -396,6 +407,8 @@ jump_table_0242:
 02B6: 19          add  hl,de
 02B7: 77          ld   (hl),a
 02B8: C9          ret
+
+erase_sprite_shadow_ram_02b9:
 02B9: 21 40 88    ld   hl,sprite_shadow_ram_8840
 02BC: 06 60       ld   b,$60
 02BE: AF          xor  a
@@ -407,8 +420,10 @@ jump_table_0242:
 02C7: D7          rst  $10
 02C8: C9          ret
 
-02C9: CD B9 02    call $02B9
+erase_a_column_02c9:
+02C9: CD B9 02    call erase_sprite_shadow_ram_02b9
 02CC: 06 1D       ld   b,$1D
+erase_a_column_02ce:
 02CE: 3E 20       ld   a,$20
 02D0: 90          sub  b
 02D1: 5F          ld   e,a
@@ -439,7 +454,7 @@ update_sprite_shadows_02EF:
 0304: CD 2A 03    call update_sprite_shadow_0321
 0307: DD 21 E0 8A ld   ix,$8AE0
 030B: 06 12       ld   b,$12
-030D: CD 43 03    call $0343
+030D: CD 43 03    call update_wolves_and_balloons_sprite_shadow_ram_0343
 0310: DD 21 B0 8A ld   ix,$8AB0
 0314: 06 02       ld   b,$02
 0316: CD 2A 03    call update_sprite_shadow_0321
@@ -447,10 +462,11 @@ update_sprite_shadows_02EF:
 031C: 35          dec  (hl)
 031D: 21 9C 88    ld   hl,$889C
 0320: 35          dec  (hl)
+update_sprite_shadow_0321:
 0321: 3A 1F 88    ld   a,($881F)
 0324: A7          and  a
 0325: C0          ret  nz
-0326: CD 78 03    call $0378
+0326: CD 78 03    call mirror_coords_for_cocktail_mode_0378
 0329: C9          ret
 
 ; < HL: 88xx (to write to shadow sprite ram)
@@ -472,6 +488,7 @@ update_sprite_shadow_0321:
 0340: 10 E8       djnz update_sprite_shadow_0321
 0342: C9          ret
 
+update_wolves_and_balloons_sprite_shadow_ram_0343:
 0343: DD 4E 05    ld   c,(ix+$05)
 0346: DD 7E 06    ld   a,(ix+$06)
 0349: CB 01       rlc  c
@@ -501,9 +518,10 @@ update_sprite_shadow_0321:
 0371: 77          ld   (hl),a
 0372: 2C          inc  l
 0373: DD 19       add  ix,de
-0375: 10 CC       djnz $0343
+0375: 10 CC       djnz update_wolves_and_balloons_sprite_shadow_ram_0343
 0377: C9          ret
 
+mirror_coords_for_cocktail_mode_0378:
 0378: 11 40 88    ld   de,sprite_shadow_ram_8840
 037B: 06 18       ld   b,$18
 037D: 1A          ld   a,(de)
@@ -532,7 +550,7 @@ update_sprite_shadow_0321:
 039E: A7          and  a
 039F: C8          ret  z
 03A0: 21 82 84    ld   hl,$8482
-03A3: 11 20 00    ld   de,$0020
+03A3: 11 20 00    ld   de,$20
 03A6: 3A 80 8A    ld   a,(top_basket_object_8A80)
 03A9: 3C          inc  a
 03AA: FE 08       cp   $08
@@ -551,6 +569,8 @@ update_sprite_shadow_0321:
 03BE: 19          add  hl,de
 03BF: 10 FB       djnz $03BC
 03C1: C9          ret
+
+display_nb_lives_03c2:
 03C2: 21 3F 86    ld   hl,$863F
 03C5: 11 E0 FF    ld   de,$FFE0
 03C8: 3A 08 89    ld   a,(nb_lives_8908)
@@ -575,38 +595,42 @@ update_sprite_shadow_0321:
 03E5: 19          add  hl,de
 03E6: 10 FB       djnz $03E3
 03E8: C9          ret
+
+display_high_scores_table_03E9:
 03E9: 3E 1A       ld   a,$1A
 03EB: 06 0B       ld   b,$0B
 03ED: F5          push af
 03EE: C5          push bc
-03EF: CD B2 05    call $05B2
+03EF: CD B2 05    call display_string_05b2
 03F2: C1          pop  bc
 03F3: F1          pop  af
 03F4: 3C          inc  a
 03F5: 10 F6       djnz $03ED
 03F7: 21 C7 85    ld   hl,$85C7
-03FA: 11 20 00    ld   de,$0020
+03FA: 11 20 00    ld   de,$20
 03FD: 06 0A       ld   b,$0A
 03FF: DD 21 00 8A ld   ix,$8A00
-0403: CD 29 04    call $0429
+0403: CD 29 04    call write_to_screen_0429
 0406: 77          ld   (hl),a
 0407: 19          add  hl,de
 0408: DD 23       inc  ix
-040A: CD 29 04    call $0429
+040A: CD 29 04    call write_to_screen_0429
 040D: 77          ld   (hl),a
 040E: 19          add  hl,de
 040F: DD 23       inc  ix
-0411: CD 29 04    call $0429
+0411: CD 29 04    call write_to_screen_0429
 0414: 28 01       jr   z,$0417
 0416: 77          ld   (hl),a
 0417: 11 62 FF    ld   de,$FF62
 041A: 19          add  hl,de
-041B: 11 20 00    ld   de,$0020
+041B: 11 20 00    ld   de,$20
 041E: DD 23       inc  ix
 0420: 10 E1       djnz $0403
-0422: CD 39 04    call $0439
-0425: CD 60 04    call $0460
+0422: CD 39 04    call display_best_times_0439
+0425: CD 60 04    call display_best_names_0460
 0428: C9          ret
+
+write_to_screen_0429:
 0429: DD 7E 00    ld   a,(ix+$00)
 042C: 4F          ld   c,a
 042D: E6 0F       and  $0F
@@ -619,18 +643,20 @@ update_sprite_shadow_0321:
 0435: 0F          rrca
 0436: E6 0F       and  $0F
 0438: C9          ret
+
+display_best_times_0439:
 0439: DD 21 C0 89 ld   ix,$89C0
 043D: 21 67 84    ld   hl,$8467
 0440: 06 0A       ld   b,$0A
-0442: 11 20 00    ld   de,$0020
+0442: 11 20 00    ld   de,$20
 0445: DD 23       inc  ix
-0447: CD 29 04    call $0429
+0447: CD 29 04    call write_to_screen_0429
 044A: 77          ld   (hl),a
 044B: 19          add  hl,de
 044C: 36 51       ld   (hl),$51
 044E: 19          add  hl,de
 044F: DD 23       inc  ix
-0451: CD 29 04    call $0429
+0451: CD 29 04    call write_to_screen_0429
 0454: 28 01       jr   z,$0457
 0456: 77          ld   (hl),a
 0457: DD 23       inc  ix
@@ -638,6 +664,8 @@ update_sprite_shadow_0321:
 045C: 19          add  hl,de
 045D: 10 E3       djnz $0442
 045F: C9          ret
+
+display_best_names_0460:
 0460: DD 21 00 8E ld   ix,$8E00
 0464: 21 67 85    ld   hl,$8567
 0467: 06 0A       ld   b,$0A
@@ -666,6 +694,8 @@ update_sprite_shadow_0321:
 0492: 19          add  hl,de
 0493: 10 D4       djnz $0469
 0495: C9          ret
+
+something_on_start_screen_0496:
 0496: 4F          ld   c,a
 0497: 3A 06 88    ld   a,($8806)
 049A: 0F          rrca
@@ -673,7 +703,7 @@ update_sprite_shadow_0321:
 049C: 79          ld   a,c
 049D: A7          and  a
 049E: 28 47       jr   z,$04E7
-04A0: CD F2 04    call $04F2
+04A0: CD F2 04    call load_current_player_score_04f2
 04A3: 87          add  a,a
 04A4: 81          add  a,c
 04A5: 4F          ld   c,a
@@ -694,7 +724,7 @@ update_sprite_shadow_0321:
 04BB: 0F          rrca
 04BC: 30 02       jr   nc,$04C0
 04BE: 3E 01       ld   a,$01
-04C0: CD 6B 05    call $056B
+04C0: CD 6B 05    call display_score_056B
 04C3: D1          pop  de
 04C4: 1B          dec  de
 04C5: 21 AA 88    ld   hl,$88AA
@@ -702,12 +732,14 @@ update_sprite_shadow_0321:
 04CA: 1A          ld   a,(de)
 04CB: BE          cp   (hl)
 04CC: D8          ret  c
-04CD: 20 05       jr   nz,$04D4
+04CD: 20 05       jr   nz,update_high_score_04d4
 04CF: 1B          dec  de
 04D0: 2B          dec  hl
 04D1: 10 F7       djnz $04CA
 04D3: C9          ret
-04D4: CD F2 04    call $04F2
+
+update_high_score_04d4:
+04D4: CD F2 04    call load_current_player_score_04f2
 04D7: 21 A8 88    ld   hl,$88A8
 04DA: 06 03       ld   b,$03
 04DC: 1A          ld   a,(de)
@@ -716,12 +748,13 @@ update_sprite_shadow_0321:
 04DF: 23          inc  hl
 04E0: 10 FA       djnz $04DC
 04E2: 3E 02       ld   a,$02
-04E4: C3 6B 05    jp   $056B
-04E7: CD F2 04    call $04F2
+04E4: C3 6B 05    jp   display_score_056B
+04E7: CD F2 04    call load_current_player_score_04f2
 04EA: 21 AB 88    ld   hl,$88AB
 04ED: A7          and  a
 04EE: 06 03       ld   b,$03
 04F0: 18 BD       jr   $04AF
+load_current_player_score_04f2:
 04F2: F5          push af
 04F3: 3A 0D 88    ld   a,($880D)
 04F6: 11 A2 88    ld   de,$88A2
@@ -732,6 +765,7 @@ update_sprite_shadow_0321:
 0500: C9          ret
 
 ; unreached?
+zero_and_display_highscores_0552:
 0552: F5          push af
 0553: 21 A2 88    ld   hl,$88A2
 0556: A7          and  a
@@ -746,6 +780,7 @@ update_sprite_shadow_0321:
 0567: 23          inc  hl
 0568: 36 00       ld   (hl),$00
 056A: F1          pop  af
+display_score_056B:
 056B: 21 A4 88    ld   hl,$88A4
 056E: DD 21 81 87 ld   ix,$8781
 0572: A7          and  a
@@ -782,6 +817,7 @@ update_sprite_shadow_0321:
 05AD: 3E 10       ld   a,$10
 05AF: 0D          dec  c
 05B0: 18 F1       jr   $05A3
+display_string_05b2:
 05B2: 87          add  a,a
 05B3: F5          push af
 05B4: 21 0D 7A    ld   hl,string_table_7A0D
@@ -803,7 +839,7 @@ update_sprite_shadow_0321:
 05CA: 38 14       jr   c,$05E0
 05CC: 1A          ld   a,(de)
 05CD: FE 2E       cp   $2E
-05CF: 28 0B       jr   z,$05DC
+05CF: 28 0B       jr   z,continues_to_next_line_05dc
 05D1: FE 3F       cp   $3F
 05D3: C8          ret  z
 05D4: D6 30       sub  $30
@@ -812,6 +848,7 @@ update_sprite_shadow_0321:
 05D8: 09          add  hl,bc
 05D9: 18 F1       jr   $05CC
 05DB: 37          scf
+continues_to_next_line_05dc:
 05DC: EB          ex   de,hl
 05DD: 23          inc  hl
 05DE: 18 E2       jr   $05C2
@@ -824,13 +861,14 @@ update_sprite_shadow_0321:
 05EA: 13          inc  de
 05EB: 09          add  hl,bc
 05EC: 18 F2       jr   $05E0
+display_credits_05EE:
 05EE: 3E 05       ld   a,$05
-05F0: CD B2 05    call $05B2
+05F0: CD B2 05    call display_string_05b2
 05F3: 3A 02 88    ld   a,(nb_credits_8802)
 05F6: FE 63       cp   $63
 05F8: 38 02       jr   c,$05FC
 05FA: 3E 63       ld   a,$63
-05FC: CD 2A 06    call $062A
+05FC: CD 2A 06    call convert_to_bcd_062a
 05FF: 47          ld   b,a
 0600: E6 F0       and  $F0
 0602: 28 07       jr   z,$060B
@@ -862,6 +900,7 @@ update_sprite_shadow_0321:
 0628: 34          inc  (hl)
 0629: C9          ret
 
+convert_to_bcd_062a:
 062A: 47          ld   b,a
 062B: E6 0F       and  $0F
 062D: C6 00       add  a,$00
@@ -882,6 +921,8 @@ update_sprite_shadow_0321:
 0641: 81          add  a,c
 0642: 27          daa
 0643: C9          ret
+
+rom_check_0644:
 0644: DD 21 8A 77 ld   ix,$778A
 0648: 16 00       ld   d,$00
 064A: DD 7E 00    ld   a,(ix+$00)
@@ -961,13 +1002,13 @@ irq_066D:
 06DE: 21 5F 8A    ld   hl,$8A5F
 06E1: 35          dec  (hl)
 06E2: CD E8 59    call $59E8
-06E5: CD 64 0E    call $0E64
+06E5: CD 64 0E    call handle_queued_sounds_0e64
 06E8: 21 FA 06    ld   hl,continue_06FA
 06EB: E5          push hl
 06EC: 3A 05 88    ld   a,(game_state_8805)
 06EF: EF          rst  $28
 jump_table_06FF:
-	.word	$072D         
+	.word	title_erase_a_column_072d         
 	.word	title_screens_0899         
 	.word	push_start_screen_0C4E         
 	.word	in_game_159B         
@@ -1015,8 +1056,9 @@ update_sprites_0714:
 072A: 10 E8       djnz update_sprites_0714
 072C: C9          ret
 
+title_erase_a_column_072d:
 072D: 06 20       ld   b,$20
-072F: CD CE 02    call $02CE
+072F: CD CE 02    call erase_a_column_02ce
 0732: C0          ret  nz
 0733: 3A FF 8F    ld   a,($8FFF)
 0736: FE 10       cp   $10
@@ -1028,7 +1070,7 @@ update_sprites_0714:
 0743: AF          xor  a
 0744: 32 0A 88    ld   (in_game_sub_state_880A),a
 0747: 01 79 07    ld   bc,$0779
-074A: CD 5D 07    call $075D
+074A: CD 5D 07    call apply_color_075d
 074D: 11 04 06    ld   de,$0604
 0750: FF          rst  $38
 0751: 11 00 05    ld   de,$0500
@@ -1039,8 +1081,9 @@ update_sprites_0714:
 0759: 32 51 8E    ld   (title_sub_state_8E51),a
 075C: C9          ret
 
+apply_color_075d:
 075D: 21 40 80    ld   hl,$8040
-0760: 11 20 00    ld   de,$0020
+0760: 11 20 00    ld   de,$20
 0763: 0A          ld   a,(bc)
 0764: 77          ld   (hl),a
 0765: 19          add  hl,de
@@ -1064,13 +1107,13 @@ title_screens_0899:
 08A0: EF          rst  $28                                            
 	.word	init_title_screens_08B3  
 	.word	title_display_play_08E9  
-	.word	$092C  
-	.word	$0986  
-	.word	$099C  
-	.word	$0AC8  
-	.word	$0B32  
+	.word	clear_screen_092c  
+	.word	wait_while_score_table_shown_0986  
+	.word	clear_screen_introduce_characters_099c  
+	.word	animate_characters_0ac8  
+	.word	character_introduction_related_0b32  
 	.word	pigs_arrive_during_title_7442 
-	.word	$76EA  
+	.word	intro_balloons_rise_76ea  
 
 init_title_screens_08B3:
 08B3: AF          xor  a                                              
@@ -1099,13 +1142,13 @@ init_title_screens_08B3:
 08DB: 32 FB 89    ld   ($89FB),a
 08DE: AF          xor  a
 08DF: 32 06 88    ld   ($8806),a
-08E2: CD B9 02    call $02B9
+08E2: CD B9 02    call erase_sprite_shadow_ram_02b9
 08E5: CD 0D 1D    call $1D0D
 08E8: C9          ret
 
 title_display_play_08E9:
 08E9: 06 1D       ld   b,$1D
-08EB: CD CE 02    call $02CE
+08EB: CD CE 02    call erase_a_column_02ce
 08EE: C0          ret  nz
 08EF: CD E3 02    call $02E3
 * ROM checksum
@@ -1118,7 +1161,7 @@ title_display_play_08E9:
 08FC: FE 63       cp   $63
 08FE: 20 F2       jr   nz,$08F2
 0900: 01 59 08    ld   bc,$0859
-0903: CD 5D 07    call $075D
+0903: CD 5D 07    call apply_color_075d
 * ROM checksum
 0906: 21 31 08    ld   hl,$0831
 0909: 06 08       ld   b,$08
@@ -1145,13 +1188,14 @@ title_display_play_08E9:
 0929: 40          ld   b,b
 092A: 38 0B       jr   c,$0937
 
+clear_screen_092c:
 092C: 06 19       ld   b,$19
-092E: CD CE 02    call $02CE
+092E: CD CE 02    call erase_a_column_02ce
 0931: C0          ret  nz
 0932: CD E3 02    call $02E3
 0935: 21 51 8E    ld   hl,title_sub_state_8E51
 0938: 34          inc  (hl)
-0939: CD B9 02    call $02B9
+0939: CD B9 02    call erase_sprite_shadow_ram_02b9
 093C: 21 F5 07    ld   hl,$07F5
 093F: 3E 11       ld   a,$11
 0941: BE          cp   (hl)
@@ -1161,7 +1205,7 @@ title_display_play_08E9:
 ; another code checksum or rom compare...
 094A: 21 76 09    ld   hl,code_bits_table_0976
 094D: 78          ld   a,b
-094E: CD 45 0C    call $0C45
+094E: CD 45 0C    call load_16bit_rom_pointer_0c45
 0951: 3E 1C       ld   a,$1C
 0953: 83          add  a,e
 0954: 5F          ld   e,a
@@ -1175,7 +1219,7 @@ title_display_play_08E9:
 0960: DD 2B       dec  ix
 0962: 10 E6       djnz $094A
 0964: 01 D9 07    ld   bc,$07D9
-0967: CD 5D 07    call $075D
+0967: CD 5D 07    call apply_color_075d
 096A: 11 8B 06    ld   de,$068B
 096D: FF          rst  $38
 096E: 1E 8E       ld   e,$8E
@@ -1199,18 +1243,21 @@ title_display_play_08E9:
 0983: 08          ex   af,af'
 0984: 59          ld   e,c
 0985: 08          ex   af,af'
+wait_while_score_table_shown_0986:
 0986: 21 50 8E    ld   hl,$8E50
 0989: 35          dec  (hl)
 098A: C0          ret  nz
-098B: CD B9 02    call $02B9
+098B: CD B9 02    call erase_sprite_shadow_ram_02b9
 098E: CD E3 02    call $02E3
 0991: 21 51 8E    ld   hl,title_sub_state_8E51
 0994: 34          inc  (hl)
 0995: 21 26 0B    ld   hl,$0B26
 0998: 22 48 8F    ld   ($8F48),hl
 099B: C9          ret
+
+clear_screen_introduce_characters_099c:
 099C: 06 19       ld   b,$19
-099E: CD CE 02    call $02CE
+099E: CD CE 02    call erase_a_column_02ce
 09A1: C0          ret  nz
 ; rom checksum but in the end, the result (A) is dropped...
 09A2: 16 0D       ld   d,$0D
@@ -1224,7 +1271,7 @@ title_display_play_08E9:
 09B0: 15          dec  d
 09B1: 20 F7       jr   nz,$09AA
 09B3: 01 B9 07    ld   bc,$07B9
-09B6: CD 5D 07    call $075D
+09B6: CD 5D 07    call apply_color_075d
 09B9: 11 0D 06    ld   de,$060D
 09BC: FF          rst  $38
 09BD: 21 70 8B    ld   hl,$8B70
@@ -1240,7 +1287,7 @@ title_display_play_08E9:
 09D5: 1A          ld   a,(de)
 09D6: 3C          inc  a
 09D7: 20 F4       jr   nz,$09CD
-09D9: CD 52 0A    call $0A52
+09D9: CD 52 0A    call apply_color_to_buuyan_0a52
 09DC: CD 25 0A    call $0A25
 09DF: 21 87 0A    ld   hl,$0A87
 09E2: 22 54 8E    ld   ($8E54),hl
@@ -1257,7 +1304,7 @@ title_display_play_08E9:
 09F8: DD 21 70 8B ld   ix,$8B70
 09FC: 06 04       ld   b,$04
 09FE: 11 18 00    ld   de,$0018
-0A01: CD 06 40    call $4006
+0A01: CD 06 40    call auto_animate_sprite_ix_4006
 0A04: DD 19       add  ix,de
 0A06: 10 F9       djnz $0A01
 0A08: CD EF 02    call update_sprite_shadows_02EF
@@ -1283,13 +1330,14 @@ title_display_play_08E9:
 0A2C: 34          inc  (hl)
 0A2D: E6 03       and  $03
 0A2F: 21 F6 26    ld   hl,$26F6
-0A32: CD 45 0C    call $0C45
+0A32: CD 45 0C    call load_16bit_rom_pointer_0c45
 0A35: D5          push de
 0A36: 21 6A 86    ld   hl,$866A
-0A39: CD 40 0A    call $0A40
+0A39: CD 40 0A    call write_buuyan_color_0a40
 0A3C: D1          pop  de
 0A3D: 21 AA 86    ld   hl,$86AA
-0A40: 01 20 00    ld   bc,$0020
+write_buuyan_color_0a40:
+0A40: 01 20 00    ld   bc,$20
 0A43: 1A          ld   a,(de)
 0A44: 77          ld   (hl),a
 0A45: 2C          inc  l
@@ -1305,14 +1353,17 @@ title_display_play_08E9:
 0A4F: 1A          ld   a,(de)
 0A50: 77          ld   (hl),a
 0A51: C9          ret
+
+apply_color_to_buuyan_0a52:
 0A52: 21 AA 82    ld   hl,$82AA
 0A55: 11 72 0A    ld   de,$0A72
-0A58: CD 40 0A    call $0A40
+0A58: CD 40 0A    call write_buuyan_color_0a40
 0A5B: 21 6A 82    ld   hl,$826A
 0A5E: 11 72 0A    ld   de,$0A72
-0A61: CD 40 0A    call $0A40
+0A61: CD 40 0A    call write_buuyan_color_0a40
 0A64: C9          ret
 
+animate_characters_0ac8:
 0AC8: 21 41 8D    ld   hl,$8D41                                      
 0ACB: 35          dec  (hl)
 0ACC: 20 03       jr   nz,$0AD1
@@ -1361,7 +1412,7 @@ title_display_play_08E9:
 0B1B: 23          inc  hl
 0B1C: 7E          ld   a,(hl)
 0B1D: BA          cp   d
-0B1E: C2 EA 76    jp   nz,$76EA   ; legit but bogus
+0B1E: C2 EA 76    jp   nz,intro_balloons_rise_76ea   ; legit but bogus
 0B21: 23          inc  hl
 0B22: 22 48 8F    ld   ($8F48),hl
 0B25: C9          ret
@@ -1370,13 +1421,14 @@ title_display_play_08E9:
 0B2B: 01 A8 01    ld   bc,$01A8
 0B2E: A7          and  a
 0B2F: 01 BC 1C    ld   bc,$1CBC
+character_introduction_related_0b32:
 0B32: 21 BC 82    ld   hl,$82BC
 0B35: 11 E0 FF    ld   de,$FFE0
 0B38: 06 0A       ld   b,$0A
 0B3A: 7E          ld   a,(hl)
 0B3B: 19          add  hl,de
 0B3C: BE          cp   (hl)
-0B3D: C2 B3 08    jp   nz,$08B3
+0B3D: C2 B3 08    jp   nz,init_title_screens_08B3
 0B40: 10 F8       djnz $0B3A
 0B42: 21 41 8D    ld   hl,$8D41
 0B45: 35          dec  (hl)
@@ -1392,7 +1444,7 @@ title_display_play_08E9:
 0B57: 3A 53 8E    ld   a,($8E53)
 0B5A: 3D          dec  a
 0B5B: 21 AB 0B    ld   hl,$0BAB
-0B5E: CD 45 0C    call $0C45
+0B5E: CD 45 0C    call load_16bit_rom_pointer_0c45
 0B61: ED 53 56 8E ld   ($8E56),de
 0B65: 21 53 8E    ld   hl,$8E53
 0B68: 35          dec  (hl)
@@ -1425,11 +1477,11 @@ title_display_play_08E9:
 0B8E: 2A 48 8F    ld   hl,($8F48)
 0B91: 7B          ld   a,e
 0B92: BE          cp   (hl)
-0B93: C2 B3 08    jp   nz,$08B3	; bogus
+0B93: C2 B3 08    jp   nz,init_title_screens_08B3	; bogus
 0B96: 23          inc  hl
 0B97: 7E          ld   a,(hl)
 0B98: BA          cp   d
-0B99: C2 E9 08    jp   nz,$08E9		; bogus
+0B99: C2 E9 08    jp   nz,title_display_play_08E9		; bogus
 ; end ram checksum
 0B9C: AF          xor  a
 0B9D: 32 48 8F    ld   ($8F48),a
@@ -1491,12 +1543,12 @@ title_display_play_08E9:
 0C03: 3A 10 88    ld   a,($8810)
 0C06: CB 5F       bit  3,a
 0C08: 28 09       jr   z,$0C13
-0C0A: CD CF 0E    call $0ECF
+0C0A: CD CF 0E    call play_null_sound_0ecf
 0C0D: 21 00 00    ld   hl,$0000
 0C10: C3 AB 0D    jp   $0DAB
 0C13: CB 67       bit  4,a
 0C15: C8          ret  z
-0C16: CD CF 0E    call $0ECF
+0C16: CD CF 0E    call play_null_sound_0ecf
 0C19: C3 A8 0D    jp   $0DA8
 0C1C: 3A 02 88    ld   a,(nb_credits_8802)
 0C1F: A7          and  a
@@ -1521,6 +1573,8 @@ title_display_play_08E9:
 0C41: B1          or   c
 0C42: 20 F9       jr   nz,$0C3D
 0C44: C9          ret
+
+load_16bit_rom_pointer_0c45:
 0C45: 87          add  a,a
 0C46: 16 00       ld   d,$00
 0C48: 5F          ld   e,a
@@ -1531,15 +1585,16 @@ title_display_play_08E9:
 0C4D: C9          ret
 
 push_start_screen_0C4E:
-0C4E: 21 78 0D    ld   hl,$0D78
+0C4E: 21 78 0D    ld   hl,continue_0d78
 0C51: E5          push hl
 0C52: 3A 0A 88    ld   a,(in_game_sub_state_880A)
 0C55: EF          rst  $28
 jump_table_0C56:
-	.word	$0C5C
-	.word	$0C77
-	.word	$0D61
+	.word	init_clear_screen_as_first_credit_inserted_0c5c
+	.word	clear_screen_as_first_credit_inserted_0c77
+	.word	wait_for_start_pushed_0d61
 
+init_clear_screen_as_first_credit_inserted_0c5c:
 0C5C: AF          xor  a
 0C5D: 32 19 88    ld   ($8819),a
 0C60: 32 28 A0    ld   ($A028),a
@@ -1550,9 +1605,10 @@ jump_table_0C56:
 0C6F: 36 0F       ld   (hl),$0F
 0C71: 23          inc  hl
 0C72: 34          inc  (hl)
-0C73: CD B9 02    call $02B9
+0C73: CD B9 02    call erase_sprite_shadow_ram_02b9
 0C76: C9          ret
 
+clear_screen_as_first_credit_inserted_0c77:
 0C77: 2A 0B 88    ld   hl,($880B)
 0C7A: 06 1D       ld   b,$1D
 0C7C: 3E 10       ld   a,$10
@@ -1584,10 +1640,10 @@ jump_table_0C56:
 0CA6: 20 F0       jr   nz,$0C98
 ; end of checksum loop
 0CA8: 01 79 07    ld   bc,$0779
-0CAB: CD 5D 07    call $075D
+0CAB: CD 5D 07    call apply_color_075d
 0CAE: 32 0D 88    ld   ($880D),a
 0CB1: CD 54 0E    call $0E54
-0CB4: CD F8 0C    call $0CF8
+0CB4: CD F8 0C    call write_pooyan_title_0cf8
 0CB7: 11 01 06    ld   de,$0601
 0CBA: FF          rst  $38
 0CBB: 1E 11       ld   e,$11
@@ -1606,7 +1662,7 @@ jump_table_0C56:
 0CD3: 28 01       jr   z,$0CD6
 0CD5: 1D          dec  e
 0CD6: FF          rst  $38
-0CD7: CD 4E 0F    call $0F4E
+0CD7: CD 4E 0F    call stop_falling_wolf_sound_loop_0f4e
 0CDA: 21 26 0B    ld   hl,$0B26
 0CDD: 11 00 00    ld   de,$0000
 0CE0: 06 20       ld   b,$20
@@ -1633,6 +1689,7 @@ jump_table_0C56:
 0CF6: 00          nop
 0CF7: C9          ret
 
+write_pooyan_title_0cf8:
 0CF8: 21 2F 0D    ld   hl,$0D2F
 0CFB: DD 21 A7 86 ld   ix,$86A7
 0CFF: 11 E0 FF    ld   de,$FFE0
@@ -1658,6 +1715,7 @@ jump_table_0C56:
 0D2B: 06 0C       ld   b,$0C
 0D2D: 18 D5       jr   $0D04
 
+wait_for_start_pushed_0d61:
 0D61: 3A 02 88    ld   a,($8802)                                      
 0D64: A7          and  a
 0D65: C8          ret  z
@@ -1671,6 +1729,8 @@ jump_table_0C56:
 0D72: 3E 02       ld   a,$02
 0D74: 32 05 88    ld   (game_state_8805),a
 0D77: C9          ret
+
+continue_0d78:
 0D78: 3A 10 88    ld   a,($8810)
 0D7B: CB 5F       bit  3,a
 0D7D: C2 E4 0D    jp   nz,$0DE4
@@ -1790,6 +1850,8 @@ init_play_0E00:
 0E5F: 11 06 06    ld   de,$0606
 0E62: FF          rst  $38
 0E63: C9          ret
+
+handle_queued_sounds_0e64:
 0E64: 11 41 8A    ld   de,$8A41
 0E67: 1A          ld   a,(de)
 0E68: 6F          ld   l,a
@@ -1809,15 +1871,18 @@ init_play_0E00:
 0E81: 36 FF       ld   (hl),$FF
 0E83: 7D          ld   a,l
 0E84: FE 5E       cp   $5E
-0E86: 28 03       jr   z,$0E8B
+0E86: 28 03       jr   z,reset_sount_slot_0e8b
 0E88: 3C          inc  a
 0E89: 12          ld   (de),a
 0E8A: C9          ret
+
+reset_sount_slot_0e8b:
 0E8B: 3E 43       ld   a,$43
 0E8D: 12          ld   (de),a
 0E8E: C9          ret
 
 audio_shit_0E8F:
+play_sound_0E8F:
 0E8F: 32 00 A1    ld   (audio_a100),a
 0E92: 3E 01       ld   a,$01
 0E94: 32 81 A1    ld   ($A181),a
@@ -1832,6 +1897,7 @@ audio_shit_0E8F:
 0E9E: 32 81 A1    ld   ($A181),a
 0EA1: C9          ret
 
+queue_sound_if_game_plays_0ea2:
 0EA2: 32 20 8D    ld   ($8D20),a
 0EA5: 3A 06 88    ld   a,($8806)
 0EA8: A7          and  a
@@ -1840,6 +1906,7 @@ audio_shit_0E8F:
 0EAE: A7          and  a
 0EAF: C8          ret  z
 0EB0: 3A 20 8D    ld   a,($8D20)
+queue_sound_0eb3:
 0EB3: C5          push bc
 0EB4: D5          push de
 0EB5: E5          push hl
@@ -1861,16 +1928,21 @@ audio_shit_0E8F:
 0ECC: D1          pop  de
 0ECD: C1          pop  bc
 0ECE: C9          ret
+
+play_null_sound_0ecf:
 0ECF: AF          xor  a
-0ED0: 18 E1       jr   $0EB3
+0ED0: 18 E1       jr   queue_sound_0eb3
+play_shooting_arrow_sound_0ed2:
 0ED2: 3E 01       ld   a,$01
-0ED4: 18 CC       jr   $0EA2
+0ED4: 18 CC       jr   queue_sound_if_game_plays_0ea2
+play_wolf_falling_sound_0ed6:
 0ED6: 3E 02       ld   a,$02
-0ED8: 18 D9       jr   $0EB3
+0ED8: 18 D9       jr   queue_sound_0eb3
+play_wolf_crashed_on_ground_sound_0eda:
 0EDA: 3E 82       ld   a,$82
-0EDC: CD B3 0E    call $0EB3
+0EDC: CD B3 0E    call queue_sound_0eb3
 0EDF: 3E 03       ld   a,$03
-0EE1: 18 D0       jr   $0EB3
+0EE1: 18 D0       jr   queue_sound_0eb3
 0EE3: 3A 24 8F    ld   a,($8F24)
 0EE6: A7          and  a
 0EE7: C0          ret  nz
@@ -1878,108 +1950,137 @@ audio_shit_0E8F:
 0EEB: A7          and  a
 0EEC: C0          ret  nz
 0EED: 3E 04       ld   a,$04
-0EEF: 18 B1       jr   $0EA2
+0EEF: 18 B1       jr   queue_sound_if_game_plays_0ea2
+play_balloon_popping_sound_0ef1:
 0EF1: 3E 05       ld   a,$05
-0EF3: 18 BE       jr   $0EB3
+0EF3: 18 BE       jr   queue_sound_0eb3
+play_wolf_shot_destroyed_sound_0ef5:
 0EF5: 3E 06       ld   a,$06
-0EF7: 18 A9       jr   $0EA2
+0EF7: 18 A9       jr   queue_sound_if_game_plays_0ea2
+play_extra_sound_wolf_hit_0ef9:
 0EF9: 3E 07       ld   a,$07
-0EFB: 18 A5       jr   $0EA2
+0EFB: 18 A5       jr   queue_sound_if_game_plays_0ea2
+play_balloon_burst_sound_0efd:
 0EFD: 3E 08       ld   a,$08
-0EFF: 18 A1       jr   $0EA2
+0EFF: 18 A1       jr   queue_sound_if_game_plays_0ea2
 0F01: 3E 09       ld   a,$09
-0F03: 18 AE       jr   $0EB3
+0F03: 18 AE       jr   queue_sound_0eb3
+play_meat_picked_sound_0f05:
 0F05: 3E 0A       ld   a,$0A
-0F07: 18 99       jr   $0EA2
+0F07: 18 99       jr   queue_sound_if_game_plays_0ea2
+play_credit_sound_0f09:
 0F09: 3E 0B       ld   a,$0B
 0F0B: 18 82       jr   audio_shit_0E8F
+play_extra_life_sound_0f0d:
 0F0D: 3E 0B       ld   a,$0B
-0F0F: 18 91       jr   $0EA2
+0F0F: 18 91       jr   queue_sound_if_game_plays_0ea2
+play_wolf_attacks_sound_2_0f11:
 0F11: 3E 0C       ld   a,$0C
-0F13: 18 8D       jr   $0EA2
+0F13: 18 8D       jr   queue_sound_if_game_plays_0ea2
+play_player_kill_blow_sound_0f15:
 0F15: 3E 0D       ld   a,$0D
-0F17: 18 89       jr   $0EA2
+0F17: 18 89       jr   queue_sound_if_game_plays_0ea2
+play_push_rock_sound_0f19:
 0F19: 3E 0E       ld   a,$0E
-0F1B: 18 85       jr   $0EA2
+0F1B: 18 85       jr   queue_sound_if_game_plays_0ea2
 0F1D: 3E 0F       ld   a,$0F
-0F1F: 18 81       jr   $0EA2
+0F1F: 18 81       jr   queue_sound_if_game_plays_0ea2
+play_mama_crashing_sound_0f21:
 0F21: 3E 95       ld   a,$95
-0F23: CD A2 0E    call $0EA2
+0F23: CD A2 0E    call queue_sound_if_game_plays_0ea2
 0F26: 3E 10       ld   a,$10
-0F28: C3 A2 0E    jp   $0EA2
+0F28: C3 A2 0E    jp   queue_sound_if_game_plays_0ea2
 0F2B: 3E 11       ld   a,$11
-0F2D: C3 A2 0E    jp   $0EA2
+0F2D: C3 A2 0E    jp   queue_sound_if_game_plays_0ea2
 0F30: 3E 95       ld   a,$95
-0F32: CD A2 0E    call $0EA2
+0F32: CD A2 0E    call queue_sound_if_game_plays_0ea2
 0F35: 3E 03       ld   a,$03
-0F37: CD A2 0E    call $0EA2
+0F37: CD A2 0E    call queue_sound_if_game_plays_0ea2
 0F3A: 3E 11       ld   a,$11
-0F3C: C3 A2 0E    jp   $0EA2
+0F3C: C3 A2 0E    jp   queue_sound_if_game_plays_0ea2
 0F3F: 3E 12       ld   a,$12
-0F41: C3 A2 0E    jp   $0EA2
+0F41: C3 A2 0E    jp   queue_sound_if_game_plays_0ea2
+
+play_bonus_stage_jingle_0f44:
 0F44: 3E 13       ld   a,$13
-0F46: C3 A2 0E    jp   $0EA2
+0F46: C3 A2 0E    jp   queue_sound_if_game_plays_0ea2
 0F49: 3E 14       ld   a,$14
-0F4B: C3 A2 0E    jp   $0EA2
+0F4B: C3 A2 0E    jp   queue_sound_if_game_plays_0ea2
+
+stop_falling_wolf_sound_loop_0f4e:
 0F4E: 3E 82       ld   a,$82
-0F50: CD B3 0E    call $0EB3
+0F50: CD B3 0E    call queue_sound_0eb3
 0F53: 3E 95       ld   a,$95
-0F55: C3 B3 0E    jp   $0EB3
+0F55: C3 B3 0E    jp   queue_sound_0eb3
 0F58: 3E 96       ld   a,$96
-0F5A: CD A2 0E    call $0EA2
+0F5A: CD A2 0E    call queue_sound_if_game_plays_0ea2
 0F5D: 3E 97       ld   a,$97
-0F5F: CD A2 0E    call $0EA2
+0F5F: CD A2 0E    call queue_sound_if_game_plays_0ea2
 0F62: 3E 18       ld   a,$18
-0F64: CD B3 0E    call $0EB3
+0F64: CD B3 0E    call queue_sound_0eb3
 0F67: 3E 15       ld   a,$15
-0F69: C3 B3 0E    jp   $0EB3
+0F69: C3 B3 0E    jp   queue_sound_0eb3
 0F6C: 3E 19       ld   a,$19
-0F6E: CD B3 0E    call $0EB3
+0F6E: CD B3 0E    call queue_sound_0eb3
 0F71: 3E 15       ld   a,$15
-0F73: C3 B3 0E    jp   $0EB3
+0F73: C3 B3 0E    jp   queue_sound_0eb3
 0F76: 3A 68 8D    ld   a,($8D68)
 0F79: B7          or   a
 0F7A: C0          ret  nz
 0F7B: 3A 07 89    ld   a,($8907)
 0F7E: E6 01       and  $01
 0F80: C6 1A       add  a,$1A
-0F82: CD A2 0E    call $0EA2
-0F85: C3 C3 0F    jp   $0FC3
+0F82: CD A2 0E    call queue_sound_if_game_plays_0ea2
+0F85: C3 C3 0F    jp   play_tune_0fc3
+
+play_game_intro_tune_0f88:
 0F88: 3E 82       ld   a,$82
-0F8A: CD A2 0E    call $0EA2
+0F8A: CD A2 0E    call queue_sound_if_game_plays_0ea2
 0F8D: 3E 1C       ld   a,$1C
-0F8F: C3 C3 0F    jp   $0FC3
+0F8F: C3 C3 0F    jp   play_tune_0fc3
+
+play_game_over_tune_0f92:
 0F92: 3E 1D       ld   a,$1D
-0F94: C3 C3 0F    jp   $0FC3
+0F94: C3 C3 0F    jp   play_tune_0fc3
+
+play_level_1_completed_tune_0f97:
 0F97: 3A 07 89    ld   a,($8907)
 0F9A: 0F          rrca
 0F9B: E6 03       and  $03
 0F9D: C6 1E       add  a,$1E
-0F9F: C3 C3 0F    jp   $0FC3
+0F9F: C3 C3 0F    jp   play_tune_0fc3
 
  0FA0  jp   $3A0F                                          C3 0F 3A
 
+play_level_2_completed_tune_0fa2:
 0FA2: 3A 07 89    ld   a,($8907)
 0FA5: 0F          rrca
 0FA6: E6 03       and  $03
 0FA8: C6 22       add  a,$22
-0FAA: C3 C3 0F    jp   $0FC3
+0FAA: C3 C3 0F    jp   play_tune_0fc3
+
+play_player_falling_sound_0fad:
 0FAD: 3E 26       ld   a,$26
-0FAF: C3 C3 0F    jp   $0FC3
+0FAF: C3 C3 0F    jp   play_tune_0fc3
+
+play_intro_tune_0fb2:
 0FB2: 3E 27       ld   a,$27
-0FB4: CD B3 0E    call $0EB3
+0FB4: CD B3 0E    call queue_sound_0eb3
 0FB7: 3E 15       ld   a,$15
-0FB9: C3 B3 0E    jp   $0EB3
+0FB9: C3 B3 0E    jp   queue_sound_0eb3
+
+play_bonus_stage_tune_0fbc:
 0FBC: 3E 28       ld   a,$28
-0FBE: C3 C3 0F    jp   $0FC3
+0FBE: C3 C3 0F    jp   play_tune_0fc3
 0FC1: 3E 29       ld   a,$29
-0FC3: CD A2 0E    call $0EA2
+play_tune_0fc3:
+0FC3: CD A2 0E    call queue_sound_if_game_plays_0ea2
 0FC6: 3E 15       ld   a,$15
-0FC8: CD A2 0E    call $0EA2
+0FC8: CD A2 0E    call queue_sound_if_game_plays_0ea2
 0FCB: 3E 16       ld   a,$16
-0FCD: CD A2 0E    call $0EA2
+0FCD: CD A2 0E    call queue_sound_if_game_plays_0ea2
 0FD0: 3E 17       ld   a,$17
-0FD2: C3 A2 0E    jp   $0EA2
+0FD2: C3 A2 0E    jp   queue_sound_if_game_plays_0ea2
 0FD5: 3A 5C 8F    ld   a,($8F5C)
 0FD8: E6 07       and  $07
 0FDA: FE 02       cp   $02
@@ -2000,12 +2101,12 @@ audio_shit_0E8F:
 0FF5: 2E 07       ld   l,$07
 0FF7: CB 56       bit  2,(hl)
 0FF9: 28 03       jr   z,$0FFE
-0FFB: CD F1 50    call $50F1
+0FFB: CD F1 50    call rom_protection_check_50f1
 0FFE: 3E 01       ld   a,$01
 1000: 32 61 8F    ld   ($8F61),a
 1003: 32 3F 8F    ld   ($8F3F),a
 1006: 32 5C 8F    ld   ($8F5C),a
-1009: CD BC 0F    call $0FBC
+1009: CD BC 0F    call play_bonus_stage_tune_0fbc
 100C: 21 38 8A    ld   hl,$8A38
 100F: 7E          ld   a,(hl)
 1010: 23          inc  hl
@@ -2017,16 +2118,16 @@ audio_shit_0E8F:
 101C: CD 7D 10    call $107D
 101F: CD D4 20    call $20D4
 1022: CD 1B 51    call $511B
-1025: CD 19 12    call $1219
-1028: CD BD 40    call $40BD
+1025: CD 19 12    call update_wolves_1219
+1028: CD BD 40    call handle_loose_balloons_40bd
 102B: CD EF 02    call update_sprite_shadows_02EF
 102E: CD E4 5A    call $5AE4
-1031: CD 64 0E    call $0E64
+1031: CD 64 0E    call handle_queued_sounds_0e64
 1034: C9          ret
 
-1035: CD 57 21    call $2157
-1038: CD 19 12    call $1219
-103B: CD BD 40    call $40BD
+1035: CD 57 21    call move_arrow_and_animate_bow_2157
+1038: CD 19 12    call update_wolves_1219
+103B: CD BD 40    call handle_loose_balloons_40bd
 103E: CD EF 02    call update_sprite_shadows_02EF
 1041: C9          ret
 1042: 3E 01       ld   a,$01
@@ -2079,9 +2180,9 @@ audio_shit_0E8F:
 10A5: FE 0A       cp   $0A
 10A7: 38 04       jr   c,$10AD
 10A9: 47          ld   b,a
-10AA: CD 31 11    call $1131
+10AA: CD 31 11    call convert_number_to_bcd_1131
 10AD: 21 50 86    ld   hl,$8650
-10B0: CD 19 11    call $1119
+10B0: CD 19 11    call write_2_digits_to_screen_1119
 10B3: 3A 5D 8F    ld   a,($8F5D)
 10B6: A7          and  a
 10B7: 28 26       jr   z,$10DF
@@ -2102,16 +2203,16 @@ audio_shit_0E8F:
 10D0: 78          ld   a,b
 10D1: 32 62 8F    ld   ($8F62),a
 10D4: CB 20       sla  b
-10D6: CD 31 11    call $1131
+10D6: CD 31 11    call convert_number_to_bcd_1131
 10D9: 21 D0 85    ld   hl,$85D0
-10DC: CD 19 11    call $1119
+10DC: CD 19 11    call write_2_digits_to_screen_1119
 10DF: 3A 5E 8F    ld   a,($8F5E)
 10E2: FE 0A       cp   $0A
 10E4: 38 04       jr   c,$10EA
 10E6: 47          ld   b,a
-10E7: CD 31 11    call $1131
+10E7: CD 31 11    call convert_number_to_bcd_1131
 10EA: 21 52 86    ld   hl,$8652
-10ED: CD 19 11    call $1119
+10ED: CD 19 11    call write_2_digits_to_screen_1119
 10F0: 21 60 8F    ld   hl,$8F60
 10F3: 7E          ld   a,(hl)
 10F4: A7          and  a
@@ -2121,7 +2222,7 @@ audio_shit_0E8F:
 10FA: 86          add  a,(hl)
 10FB: 77          ld   (hl),a
 10FC: CB 20       sla  b
-10FE: CD 31 11    call $1131
+10FE: CD 31 11    call convert_number_to_bcd_1131
 1101: 5F          ld   e,a
 1102: 79          ld   a,c
 1103: A7          and  a
@@ -2130,11 +2231,13 @@ audio_shit_0E8F:
 1107: 32 F2 85    ld   ($85F2),a
 110A: 21 D2 85    ld   hl,$85D2
 110D: 7B          ld   a,e
-110E: CD 19 11    call $1119
+110E: CD 19 11    call write_2_digits_to_screen_1119
 1111: 21 5C 8F    ld   hl,$8F5C
 1114: 34          inc  (hl)
-1115: CD 44 0F    call $0F44
+1115: CD 44 0F    call play_bonus_stage_jingle_0f44
 1118: C9          ret
+
+write_2_digits_to_screen_1119:
 1119: 01 E0 FF    ld   bc,$FFE0
 111C: 5F          ld   e,a
 111D: CB 3F       srl  a
@@ -2150,6 +2253,8 @@ audio_shit_0E8F:
 112D: E6 0F       and  $0F
 112F: 77          ld   (hl),a
 1130: C9          ret
+
+convert_number_to_bcd_1131:
 1131: AF          xor  a
 1132: 4F          ld   c,a
 1133: C6 01       add  a,$01
@@ -2180,7 +2285,7 @@ audio_shit_0E8F:
 1159: 2E 5B       ld   l,$5B
 115B: 06 09       ld   b,$09
 115D: D7          rst  $10
-115E: CD CF 0E    call $0ECF
+115E: CD CF 0E    call play_null_sound_0ecf
 1161: 3E 06       ld   a,$06
 1163: 32 0A 88    ld   (in_game_sub_state_880A),a
 ; if one of those 2 checksums fail, do something probably nasty
@@ -2192,6 +2297,7 @@ audio_shit_0E8F:
 ; supposed to do something nasty. Game keeps running
 ; but difficulty seems super hard (TBC)
 116F: 18 1C       jr   $118D
+try_to_spawn_wolf_1171:
 1171: 21 07 8D    ld   hl,$8D07
 1174: 7E          ld   a,(hl)
 1175: A7          and  a
@@ -2241,7 +2347,7 @@ audio_shit_0E8F:
 11D4: ED 44       neg
 11D6: DD 77 0A    ld   (ix+$0a),a
 11D9: 11 29 38    ld   de,$3829
-11DC: CD 1E 38    call $381E
+11DC: CD 1E 38    call store_de_in_struct_381e
 11DF: 21 F9 11    ld   hl,$11F9
 11E2: 3A 07 89    ld   a,($8907)
 11E5: E6 3F       and  $3F
@@ -2256,6 +2362,7 @@ audio_shit_0E8F:
 11F7: F1          pop  af
 11F8: C9          ret
 
+update_wolves_1219:
 1219: DD 21 E0 8A ld   ix,$8AE0
 121D: 11 18 00    ld   de,$0018
 1220: 06 0E       ld   b,$0E
@@ -2277,29 +2384,29 @@ audio_shit_0E8F:
 
 	.word	$125F 
 	.word	$1270 
-	.word	$3536 
-	.word	$12AF 
-	.word	$3865 
+	.word	wolf_shot_exploding_3536 
+	.word	move_wolf_horizontally_12af 
+	.word	wolf_updates_balloon_3865 
 	.word	$1496
-	.word	$3BE3 
+	.word	wolf_walking_to_ladders_3be3 
 	.word	$3C92 
 	.word	$14DC 
 	.word	$1518
 	.word	$154D 
-	.word	$3E69 
-	.word	$3E9C
+	.word	flying_wolf_prepares_to_shoot_3e69 
+	.word	flying_wolf_shoots_3e9c
 	.word	$3F5C
 	.word	$3F72 
-	.word	$3F7C 
-	.word	$3FE9
+	.word	wolf_falling_3f7c 
+	.word	rom_check_3fe9
 
 125F: DD 35 11    dec  (ix+$11)
 1262: C0          ret  nz
 1263: DD 34 02    inc  (ix+$02)
 1266: 11 38 38    ld   de,$3838
 1269: DD 36 08 01 ld   (ix+$08),$01
-126D: C3 1E 38    jp   $381E
-1270: CD 06 40    call $4006
+126D: C3 1E 38    jp   store_de_in_struct_381e
+1270: CD 06 40    call auto_animate_sprite_ix_4006
 1273: DD 7E 0A    ld   a,(ix+$0a)
 1276: ED 44       neg
 1278: 47          ld   b,a
@@ -2332,7 +2439,9 @@ audio_shit_0E8F:
 12AA: D0          ret  nc
 12AB: 32 43 87    ld   ($8743),a
 12AE: C9          ret
-12AF: CD 06 40    call $4006
+
+move_wolf_horizontally_12af:
+12AF: CD 06 40    call auto_animate_sprite_ix_4006
 12B2: DD 7E 08    ld   a,(ix+$08)
 12B5: A7          and  a
 12B6: C2 FE 13    jp   nz,$13FE
@@ -2350,7 +2459,7 @@ audio_shit_0E8F:
 12D6: E6 1F       and  $1F
 12D8: CB 3F       srl  a
 12DA: CB 3F       srl  a
-12DC: CD 45 0C    call $0C45
+12DC: CD 45 0C    call load_16bit_rom_pointer_0c45
 12DF: EB          ex   de,hl
 12E0: 3A 41 8D    ld   a,($8D41)
 12E3: E6 0F       and  $0F
@@ -2363,7 +2472,7 @@ audio_shit_0E8F:
 12F0: D8          ret  c
 12F1: DD 36 08 01 ld   (ix+$08),$01
 12F5: 11 38 38    ld   de,$3838
-12F8: C3 1E 38    jp   $381E
+12F8: C3 1E 38    jp   store_de_in_struct_381e
 
 1383: 78          ld   a,b
 1384: FE 20       cp   $20
@@ -2438,7 +2547,7 @@ audio_shit_0E8F:
 1421: D0          ret  nc
 1422: DD 36 08 00 ld   (ix+$08),$00
 1426: 11 29 38    ld   de,$3829
-1429: C3 1E 38    jp   $381E
+1429: C3 1E 38    jp   store_de_in_struct_381e
 142C: FD 36 00 01 ld   (iy+$00),$01
 1430: FD 36 02 04 ld   (iy+$02),$04
 1434: FD 71 14    ld   (iy+$14),c
@@ -2482,7 +2591,7 @@ audio_shit_0E8F:
 14        
 15        
 16 17     
-1496: CD 06 40    call $4006
+1496: CD 06 40    call auto_animate_sprite_ix_4006
 1499: DD 7E 0A    ld   a,(ix+$0a)
 149C: ED 44       neg
 149E: 47          ld   b,a
@@ -2508,7 +2617,7 @@ audio_shit_0E8F:
 14CA: FE 02       cp   $02
 14CC: D0          ret  nc
 14CD: 11 D1 3B    ld   de,$3BD1
-14D0: CD 1E 38    call $381E
+14D0: CD 1E 38    call store_de_in_struct_381e
 14D3: DD 36 02 02 ld   (ix+$02),$02
 14D7: DD 36 11 28 ld   (ix+$11),$28
 14DB: C9          ret
@@ -2539,10 +2648,10 @@ audio_shit_0E8F:
 1508: DD 70 11    ld   (ix+$11),b
 150B: 79          ld   a,c
 150C: 21 57 15    ld   hl,$1557
-150F: CD 45 0C    call $0C45
-1512: CD 1E 38    call $381E
+150F: CD 45 0C    call load_16bit_rom_pointer_0c45
+1512: CD 1E 38    call store_de_in_struct_381e
 1515: DD 34 02    inc  (ix+$02)
-1518: CD 06 40    call $4006
+1518: CD 06 40    call auto_animate_sprite_ix_4006
 151B: DD 35 11    dec  (ix+$11)
 151E: C0          ret  nz
 151F: 3A 60 8F    ld   a,($8F60)
@@ -2550,7 +2659,7 @@ audio_shit_0E8F:
 1524: 47          ld   b,a
 1525: A7          and  a
 1526: 28 12       jr   z,$153A
-1528: CD 31 11    call $1131
+1528: CD 31 11    call convert_number_to_bcd_1131
 152B: 5F          ld   e,a
 152C: 79          ld   a,c
 152D: A7          and  a
@@ -2558,7 +2667,7 @@ audio_shit_0E8F:
 1530: 32 E9 85    ld   ($85E9),a
 1533: 21 C9 85    ld   hl,$85C9
 1536: 7B          ld   a,e
-1537: CD 19 11    call $1119
+1537: CD 19 11    call write_2_digits_to_screen_1119
 153A: DD 7E 16    ld   a,(ix+$16)
 153D: FE 07       cp   $07
 153F: CA 99 3D    jp   z,$3D99
@@ -2566,7 +2675,7 @@ audio_shit_0E8F:
 1543: DD 77 13    ld   (ix+$13),a
 1546: DD 36 11 01 ld   (ix+$11),$01
 154A: DD 34 02    inc  (ix+$02)
-154D: CD 06 40    call $4006
+154D: CD 06 40    call auto_animate_sprite_ix_4006
 1550: DD 35 11    dec  (ix+$11)
 1553: C0          ret  nz
 1554: C3 53 35    jp   $3553
@@ -2593,22 +2702,22 @@ in_game_159B:
 15A2: 3A 0A 88    ld   a,(in_game_sub_state_880A)
 15A5: E6 1F       and  $1F
 15A7: EF          rst  $28
-	 .word	$1601  
-	 .word	$16B7
-	 .word	$175D  
-	 .word	$17C1 
-	 .word	$18AF  
-	 .word	$19EE  
-	 .word	$1A01 
-	 .word	$1A64 
+	 .word	clear_character_intro_screen_1601  
+	 .word	init_level_background_16b7
+	 .word	draw_game_scenery_175d  
+	 .word	init_level_logic_17c1 
+	 .word	main_game_sequence_18af  
+	 .word	level_completed_19ee  
+	 .word	prepare_next_round_1a01 
+	 .word	player_died_1A64 
      .word	$15B8 
 	 .word	$1B43 
 	 .word	$1B8C 
-	 .word	$1BAB 
+	 .word	switch_players_if_needed_1bab 
 	 .word	$1BCC 
 	 .word	$1C03
-	 .word	$1C53 
-	 .word	$1C66 
+	 .word	move_pigs_to_left_game_start_1c53 
+	 .word	wait_while_showing_highscores_1c66 
 	 .word	$1D9C 
      .word	$15C8 
 	 .word	$1D6E  
@@ -2630,7 +2739,7 @@ continue_15D1:
 15E8: 2E 0A       ld   l,$0A
 15EA: 36 00       ld   (hl),$00
 15EC: CD 27 25    call $2527
-15EF: CD B9 02    call $02B9
+15EF: CD B9 02    call erase_sprite_shadow_ram_02b9
 15F2: 21 5F 85    ld   hl,$855F
 15F5: 11 E0 FF    ld   de,$FFE0
 15F8: 06 08       ld   b,$08
@@ -2639,7 +2748,9 @@ continue_15D1:
 15FD: 19          add  hl,de
 15FE: 10 FA       djnz $15FA
 1600: C9          ret
-1601: CD C9 02    call $02C9
+
+clear_character_intro_screen_1601:
+1601: CD C9 02    call erase_a_column_02c9
 1604: C0          ret  nz
 1605: CD E3 02    call $02E3
 1608: CD BC 19    call $19BC
@@ -2676,7 +2787,7 @@ continue_15D1:
 1649: 1C          inc  e
 164A: FF          rst  $38
 164B: 01 79 07    ld   bc,$0779
-164E: CD 5D 07    call $075D
+164E: CD 5D 07    call apply_color_075d
 1651: 3E 80       ld   a,$80
 1653: 32 08 88    ld   ($8808),a
 1656: 21 0A 88    ld   hl,in_game_sub_state_880A
@@ -2715,7 +2826,7 @@ continue_15D1:
 169B: FE FF       cp   $FF
 169D: 28 07       jr   z,$16A6
 169F: BE          cp   (hl)
-16A0: 20 15       jr   nz,$16B7
+16A0: 20 15       jr   nz,init_level_background_16b7
 16A2: 13          inc  de
 16A3: 23          inc  hl
 16A4: 18 F4       jr   $169A
@@ -2731,6 +2842,7 @@ continue_15D1:
 16B4: 1D          dec  e
 16B5: 19          add  hl,de
 16B6: FF          rst  $38
+init_level_background_16b7:
 16B7: 21 08 88    ld   hl,$8808
 16BA: 35          dec  (hl)
 16BB: C0          ret  nz
@@ -2744,7 +2856,7 @@ continue_15D1:
 16CE: C9          ret
 16CF: AF          xor  a
 16D0: 32 B7 88    ld   ($88B7),a
-16D3: CD C2 03    call $03C2
+16D3: CD C2 03    call display_nb_lives_03c2
 16D6: 3A 50 8F    ld   a,($8F50)
 16D9: A7          and  a
 16DA: 28 17       jr   z,$16F3
@@ -2753,10 +2865,10 @@ continue_15D1:
 16E1: 20 08       jr   nz,$16EB
 16E3: 21 81 4E    ld   hl,$4E81
 16E6: 11 39 50    ld   de,$5039
-16E9: 18 3D       jr   $1728
+16E9: 18 3D       jr   init_level_layout_1728
 16EB: 21 92 4C    ld   hl,$4C92
 16EE: 11 CE 4D    ld   de,$4DCE
-16F1: 18 35       jr   $1728
+16F1: 18 35       jr   init_level_layout_1728
 
 16F3: 3A 04 89    ld   a,($8904)
 16F6: A7          and  a
@@ -2768,18 +2880,19 @@ continue_15D1:
 1702: CB 47       bit  0,a
 1704: 21 2C 46    ld   hl,$462C
 1707: 11 30 4B    ld   de,$4B30
-170A: 20 1C       jr   nz,$1728
+170A: 20 1C       jr   nz,init_level_layout_1728
 170C: A7          and  a
 170D: 21 A9 44    ld   hl,$44A9
 1710: 11 55 4B    ld   de,$4B55
-1713: 28 13       jr   z,$1728
+1713: 28 13       jr   z,init_level_layout_1728
 1715: 3A 07 89    ld   a,($8907)
 1718: CB 47       bit  0,a
 171A: 21 D6 46    ld   hl,$46D6
 171D: 11 50 4A    ld   de,$4A50
-1720: 28 06       jr   z,$1728
+1720: 28 06       jr   z,init_level_layout_1728
 1722: 21 72 48    ld   hl,$4872
 1725: 11 F6 4B    ld   de,$4BF6
+init_level_layout_1728:
 1728: ED 53 45 8F ld   ($8F45),de
 172C: 22 BA 88    ld   ($88BA),hl
 172F: 21 42 84    ld   hl,$8442
@@ -2799,7 +2912,8 @@ table_1754:
    .byte 	04 08 8D 8F 0F 88 8E 8C 5A
 
 
-175D: CD 81 43    call $4381
+draw_game_scenery_175d:
+175D: CD 81 43    call write_column_to_screen_4381
 1760: 21 B7 88    ld   hl,$88B7
 1763: 34          inc  (hl)
 1764: 7E          ld   a,(hl)
@@ -2836,8 +2950,8 @@ table_1754:
 179D: 3C          inc  a
 179E: 32 03 89    ld   ($8903),a
 17A1: CD AD 1E    call $1EAD
-17A4: CD 65 20    call $2065
-17A7: CD 0B 4A    call $4A0B
+17A4: CD 65 20    call display_nb_lives_2065
+17A7: CD 0B 4A    call update_wolves_pushing_rock_4a0b
 17AA: 3E 10       ld   a,$10
 17AC: 32 91 8A    ld   ($8A91),a
 17AF: 32 06 8F    ld   ($8F06),a
@@ -2847,6 +2961,8 @@ table_1754:
 17BB: 21 0A 88    ld   hl,in_game_sub_state_880A
 17BE: 36 03       ld   (hl),$03
 17C0: C9          ret
+
+init_level_logic_17c1:
 17C1: DD 21 80 8A ld   ix,top_basket_object_8A80
 17C5: 3A 50 8F    ld   a,($8F50)
 17C8: A7          and  a
@@ -2878,7 +2994,7 @@ table_1754:
 1805: DD 35 06    dec  (ix+$06)
 1808: 21 C9 26    ld   hl,$26C9
 180B: 22 00 8F    ld   ($8F00),hl
-180E: CD B1 22    call $22B1
+180E: CD B1 22    call animate_bow_22b1
 1811: 3A 50 8F    ld   a,($8F50)
 1814: A7          and  a
 1815: 20 31       jr   nz,$1848
@@ -2922,7 +3038,7 @@ table_1754:
 1865: 32 47 8F    ld   ($8F47),a
 1868: 78          ld   a,b
 1869: 21 EB 70    ld   hl,$70EB
-186C: CD 45 0C    call $0C45
+186C: CD 45 0C    call load_16bit_rom_pointer_0c45
 186F: EB          ex   de,hl
 1870: DD 21 E0 8A ld   ix,$8AE0
 1874: 3A 47 8F    ld   a,($8F47)
@@ -2945,7 +3061,7 @@ table_1754:
 1898: DD 34 04    inc  (ix+$04)
 189B: 24          inc  h
 189C: 11 29 38    ld   de,$3829
-189F: CD 1E 38    call $381E
+189F: CD 1E 38    call store_de_in_struct_381e
 18A2: 11 18 00    ld   de,$0018
 18A5: DD 19       add  ix,de
 18A7: 10 D1       djnz $187A
@@ -2953,22 +3069,24 @@ table_1754:
 18AC: 36 0F       ld   (hl),$0F
 18AE: C9          ret
 
-18AF: CD 55 1E    call $1E55
+main_game_sequence_18af:
+18AF: CD 55 1E    call read_controls_1e55
 18B2: CD AB 6C    call $6CAB
 18B5: CD D4 20    call $20D4
 18B8: CD 1B 51    call $511B
-18BB: CD 77 33    call $3377
-18BE: CD BD 40    call $40BD
+18BB: CD 77 33    call update_wolves_3377
+18BE: CD BD 40    call handle_loose_balloons_40bd
 18C1: CD EF 02    call update_sprite_shadows_02EF
-18C4: CD DA 18    call $18DA
+18C4: CD DA 18    call handle_extra_life_award_18da
 18C7: CD 1C 19    call $191C
 18CA: CD E4 5A    call $5AE4
 18CD: CD 6E 19    call $196E
-18D0: CD 2F 1F    call $1F2F
+18D0: CD 2F 1F    call update_left_flag_color_1f2f
 18D3: CD 3B 6B    call $6B3B
 18D6: CD CA 19    call $19CA
 18D9: C9          ret
 
+handle_extra_life_award_18da:
 18DA: 3A 09 89    ld   a,($8909)
 18DD: A7          and  a
 18DE: 28 2E       jr   z,$190E
@@ -2994,8 +3112,8 @@ table_1754:
 1902: 81          add  a,c
 1903: 27          daa
 1904: 32 09 89    ld   ($8909),a
-1907: CD C2 03    call $03C2
-190A: CD 0D 0F    call $0F0D
+1907: CD C2 03    call display_nb_lives_03c2
+190A: CD 0D 0F    call play_extra_life_sound_0f0d
 190D: C9          ret
 
 190E: 3A 00 88    ld   a,($8800)
@@ -3118,13 +3236,17 @@ table_1754:
 19E9: 11 8F 06    ld   de,$068F
 19EC: FF          rst  $38
 19ED: C9          ret
-19EE: CD 8B 30    call $308B
-19F1: CD A6 25    call $25A6
-19F4: CD 77 33    call $3377
-19F7: CD BD 40    call $40BD
+
+level_completed_19ee:
+19EE: CD 8B 30    call handle_falling_rock_308b
+19F1: CD A6 25    call handle_side_wolves_25a6
+19F4: CD 77 33    call update_wolves_3377
+19F7: CD BD 40    call handle_loose_balloons_40bd
 19FA: CD C6 28    call $28C6
 19FD: CD EF 02    call update_sprite_shadows_02EF
 1A00: C9          ret
+
+prepare_next_round_1a01:
 1A01: CD 27 25    call $2527
 1A04: 32 02 89    ld   ($8902),a
 1A07: 32 34 89    ld   ($8934),a
@@ -3171,10 +3293,12 @@ table_1754:
 1A5F: AF          xor  a
 1A60: 32 0A 88    ld   (in_game_sub_state_880A),a
 1A63: C9          ret
+
+player_died_1A64:
 1A64: 3A 50 8F    ld   a,($8F50)
 1A67: A7          and  a
-1A68: 20 97       jr   nz,$1A01
-1A6A: CD 4E 0F    call $0F4E
+1A68: 20 97       jr   nz,prepare_next_round_1a01
+1A6A: CD 4E 0F    call stop_falling_wolf_sound_loop_0f4e
 1A6D: CD 27 25    call $2527
 1A70: AF          xor  a
 1A71: 32 E3 89    ld   ($89E3),a
@@ -3187,7 +3311,7 @@ table_1754:
 1A80: 28 14       jr   z,$1A96
 1A82: 35          dec  (hl)
 1A83: 28 11       jr   z,$1A96
-1A85: CD C2 03    call $03C2
+1A85: CD C2 03    call display_nb_lives_03c2
 1A88: 0E 0A       ld   c,$0A
 1A8A: 3A 0D 88    ld   a,($880D)
 1A8D: A7          and  a
@@ -3196,7 +3320,7 @@ table_1754:
 1A91: 79          ld   a,c
 1A92: 32 0A 88    ld   (in_game_sub_state_880A),a
 1A95: C9          ret
-1A96: CD 92 0F    call $0F92
+1A96: CD 92 0F    call play_game_over_tune_0f92
 1A99: 21 0A 88    ld   hl,in_game_sub_state_880A
 1A9C: 3A 0D 88    ld   a,($880D)
 1A9F: A7          and  a
@@ -3277,11 +3401,11 @@ table_1754:
 1B3F: 06 03       ld   b,$03
 1B41: D7          rst  $10
 1B42: C9          ret
-1B43: CD C9 02    call $02C9
+1B43: CD C9 02    call erase_a_column_02c9
 1B46: C0          ret  nz
 1B47: CD E3 02    call $02E3
 1B4A: 01 19 08    ld   bc,$0819
-1B4D: CD 5D 07    call $075D
+1B4D: CD 5D 07    call apply_color_075d
 1B50: 11 00 06    ld   de,$0600
 1B53: FF          rst  $38
 1B54: 1E 02       ld   e,$02
@@ -3316,10 +3440,10 @@ table_1754:
 1B88: 23          inc  hl
 1B89: 18 F5       jr   $1B80
 1B8B: C9          ret
-1B8C: CD C9 02    call $02C9
+1B8C: CD C9 02    call erase_a_column_02c9
 1B8F: C0          ret  nz
 1B90: 01 19 08    ld   bc,$0819
-1B93: CD 5D 07    call $075D
+1B93: CD 5D 07    call apply_color_075d
 1B96: 11 00 06    ld   de,$0600
 1B99: FF          rst  $38
 1B9A: 1E 03       ld   e,$03
@@ -3330,6 +3454,8 @@ table_1754:
 1BA5: 3E 60       ld   a,$60
 1BA7: 32 08 88    ld   ($8808),a
 1BAA: C9          ret
+
+switch_players_if_needed_1bab:
 1BAB: 3A 0E 88    ld   a,($880E)
 1BAE: A7          and  a
 1BAF: 28 0B       jr   z,$1BBC
@@ -3379,14 +3505,14 @@ table_1754:
 1C06: 35          dec  (hl)
 1C07: C0          ret  nz
 1C08: 3E 82       ld   a,$82
-1C0A: CD B2 05    call $05B2
+1C0A: CD B2 05    call display_string_05b2
 1C0D: 3E 80       ld   a,$80
-1C0F: CD B2 05    call $05B2
+1C0F: CD B2 05    call display_string_05b2
 1C12: 3E 89       ld   a,$89
-1C14: CD B2 05    call $05B2
+1C14: CD B2 05    call display_string_05b2
 1C17: 01 D9 07    ld   bc,$07D9
-1C1A: CD 5D 07    call $075D
-1C1D: CD E9 03    call $03E9
+1C1A: CD 5D 07    call apply_color_075d
+1C1D: CD E9 03    call display_high_scores_table_03E9
 1C20: 11 11 06    ld   de,$0611
 1C23: FF          rst  $38
 1C24: 21 0A 88    ld   hl,in_game_sub_state_880A
@@ -3414,6 +3540,8 @@ table_1754:
 1C4F: 23          inc  hl
 1C50: 18 F5       jr   $1C47
 1C52: C9          ret
+
+move_pigs_to_left_game_start_1c53:
 1C53: 3A 07 89    ld   a,($8907)
 1C56: E6 01       and  $01
 1C58: 20 05       jr   nz,$1C5F
@@ -3423,6 +3551,7 @@ table_1754:
 1C62: CD EF 02    call update_sprite_shadows_02EF
 1C65: C9          ret
 
+wait_while_showing_highscores_1c66:
 1C66: 21 08 88    ld   hl,$8808
 1C69: 35          dec  (hl)
 1C6A: 3A 2A 8E    ld   a,($8E2A)
@@ -3440,7 +3569,7 @@ table_1754:
 1C81: C0          ret  nz
 1C82: 3A FF 89    ld   a,($89FF)
 1C85: 2A FD 89    ld   hl,($89FD)
-1C88: 11 20 00    ld   de,$0020
+1C88: 11 20 00    ld   de,$20
 1C8B: 06 1C       ld   b,$1C
 1C8D: 77          ld   (hl),a
 1C8E: 19          add  hl,de
@@ -3542,8 +3671,8 @@ table_1754:
 1D4D: 32 05 88    ld   (game_state_8805),a
 1D50: 32 1F 88    ld   ($881F),a
 1D53: 32 3F 8F    ld   ($8F3F),a
-1D56: CD B9 02    call $02B9
-1D59: CD CF 0E    call $0ECF
+1D56: CD B9 02    call erase_sprite_shadow_ram_02b9
+1D59: CD CF 0E    call play_null_sound_0ecf
 1D5C: 11 4C 1E    ld   de,$1E4C
 1D5F: 21 F0 89    ld   hl,$89F0
 1D62: 1A          ld   a,(de)
@@ -3563,7 +3692,7 @@ table_1754:
 1D77: CD E9 79    call $79E9
 1D7A: 11 26 06    ld   de,$0626
 1D7D: FF          rst  $38
-1D7E: CD 44 0F    call $0F44
+1D7E: CD 44 0F    call play_bonus_stage_jingle_0f44
 1D81: C9          ret
 1D82: A7          and  a
 1D83: C0          ret  nz
@@ -3624,10 +3753,10 @@ table_1754:
 1DEE: 01 39 08    ld   bc,$0839
 1DF1: 20 03       jr   nz,$1DF6
 1DF3: 01 79 08    ld   bc,$0879
-1DF6: CD 5D 07    call $075D
+1DF6: CD 5D 07    call apply_color_075d
 1DF9: 3E 0F       ld   a,$0F
 1DFB: 21 45 80    ld   hl,$8045
-1DFE: 11 20 00    ld   de,$0020
+1DFE: 11 20 00    ld   de,$20
 1E01: 06 04       ld   b,$04
 1E03: 77          ld   (hl),a
 1E04: 19          add  hl,de
@@ -3642,9 +3771,9 @@ table_1754:
 1E14: A7          and  a
 1E15: 20 D4       jr   nz,$1DEB
 1E17: 01 59 08    ld   bc,$0859
-1E1A: CD 5D 07    call $075D
+1E1A: CD 5D 07    call apply_color_075d
 1E1D: 21 1C 81    ld   hl,$811C
-1E20: 11 20 00    ld   de,$0020
+1E20: 11 20 00    ld   de,$20
 1E23: 06 10       ld   b,$10
 1E25: 3E 09       ld   a,$09
 1E27: 77          ld   (hl),a
@@ -3652,6 +3781,7 @@ table_1754:
 1E29: 10 FC       djnz $1E27
 1E2B: C9          ret
 
+read_controls_1e55:
 1E55: 21 E5 89    ld   hl,$89E5
 1E58: 46          ld   b,(hl)
 1E59: 7D          ld   a,l
@@ -3661,18 +3791,18 @@ table_1754:
 1E5E: B6          or   (hl)   ; rom_check_failed_89FB flag == 1: cannot move
 1E5F: A7          and  a
 1E60: DD 21 80 8A ld   ix,top_basket_object_8A80
-1E64: 20 3C       jr   nz,$1EA2
+1E64: 20 3C       jr   nz,skip_input_read_1ea2
 1E66: 3A 06 88    ld   a,($8806)
 1E69: A7          and  a
 1E6A: C8          ret  z
 1E6B: FD 21 90 8C ld   iy,$8C90
 1E6F: DD 7E 02    ld   a,(ix+$02)
 1E72: A7          and  a
-1E73: 20 2D       jr   nz,$1EA2
+1E73: 20 2D       jr   nz,skip_input_read_1ea2
 1E75: 3A 24 8F    ld   a,($8F24)
 1E78: 21 57 8F    ld   hl,$8F57
 1E7B: B6          or   (hl)
-1E7C: 20 24       jr   nz,$1EA2
+1E7C: 20 24       jr   nz,skip_input_read_1ea2
 1E7E: 3A 1F 88    ld   a,($881F)
 1E81: A7          and  a
 1E82: 3A A0 A0    ld   a,(in1_a0a0)
@@ -3693,6 +3823,8 @@ table_1754:
 1E9C: C8          ret  z
 1E9D: DD CB 07 A6 res  4,(ix+$07)
 1EA1: C9          ret
+
+skip_input_read_1ea2:
 1EA2: DD 36 07 00 ld   (ix+$07),$00
 1EA6: C9          ret
 
@@ -3738,20 +3870,21 @@ table_1754:
 1EF1: CB 3F       srl  a
 1EF3: E6 01       and  $01
 1EF5: 21 0D 20    ld   hl,$200D
-1EF8: CD 45 0C    call $0C45
+1EF8: CD 45 0C    call load_16bit_rom_pointer_0c45
 1EFB: 21 62 84    ld   hl,$8462
-1EFE: CD 07 33    call $3307
+1EFE: CD 07 33    call update_4x4_block_3307
 1F01: 21 22 87    ld   hl,$8722
 1F04: CD 8C 1F    call update_flag_1F8C
 1F07: F1          pop  af
 1F08: 47          ld   b,a
 1F09: E6 0F       and  $0F
 1F0B: 32 83 84    ld   ($8483),a
-1F0E: CD FB 1F    call $1FFB
-1F11: CD 18 1F    call $1F18
-1F14: CD C9 34    call $34C9
+1F0E: CD FB 1F    call update_right_flag_color_1ffb
+1F11: CD 18 1F    call update_left_flag_color_1f18
+1F14: CD C9 34    call write_number_of_remaining_wolves_34c9
 1F17: C9          ret
 ; if any rom checksum failed, return
+update_left_flag_color_1f18:
 1F18: 21 E7 89    ld   hl,$89E7
 1F1B: 06 07       ld   b,$07
 1F1D: 7E          ld   a,(hl)
@@ -3766,6 +3899,7 @@ table_1754:
 1F2A: 38 22       jr   c,$1F4E
 1F2C: 0C          inc  c
 1F2D: 18 F9       jr   $1F28
+update_left_flag_color_1f2f:
 1F2F: 3A 56 8D    ld   a,($8D56)
 1F32: A7          and  a
 1F33: C0          ret  nz
@@ -3806,7 +3940,7 @@ table_1754:
 1F76: 32 43 87    ld   ($8743),a
 1F79: AF          xor  a
 1F7A: 21 A3 1F    ld   hl,$1FA3
-1F7D: CD 45 0C    call $0C45
+1F7D: CD 45 0C    call load_16bit_rom_pointer_0c45
 1F80: 21 22 83    ld   hl,$8322
 1F83: CD 8C 1F    call update_flag_1F8C
 1F86: C9          ret
@@ -3815,6 +3949,7 @@ table_1F87:
   .byte 	09 14 1E 28 30 3E 04 ED 47
  
 ; < HL: screen address
+update_left_flag_1F8C:
 1F8C: 3E 04       ld   a,$04                                          
 1F8E: ED 47       ld   i,a                                            
 1F90: 06 03       ld   b,$03
@@ -3832,15 +3967,17 @@ table_1F87:
 1FA1: 18 ED       jr   $1F90
 
 
+update_right_flag_color_1ffb:
 1FFB: 78          ld   a,b                                            
 1FFC: CB 6F       bit  5,a
 1FFE: 11 3B 20    ld   de,$203B
 2001: 28 03       jr   z,$2006
 2003: 11 50 20    ld   de,$2050
 2006: 21 62 80    ld   hl,$8062
-2009: CD 07 33    call $3307
+2009: CD 07 33    call update_4x4_block_3307
 200C: C9          ret
 
+display_nb_lives_2065:
 2065: 21 3F 86    ld   hl,$863F
 2068: 11 E0 FF    ld   de,$FFE0
 206B: 3A 08 89    ld   a,(nb_lives_8908)
@@ -3916,15 +4053,16 @@ rom_corrupt_20A4:
 20ED: DD 21 80 8A ld   ix,top_basket_object_8A80
 20F1: CD 29 23    call $2329
 20F4: CD 01 21    call $2101
-20F7: CD 63 25    call $2563
-20FA: CD A6 25    call $25A6
-20FD: CD 8B 30    call $308B
+20F7: CD 63 25    call animate_pigs_in_house_2563
+20FA: CD A6 25    call handle_side_wolves_25a6
+20FD: CD 8B 30    call handle_falling_rock_308b
 2100: C9          ret
-2101: CD 78 27    call $2778
-2104: CD 0B 21    call $210B
-2107: CD 57 21    call $2157
+2101: CD 78 27    call pickup_meat_management_2778
+2104: CD 0B 21    call arrow_shot_management_210b
+2107: CD 57 21    call move_arrow_and_animate_bow_2157
 210A: C9          ret
 
+arrow_shot_management_210b:
 210B: DD 21 80 8A ld   ix,top_basket_object_8A80
 210F: DD CB 07 66 bit  4,(ix+$07)
 2113: DD 36 07 00 ld   (ix+$07),$00
@@ -3956,13 +4094,15 @@ rom_corrupt_20A4:
 2150: 1E 3C       ld   e,$3C
 2152: 1A          ld   a,(de)
 2153: A7          and  a
-2154: 20 01       jr   nz,$2157
+2154: 20 01       jr   nz,move_arrow_and_animate_bow_2157
 2156: C9          ret
+
+move_arrow_and_animate_bow_2157:
 2157: FD 21 90 8C ld   iy,$8C90
 215B: 3E 02       ld   a,$02
 215D: 32 15 8F    ld   ($8F15),a
 2160: FD CB 00 46 bit  0,(iy+$00)
-2164: C4 CF 21    call nz,$21CF
+2164: C4 CF 21    call nz,move_arrow_21cf
 2167: 11 18 00    ld   de,$0018
 216A: FD 19       add  iy,de
 216C: 3A 15 8F    ld   a,($8F15)
@@ -3972,7 +4112,7 @@ rom_corrupt_20A4:
 2176: 11 C9 26    ld   de,$26C9
 2179: D6 0C       sub  $0C
 217B: 93          sub  e
-217C: C2 B1 22    jp   nz,$22B1
+217C: C2 B1 22    jp   nz,animate_bow_22b1
 217F: AF          xor  a
 2180: 32 02 8F    ld   ($8F02),a
 2183: C9          ret
@@ -3984,10 +4124,11 @@ rom_corrupt_20A4:
 2193: C6 04       add  a,$04
 2195: FD 77 06    ld   (iy+$06),a
 2198: FD CB 00 4E bit  1,(iy+$00)
-219C: 20 0A       jr   nz,$21A8
+219C: 20 0A       jr   nz,shoot_meat_21a8
 219E: FD 36 0F 14 ld   (iy+$0f),$14
 21A2: FD 36 10 40 ld   (iy+$10),$40
 21A6: 18 14       jr   $21BC
+shoot_meat_21a8:
 21A8: FD 36 0F 10 ld   (iy+$0f),$10
 21AC: FD 36 10 40 ld   (iy+$10),$40
 21B0: 3E 01       ld   a,$01
@@ -4007,14 +4148,16 @@ rom_corrupt_20A4:
 21C9: 23          inc  hl
 21CA: 23          inc  hl
 21CB: 77          ld   (hl),a
-21CC: C3 B1 22    jp   $22B1
+21CC: C3 B1 22    jp   animate_bow_22b1
+
+move_arrow_21cf:
 21CF: FD CB 07 46 bit  0,(iy+$07)
 21D3: 20 2F       jr   nz,$2204
 21D5: FD 7E 12    ld   a,(iy+$12)
 21D8: A7          and  a
 21D9: 20 06       jr   nz,$21E1
 21DB: FD 34 12    inc  (iy+$12)
-21DE: CD D2 0E    call $0ED2
+21DE: CD D2 0E    call play_shooting_arrow_sound_0ed2
 21E1: FD CB 00 4E bit  1,(iy+$00)
 21E5: 20 3F       jr   nz,$2226
 21E7: FD 7D       ld   a,iyl
@@ -4026,10 +4169,10 @@ rom_corrupt_20A4:
 21F2: A7          and  a
 21F3: 28 04       jr   z,$21F9
 21F5: 36 00       ld   (hl),$00
-21F7: 18 25       jr   $221E
+21F7: 18 25       jr   kill_arrow_221e
 21F9: FD 7E 06    ld   a,(iy+$06)
 21FC: D6 04       sub  $04			; arrow speed
-21FE: 38 1E       jr   c,$221E
+21FE: 38 1E       jr   c,kill_arrow_221e
 2200: FD 77 06    ld   (iy+$06),a
 2203: C9          ret
 2204: FD 7E 01    ld   a,(iy+$01)
@@ -4043,6 +4186,8 @@ rom_corrupt_20A4:
 2218: FD 77 04    ld   (iy+$04),a
 221B: FE E8       cp   $E8
 221D: D8          ret  c
+
+kill_arrow_221e:
 221E: FD E5       push iy
 2220: E1          pop  hl
 2221: 06 18       ld   b,$18
@@ -4087,7 +4232,7 @@ rom_corrupt_20A4:
 2276: 32 45 8D    ld   ($8D45),a
 2279: 32 77 8D    ld   ($8D77),a
 227C: 32 3F 8F    ld   ($8F3F),a
-227F: 18 9D       jr   $221E
+227F: 18 9D       jr   kill_arrow_221e
 2281: C9          ret
 2282: 3A 0F 8F    ld   a,(meat_speed_8F0F)
 2285: 21 12 27    ld   hl,$2712
@@ -4095,11 +4240,11 @@ rom_corrupt_20A4:
 2289: 32 0E 8F    ld   ($8F0E),a
 228C: 3A 0F 8F    ld   a,(meat_speed_8F0F)
 228F: 21 1C 27    ld   hl,$271C
-2292: CD 45 0C    call $0C45
+2292: CD 45 0C    call load_16bit_rom_pointer_0c45
 2295: ED 53 10 8F ld   ($8F10),de
 2299: 3A 0F 8F    ld   a,(meat_speed_8F0F)
 229C: 21 30 27    ld   hl,$2730
-229F: CD 45 0C    call $0C45
+229F: CD 45 0C    call load_16bit_rom_pointer_0c45
 22A2: ED 53 12 8F ld   ($8F12),de
 22A6: 21 0F 8F    ld   hl,meat_speed_8F0F
 22A9: 34          inc  (hl)
@@ -4108,19 +4253,23 @@ rom_corrupt_20A4:
 22AD: C0          ret  nz
 22AE: 36 08       ld   (hl),$08
 22B0: C9          ret
+
+animate_bow_22b1:
 22B1: 3A 32 8D    ld   a,($8D32)
 22B4: A7          and  a
 22B5: C0          ret  nz
 22B6: DD 21 80 8A ld   ix,top_basket_object_8A80
-22BA: CD E6 22    call $22E6
+22BA: CD E6 22    call animate_object_22e6
 22BD: 11 18 00    ld   de,$0018
 22C0: DD 19       add  ix,de
-22C2: CD E6 22    call $22E6
+22C2: CD E6 22    call animate_object_22e6
 22C5: DD 19       add  ix,de
-22C7: CD E6 22    call $22E6
+22C7: CD E6 22    call animate_object_22e6
 22CA: DD 19       add  ix,de
-22CC: CD E6 22    call $22E6
+22CC: CD E6 22    call animate_object_22e6
 22CF: C9          ret
+
+nothing_useful_22d0:
 22D0: FD 21 90 8C ld   iy,$8C90
 22D4: 11 18 00    ld   de,$0018
 22D7: 06 02       ld   b,$02
@@ -4131,6 +4280,8 @@ rom_corrupt_20A4:
 22E1: FD 19       add  iy,de
 22E3: 10 F5       djnz $22DA
 22E5: C9          ret
+
+animate_object_22e6:
 22E6: DD 7E 0E    ld   a,(ix+$0e)
 22E9: A7          and  a
 22EA: 28 04       jr   z,$22F0
@@ -4150,12 +4301,13 @@ rom_corrupt_20A4:
 2305: 23          inc  hl
 2306: 22 00 8F    ld   ($8F00),hl
 2309: C9          ret
-230A: CD D0 22    call $22D0
+230A: CD D0 22    call nothing_useful_22d0
 230D: FE 03       cp   $03
-230F: 20 08       jr   nz,$2319
+230F: 20 08       jr   nz,move_player_if_needed_2319
 2311: 21 E7 26    ld   hl,$26E7
 2314: 22 00 8F    ld   ($8F00),hl
 2317: 18 D7       jr   $22F0
+move_player_if_needed_2319:
 2319: 23          inc  hl
 231A: 7E          ld   a,(hl)
 231B: 32 00 8F    ld   ($8F00),a
@@ -4173,7 +4325,7 @@ rom_corrupt_20A4:
 2335: FE 41       cp   $41
 2337: 30 04       jr   nc,$233D
 2339: DD 36 04 41 ld   (ix+$04),$41
-233D: CD D7 23    call $23D7
+233D: CD D7 23    call sync_player_coords_with_bow_coords_23d7
 2340: 2A BE 88    ld   hl,($88BE)
 2343: 7D          ld   a,l
 2344: FE E6       cp   $E6
@@ -4207,7 +4359,7 @@ rom_corrupt_20A4:
 2375: FE C0       cp   $C0
 2377: 38 04       jr   c,$237D
 2379: DD 36 04 C0 ld   (ix+$04),$C0
-237D: CD D7 23    call $23D7
+237D: CD D7 23    call sync_player_coords_with_bow_coords_23d7
 2380: 3A BE 88    ld   a,($88BE)
 2383: FE F6       cp   $F6
 2385: 20 17       jr   nz,$239E
@@ -4238,7 +4390,7 @@ rom_corrupt_20A4:
 23AE: E6 03       and  $03
 23B0: 77          ld   (hl),a
 23B1: 21 F6 26    ld   hl,$26F6
-23B4: CD 45 0C    call $0C45
+23B4: CD 45 0C    call load_16bit_rom_pointer_0c45
 23B7: D5          push de
 23B8: 21 25 84    ld   hl,$8425
 23BB: CD 25 33    call write_4x4_tile_block_3325
@@ -4253,6 +4405,8 @@ rom_corrupt_20A4:
 23D0: 11 0E 27    ld   de,$270E
 23D3: CD 25 33    call write_4x4_tile_block_3325
 23D6: C9          ret
+
+sync_player_coords_with_bow_coords_23d7:
 23D7: DD 21 80 8A ld   ix,top_basket_object_8A80
 23DB: DD 7E 04    ld   a,(ix+$04)
 23DE: DD 77 4C    ld   (ix+$4c),a
@@ -4290,8 +4444,8 @@ rom_corrupt_20A4:
 241A: 22 BE 88    ld   ($88BE),hl
 241D: C9          ret
 241E: CD 01 21    call $2101
-2421: CD A6 25    call $25A6
-2424: CD 8B 30    call $308B
+2421: CD A6 25    call handle_side_wolves_25a6
+2424: CD 8B 30    call handle_falling_rock_308b
 2427: 3A 1E 88    ld   a,(checksum_failed_881E)
 242A: A7          and  a
 242B: C0          ret  nz
@@ -4300,13 +4454,14 @@ rom_corrupt_20A4:
 2433: E6 07       and  $07
 2435: EF          rst  $28
 jump_table_2436:
-	.word	$2442
-	.word	$2473
-	.word	$2497
-	.word	$24B9
-	.word	$24DB
-	.word	$24FB
+	.word	init_player_hit_2442
+	.word	player_hit_starts_falling_2473
+	.word	player_hit_falls_2497
+	.word	player_hit_keeps_falling_24b9
+	.word	player_hit_touches_ground_24db
+	.word	player_hit_lying_on_groundl_24fb
 
+init_player_hit_2442:
 2442: 21 E8 89    ld   hl,$89E8                                       
 2445: 7E89        ld   a,(hl)
 2446: 2E EF       ld   l,$EF
@@ -4326,9 +4481,10 @@ jump_table_2436:
 246A: 3A 24 8F    ld   a,($8F24)
 246D: A7          and  a
 246E: C0          ret  nz
-246F: CD AD 0F    call $0FAD
+246F: CD AD 0F    call play_player_falling_sound_0fad
 2472: C9          ret
 
+player_hit_starts_falling_2473:
 2473: DD 35 11    dec  (ix+$11)
 2476: C0          ret  nz
 2477: 3A 39 8A    ld   a,($8A39)
@@ -4344,6 +4500,8 @@ jump_table_2436:
 2490: 21 C1 26    ld   hl,$26C1
 2493: CD 0F 25    call $250F
 2496: C9          ret
+
+player_hit_falls_2497:
 2497: DD 35 11    dec  (ix+$11)
 249A: C0          ret  nz
 249B: DD 34 02    inc  (ix+$02)
@@ -4357,6 +4515,8 @@ jump_table_2436:
 24B3: D6 06       sub  $06
 24B5: DD 77 06    ld   (ix+$06),a
 24B8: C9          ret
+
+player_hit_keeps_falling_24b9:
 24B9: DD 34 05    inc  (ix+$05)
 24BC: DD CB 05 46 bit  0,(ix+$05)
 24C0: 20 03       jr   nz,$24C5
@@ -4366,10 +4526,12 @@ jump_table_2436:
 24CA: DD 77 04    ld   (ix+$04),a
 24CD: FE DC       cp   $DC
 24CF: D8          ret  c
-24D0: CD 21 0F    call $0F21
+24D0: CD 21 0F    call play_mama_crashing_sound_0f21
 24D3: DD 36 11 02 ld   (ix+$11),$02
 24D7: DD 34 02    inc  (ix+$02)
 24DA: C9          ret
+
+player_hit_touches_ground_24db:
 24DB: DD 35 11    dec  (ix+$11)
 24DE: C0          ret  nz
 24DF: DD 7E 04    ld   a,(ix+$04)
@@ -4382,6 +4544,8 @@ jump_table_2436:
 24F3: DD 36 11 30 ld   (ix+$11),$30
 24F7: DD 34 02    inc  (ix+$02)
 24FA: C9          ret
+
+player_hit_lying_on_groundl_24fb:
 24FB: DD 35 11    dec  (ix+$11)
 24FE: C0          ret  nz
 24FF: 21 2B 88    ld   hl,$882B
@@ -4435,6 +4599,7 @@ jump_table_2436:
 255E: 32 63 8F    ld   ($8F63),a
 2561: C9          ret
 
+animate_pigs_in_house_2563:
 2563: 3A 50 8F    ld   a,($8F50)
 2566: A7          and  a
 2567: C0          ret  nz
@@ -4456,13 +4621,14 @@ jump_table_2436:
 2581: 26 84       ld   h,$84
 2583: 11 44 27    ld   de,$2744
 2586: E6 01       and  $01
-2588: 28 0F       jr   z,$2599
+2588: 28 0F       jr   z,write_two_4x4_tile_block_2599
 258A: 11 48 27    ld   de,$2748
-258D: 18 0A       jr   $2599
+258D: 18 0A       jr   write_two_4x4_tile_block_2599
 258F: 11 4C 27    ld   de,$274C
 2592: E6 01       and  $01
-2594: 28 03       jr   z,$2599
+2594: 28 03       jr   z,write_two_4x4_tile_block_2599
 2596: 11 50 27    ld   de,$2750
+write_two_4x4_tile_block_2599:
 2599: D5          push de
 259A: CD 25 33    call write_4x4_tile_block_3325
 259D: 11 A0 FF    ld   de,$FFA0
@@ -4470,9 +4636,11 @@ jump_table_2436:
 25A1: D1          pop  de
 25A2: CD 25 33    call write_4x4_tile_block_3325
 25A5: C9          ret
+
+handle_side_wolves_25a6:
 25A6: 3A 07 89    ld   a,($8907)
 25A9: CB 47       bit  0,a
-25AB: CA 66 2D    jp   z,$2D66
+25AB: CA 66 2D    jp   z,handle_ladder_wolves_2d66
 25AE: 21 09 8F    ld   hl,$8F09
 25B1: 35          dec  (hl)
 25B2: C0          ret  nz
@@ -4520,7 +4688,7 @@ jump_table_2436:
 25FF: 11 C0 FF    ld   de,$FFC0
 2602: 3A 05 8F    ld   a,($8F05)
 2605: A7          and  a
-2606: 28 63       jr   z,$266B
+2606: 28 63       jr   z,animate_rock_pushing_wolves_266b
 2608: 21 09 8F    ld   hl,$8F09
 260B: 36 1C       ld   (hl),$1C
 260D: 11 E0 FF    ld   de,$FFE0
@@ -4534,12 +4702,12 @@ jump_table_2436:
 2622: 21 68 27    ld   hl,$2768
 2625: DD 36 40 10 ld   (ix+$40),$10
 2629: DD 36 41 10 ld   (ix+$41),$10
-262D: CD 19 0F    call $0F19
-2630: CD 11 0F    call $0F11
+262D: CD 19 0F    call play_push_rock_sound_0f19
+2630: CD 11 0F    call play_wolf_attacks_sound_2_0f11
 2633: 18 43       jr   $2678
 2635: 3A 0A 8F    ld   a,($8F0A)
 2638: CB 47       bit  0,a
-263A: 21 70 27    ld   hl,$2770
+263A: 21 70 27    ld   hl,table_2770
 263D: 28 03       jr   z,$2642
 263F: 21 74 27    ld   hl,table_2774
 2642: FD 2A 32 89 ld   iy,($8932)
@@ -4559,6 +4727,7 @@ jump_table_2436:
 2664: CD 49 0F    call $0F49
 2667: 06 07       ld   b,$07
 2669: 18 0D       jr   $2678
+animate_rock_pushing_wolves_266b:
 266B: 3A 0A 8F    ld   a,($8F0A)
 266E: CB 47       bit  0,a
 2670: 21 68 27    ld   hl,$2768
@@ -4593,7 +4762,7 @@ jump_table_2436:
 26AB: 11 54 27    ld   de,$2754
 26AE: 28 03       jr   z,$26B3
 26B0: 11 5E 27    ld   de,$275E
-26B3: CD 07 33    call $3307
+26B3: CD 07 33    call update_4x4_block_3307
 26B6: 36 10       ld   (hl),$10
 26B8: 21 0A 8F    ld   hl,$8F0A
 26BB: 34          inc  (hl)
@@ -4606,17 +4775,19 @@ table_2774:
   74 54 74 54 
 
 
+pickup_meat_management_2778:
 2778: 3A 30 8F    ld   a,($8F30)
 277B: E6 07       and  $07
 277D: EF          rst  $28
-	.word	$278F
-	.word	$27F3
-	.word	$2856
-	.word	$28AD
-	.word	$28C5
+	.word	unknown_in_game_278F
+	.word	meat_flashing_27f3
+	.word	meat_taken_2856
+	.word	display_meat_score_28ad
+	.word	do_nothing_28c5
 
 
 
+unknown_in_game_278F:
 278F: 3A 3F 8F    ld   a,($8F3F)
 2792: A7          and  a
 2793: 20 1D       jr   nz,$27B2
@@ -4665,6 +4836,8 @@ table_2774:
 27EA: 21 A7 84    ld   hl,$84A7
 27ED: 11 51 2D    ld   de,$2D51
 27F0: C3 25 33    jp   write_4x4_tile_block_3325
+
+meat_flashing_27f3:
 27F3: 3A B4 8A    ld   a,($8AB4)
 27F6: FE 34       cp   $34
 27F8: 38 19       jr   c,$2813	; collect meat
@@ -4692,7 +4865,7 @@ table_2774:
 2823: 3E 02       ld   a,$02
 2825: 32 30 8F    ld   ($8F30),a
 2828: 77          ld   (hl),a
-2829: CD 05 0F    call $0F05
+2829: CD 05 0F    call play_meat_picked_sound_0f05
 282C: 21 A7 84    ld   hl,$84A7
 282F: 11 55 2D    ld   de,$2D55
 2832: CD 25 33    call write_4x4_tile_block_3325
@@ -4710,6 +4883,8 @@ table_2774:
 2850: 3E 10       ld   a,$10
 2852: 32 A7 8A    ld   ($8AA7),a
 2855: C9          ret
+
+meat_taken_2856:
 2856: 3A 50 8F    ld   a,($8F50)
 2859: A7          and  a
 285A: 20 3A       jr   nz,$2896
@@ -4745,6 +4920,8 @@ table_2774:
 28A8: 11 15 03    ld   de,$0315
 28AB: FF          rst  $38
 28AC: C9          ret
+
+display_meat_score_28ad:
 28AD: 21 34 8F    ld   hl,$8F34
 28B0: 7E          ld   a,(hl)
 28B1: A7          and  a
@@ -4760,6 +4937,7 @@ table_2774:
 28BF: 2A 32 8F    ld   hl,($8F32)
 28C2: 06 18       ld   b,$18
 28C4: D7          rst  $10
+do_nothing_28c5:
 28C5: C9          ret
 28C6: CD 01 21    call $2101
 28C9: 3A 07 89    ld   a,($8907)
@@ -4781,7 +4959,7 @@ table_2774:
 28EB: DD 7E 02    ld   a,(ix+$02)
 28EE: E6 07       and  $07
 28F0: EF          rst  $28
-	.word	$2901     
+	.word	l_player_basket_goes_to_ground_2901     
 	.word	$29A0     
 	.word	$2A01    
 	.word	$2A32 
@@ -4790,12 +4968,13 @@ table_2774:
 	.word	$2AB3
 	.word	$2AE8 
  
+l_player_basket_goes_to_ground_2901:
 2901: DD 36 11 01 ld  (ix+$11),$01          
 2905: DD 34 04    inc  (ix+$04)  
 2908: DD 7E 04    ld   a,(ix+$04)
 290B: FE DC       cp   $DC
 290D: 30 0F       jr   nc,$291E
-290F: CD D7 23    call $23D7
+290F: CD D7 23    call sync_player_coords_with_bow_coords_23d7
 2912: 3A BE 88    ld   a,($88BE)
 2915: FE F9       cp   $F9
 2917: C8          ret  z
@@ -4833,7 +5012,7 @@ table_2774:
 2952: C2 9A 2B    jp   nz,$2B9A
 2955: 23          inc  hl
 2956: 10 F7       djnz $294F
-2958: CD A2 0F    call $0FA2
+2958: CD A2 0F    call play_level_2_completed_tune_0fa2
 295B: C9          ret
 
 29A0: DD 36 11 03 ld   (ix+$11),$03
@@ -4875,7 +5054,7 @@ table_2774:
 29F0: 11 80 29    ld   de,$2980
 29F3: 1A          ld   a,(de)
 29F4: BE          cp   (hl)
-29F5: C2 01 29    jp   nz,$2901
+29F5: C2 01 29    jp   nz,l_player_basket_goes_to_ground_2901
 29F8: 23          inc  hl
 29F9: 13          inc  de
 29FA: 10 F7       djnz $29F3
@@ -4944,7 +5123,7 @@ table_2774:
 2A75: DD 34 02    inc  (ix+$02)
 2A78: C9          ret
 
-2A79: 21 66 1C    ld   hl,$1C66		; another protection check
+2A79: 21 66 1C    ld   hl,wait_while_showing_highscores_1c66		; another protection check
 2A7C: 11 23 2B    ld   de,$2B23
 2A7F: 06 68       ld   b,$68
 2A81: 1A          ld   a,(de)
@@ -4958,7 +5137,7 @@ table_2774:
 2A92: DD 34 02    inc  (ix+$02)
 2A95: C9          ret
 
-2A96: 21 DF 67    ld   hl,$67DF			; another rom compare check
+2A96: 21 DF 67    ld   hl,game_intro_sequence_end_67df			; another rom compare check
 2A99: 11 23 2B    ld   de,$2B23
 2A9C: 06 20       ld   b,$20
 2A9E: 1A          ld   a,(de)
@@ -5022,7 +5201,7 @@ table_2774:
 2B3E: C0          ret  nz
 2B3F: 3A FF 89    ld   a,($89FF)
 2B42: 2A FD 89    ld   hl,($89FD)
-2B45: 11 20 00    ld   de,$0020
+2B45: 11 20 00    ld   de,$20
 2B48: 06 1C       ld   b,$1C
 2B4A: 77          ld   (hl),a
 2B4B: 19          add  hl,de
@@ -5124,7 +5303,7 @@ table_2774:
 2C0C: 3C          inc  a
 2C0D: DD 77 07    ld   (ix+$07),a
 2C10: 11 5D 2D    ld   de,$2D5D
-2C13: CD 1E 38    call $381E
+2C13: CD 1E 38    call store_de_in_struct_381e
 2C16: 3A 03 89    ld   a,($8903)
 2C19: FE 0A       cp   $0A
 2C1B: 38 02       jr   c,$2C1F
@@ -5160,7 +5339,7 @@ table_2774:
 	.word	$2D4A 
      
 
-2C58: CD 06 40    call $4006
+2C58: CD 06 40    call auto_animate_sprite_ix_4006
 2C5B: DD 7E 05    ld   a,(ix+$05)
 2C5E: DD 86 09    add  a,(ix+$09)
 2C61: 30 03       jr   nc,$2C66
@@ -5184,7 +5363,7 @@ table_2774:
 2C8A: C0          ret  nz
 2C8B: DD 36 02 12 ld   (ix+$02),$12
 2C8F: 11 A7 2C    ld   de,$2CA7
-2C92: CD 1E 38    call $381E
+2C92: CD 1E 38    call store_de_in_struct_381e
 2C95: 21 00 2D    ld   hl,$2D00
 2C98: DD 75 16    ld   (ix+$16),l
 2C9B: DD 74 17    ld   (ix+$17),h
@@ -5206,7 +5385,7 @@ table_2774:
 2CB0: FF          rst  $38
 2CB1: AD          xor  l
 2CB2: 2C          inc  l
-2CB3: CD 06 40    call $4006
+2CB3: CD 06 40    call auto_animate_sprite_ix_4006
 2CB6: DD 6E 16    ld   l,(ix+$16)
 2CB9: DD 66 17    ld   h,(ix+$17)
 2CBC: 7E          ld   a,(hl)
@@ -5219,7 +5398,7 @@ table_2774:
 2CC9: 20 0E       jr   nz,$2CD9
 2CCB: DD 34 02    inc  (ix+$02)
 2CCE: 11 5D 2D    ld   de,$2D5D
-2CD1: CD 1E 38    call $381E
+2CD1: CD 1E 38    call store_de_in_struct_381e
 2CD4: DD 36 11 20 ld   (ix+$11),$20
 2CD8: C9          ret
 2CD9: 23          inc  hl
@@ -5240,7 +5419,7 @@ table_2774:
 2CFC: DD 77 03    ld   (ix+$03),a
 2CFF: C9          ret
 
-2D24: CD 06 40    call $4006
+2D24: CD 06 40    call auto_animate_sprite_ix_4006
 2D27: DD 7E 05    ld   a,(ix+$05)
 2D2A: DD 86 09    add  a,(ix+$09)
 2D2D: 30 03       jr   nc,$2D32
@@ -5248,6 +5427,7 @@ table_2774:
 2D32: DD 77 05    ld   (ix+$05),a
 2D35: DD 7E 06    ld   a,(ix+$06)
 2D38: FE 19       cp   $19
+do_nothing_2d3a:
 2D3A: D8          ret  c
 2D3B: DD 34 02    inc  (ix+$02)
 2D3E: AF          xor  a
@@ -5261,21 +5441,25 @@ table_2774:
 2D4F: F1          pop  af
 2D50: C9          ret
 
+handle_ladder_wolves_2d66:
 2D66: 3A 32 8D    ld   a,($8D32)
 2D69: A7          and  a
 2D6A: C0          ret  nz
 2D6B: 3A 03 89    ld   a,($8903)
 2D6E: D6 02       sub  $02
 2D70: C8          ret  z
-2D71: CD 78 2D    call $2D78
-2D74: CD 22 2E    call $2E22
+2D71: CD 78 2D    call handle_wolf_that_escaped_2d78
+2D74: CD 22 2E    call handle_wolves_on_ladders_2e22
 2D77: C9          ret
+
+handle_wolf_that_escaped_2d78:
 2D78: 3A 14 8F    ld   a,($8F14)
 2D7B: EF          rst  $28
-	.word	$2D80
-	.word	$2DBC
-	.word	$2D3A
+	.word	wolf_reaches_ladder_2d80
+	.word	animate_wolf_on_ladder_2dBc
+	.word	do_nothing_2d3a
 
+wolf_reaches_ladder_2d80:
 2D80: 3A 03 89    ld   a,($8903)
 2D83: D6 02       sub  $02
 2D85: 21 31 89    ld   hl,$8931
@@ -5285,10 +5469,12 @@ table_2774:
 2D8B: 21 18 8F    ld   hl,$8F18
 2D8E: 7E          ld   a,(hl)
 2D8F: FE 04       cp   $04
-2D91: 38 05       jr   c,$2D98
+2D91: 38 05       jr   c,one_more_wolf_on_ladder_2d98
 2D93: 3A EF 89    ld   a,($89EF)
 2D96: A7          and  a
 2D97: C8          ret  z
+
+one_more_wolf_on_ladder_2d98:
 2D98: 34          inc  (hl)
 2D99: 21 B8 2D    ld   hl,$2DB8
 2D9C: E7          rst  $20
@@ -5308,6 +5494,7 @@ table_2774:
 2DB5: 36 10       ld   (hl),$10
 2DB7: C9          ret
 
+animate_wolf_on_ladder_2dBc:
 2DBC: 21 16 8F    ld   hl,$8F16
 2DBF: 7E          ld   a,(hl)
 2DC0: A7          and  a
@@ -5330,7 +5517,7 @@ table_2774:
 2DDA: 36 01       ld   (hl),$01
 2DDC: C9          ret
 2DDD: 21 EE 2D    ld   hl,$2DEE
-2DE0: CD 45 0C    call $0C45
+2DE0: CD 45 0C    call load_16bit_rom_pointer_0c45
 2DE3: 2A 19 8F    ld   hl,($8F19)
 2DE6: CD 25 33    call write_4x4_tile_block_3325
 2DE9: 21 1B 8F    ld   hl,$8F1B
@@ -5338,6 +5525,7 @@ table_2774:
 2DED: C9          ret
 
 
+handle_wolves_on_ladders_2e22:
 2E22: 3A 18 8F    ld   a,($8F18)
 2E25: A7          and  a
 2E26: C8          ret  z
@@ -5354,11 +5542,12 @@ table_2774:
 2E39: D6 01       sub  $01
 2E3B: D8          ret  c
 2E3C: EF          rst  $28
-	.word	$2E5E
-	.word	$2ECB
-	.word	$2F01
-	.word	$2F2F
+	.word	wolf_inactive_on_ladder_2e5e
+	.word	wolf_starting_attack_on_ladder_2ecb
+	.word	wolf_attacking_on_ladder_2f01
+	.word	wolf_retreating_on_ladder_2f2f
 
+decrease_ladder_wolf_state_timer_2e45:
 2E45: DD 7D       ld   a,ixl
 2E47: 4F          ld   c,a
 2E48: E6 03       and  $03
@@ -5368,6 +5557,8 @@ table_2774:
 2E4E: 26 8F       ld   h,$8F
 2E50: 35          dec  (hl)
 2E51: C9          ret
+
+compute_screen_address_2e52:
 2E52: DD 7D       ld   a,ixl
 2E54: E6 03       and  $03
 2E56: 21 B8 2D    ld   hl,$2DB8
@@ -5375,10 +5566,12 @@ table_2774:
 2E5A: 6F          ld   l,a
 2E5B: 26 84       ld   h,$84
 2E5D: C9          ret
+
+wolf_inactive_on_ladder_2e5e:
 2E5E: 3A 5F 8A    ld   a,($8A5F)
 2E61: E6 03       and  $03
 2E63: C0          ret  nz
-2E64: CD 45 2E    call $2E45
+2E64: CD 45 2E    call decrease_ladder_wolf_state_timer_2e45
 2E67: C0          ret  nz
 2E68: 36 01       ld   (hl),$01
 2E6A: FD 21 48 8C ld   iy,$8C48
@@ -5415,14 +5608,15 @@ table_2774:
 2EAF: FD 36 0F 2E ld   (iy+$0f),$2E
 2EB3: FD 36 10 40 ld   (iy+$10),$40
 2EB7: DD 34 00    inc  (ix+$00)
-2EBA: CD 52 2E    call $2E52
+2EBA: CD 52 2E    call compute_screen_address_2e52
 2EBD: 11 FE 2D    ld   de,$2DFE
 2EC0: CD 25 33    call write_4x4_tile_block_3325
-2EC3: CD 11 0F    call $0F11
+2EC3: CD 11 0F    call play_wolf_attacks_sound_2_0f11
 2EC6: C9          ret
 2EC7: 18 14       jr   $2EDD
 2EC9: 10 0B       djnz $2ED6
-2ECB: CD 45 2E    call $2E45
+wolf_starting_attack_on_ladder_2ecb:
+2ECB: CD 45 2E    call decrease_ladder_wolf_state_timer_2e45
 2ECE: C0          ret  nz
 2ECF: 3A 07 89    ld   a,($8907)
 2ED2: FE 10       cp   $10
@@ -5442,12 +5636,14 @@ table_2774:
 2EED: FD 36 05 00 ld   (iy+$05),$00
 2EF1: FD 35 06    dec  (iy+$06)
 2EF4: DD 34 00    inc  (ix+$00)
-2EF7: CD 52 2E    call $2E52
+2EF7: CD 52 2E    call compute_screen_address_2e52
 2EFA: 11 1E 2E    ld   de,$2E1E
 2EFD: CD 25 33    call write_4x4_tile_block_3325
 2F00: C9          ret
-2F01: CD 5F 30    call $305F
-2F04: CD 45 2E    call $2E45
+
+wolf_attacking_on_ladder_2f01:
+2F01: CD 5F 30    call check_attacking_ladder_wolf_collision_305f
+2F04: CD 45 2E    call decrease_ladder_wolf_state_timer_2e45
 2F07: C0          ret  nz
 2F08: 36 0C       ld   (hl),$0C
 2F0A: FD 21 30 8C ld   iy,$8C30
@@ -5461,11 +5657,13 @@ table_2774:
 2F1B: FD 36 05 C0 ld   (iy+$05),$C0
 2F1F: FD 34 06    inc  (iy+$06)
 2F22: DD 34 00    inc  (ix+$00)
-2F25: CD 52 2E    call $2E52
+2F25: CD 52 2E    call compute_screen_address_2e52
 2F28: 11 FE 2D    ld   de,$2DFE
 2F2B: CD 25 33    call write_4x4_tile_block_3325
 2F2E: C9          ret
-2F2F: CD 45 2E    call $2E45
+
+wolf_retreating_on_ladder_2f2f:
+2F2F: CD 45 2E    call decrease_ladder_wolf_state_timer_2e45
 2F32: C0          ret  nz
 2F33: 3A 31 89    ld   a,($8931)
 2F36: A7          and  a
@@ -5483,7 +5681,7 @@ table_2774:
 2F4C: 0F          rrca
 2F4D: 80          add  a,b
 2F4E: 21 93 2F    ld   hl,$2F93
-2F51: CD 45 0C    call $0C45
+2F51: CD 45 0C    call load_16bit_rom_pointer_0c45
 2F54: EB          ex   de,hl
 2F55: 3A 31 89    ld   a,($8931)
 2F58: 3D          dec  a
@@ -5519,11 +5717,12 @@ table_2774:
 2F84: D7          rst  $10
 2F85: 3C          inc  a
 2F86: DD 77 00    ld   (ix+$00),a
-2F89: CD 52 2E    call $2E52
+2F89: CD 52 2E    call compute_screen_address_2e52
 2F8C: 11 1A 2E    ld   de,$2E1A
 2F8F: CD 25 33    call write_4x4_tile_block_3325
 2F92: C9          ret
 
+check_attacking_ladder_wolf_collision_305f:
 305F: DD 7D       ld   a,ixl                                          
 3061: E6 03       and  $03
 3063: 21 87 30    ld   hl,$3087
@@ -5545,13 +5744,14 @@ table_2774:
 307C: C0          ret  nz
 307D: 3E 01       ld   a,$01
 307F: 32 32 8D    ld   ($8D32),a
-3082: CD 15 0F    call $0F15
+3082: CD 15 0F    call play_player_kill_blow_sound_0f15
 3085: F1          pop  af
 3086: C9          ret
 3087: C0          ret  nz
 3088: A0          and  b
 3089: 80          add  a,b
 308A: 58          ld   e,b
+handle_falling_rock_308b:
 308B: 3A 04 8F    ld   a,($8F04)
 308E: A7          and  a
 308F: C8          ret  z
@@ -5591,16 +5791,17 @@ table_2774:
 30DC: 23          inc  hl
 30DD: 36 20       ld   (hl),$20
 30DF: C9          ret
-30E0: 21 BD 32    ld   hl,$32BD
+30E0: 21 BD 32    ld   hl,continue_rock_falling_32bd
 30E3: E5          push hl
 30E4: 3A 08 8F    ld   a,($8F08)
 30E7: E6 03       and  $03
 30E9: 3D          dec  a
 30EA: EF          rst  $28
-	.word	$30F1         
-	.word	$316E      
-	.word	$3266    
+	.word	rock_tilting_before_fall_30f1         
+	.word	rock_falling_316e      
+	.word	rom_checksum_3266    
 
+rock_tilting_before_fall_30f1:
 30F1: DD 21 20 89 ld   ix,$8920
 30F5: 21 37 33    ld   hl,$3337
 30F8: 06 04       ld   b,$04
@@ -5639,10 +5840,10 @@ table_2774:
 313A: 20 F9       jr   nz,$3135
 313C: 21 70 33    ld   hl,$3370
 313F: 22 4B 8F    ld   ($8F4B),hl
-3142: CD 19 0F    call $0F19
+3142: CD 19 0F    call play_push_rock_sound_0f19
 3145: CD 3E 32    call $323E
 * another ROM compare code. Fails: RAM erased
-3148: 11 AC 68    ld   de,$68AC
+3148: 11 AC 68    ld   de,video_ram_checksum_68ac
 314B: 21 78 32    ld   hl,code_clone_3278
 314E: 06 40       ld   b,$40
 3150: 7B          ld   a,e
@@ -5667,6 +5868,8 @@ table_2774:
 316A: 77          ld   (hl),a
 316B: ED B0       ldir
 316D: C9          ret
+
+rock_falling_316e:
 316E: 21 28 89    ld   hl,$8928
 3171: 7E          ld   a,(hl)
 3172: A7          and  a
@@ -5799,6 +6002,8 @@ table_2774:
 3262: A7          and  a
 3263: 20 13       jr   nz,code_clone_3278
 3265: C9          ret
+
+rom_checksum_3266:
 3266: 21 99 07    ld   hl,$0799
 3269: 01 00 20    ld   bc,$2000
 326C: 7E          ld   a,(hl)
@@ -5810,7 +6015,7 @@ table_2774:
 3274: C2 99 07    jp   nz,$0799
 3277: C9          ret
 
-; copy of actually called code in $68AC
+; copy of actually called code in video_ram_checksum_68ac
 code_clone_3278:
 3278: AC          xor  h
 3279: 68          ld   l,b
@@ -5856,18 +6061,19 @@ code_clone_3278:
 32B4: 10 FA       djnz $32B0
 32B6: C3 29 38    jp   $3829		; bogus
 
+continue_rock_falling_32bd:
 32BD: 3A 24 8F    ld   a,($8F24)
 32C0: A7          and  a
 32C1: C8          ret  z
 32C2: FE 02       cp   $02
-32C4: 28 22       jr   z,$32E8
+32C4: 28 22       jr   z,player_basket_falls_32e8
 32C6: D0          ret  nc
 32C7: AF          xor  a
 32C8: 21 21 8D    ld   hl,$8D21
 32CB: 77          ld   (hl),a
 32CC: 23          inc  hl
 32CD: 36 20       ld   (hl),$20
-32CF: CD AD 0F    call $0FAD
+32CF: CD AD 0F    call play_player_falling_sound_0fad
 32D2: 21 24 8F    ld   hl,$8F24
 32D5: 34          inc  (hl)
 ; another rom checksum!
@@ -5882,14 +6088,17 @@ code_clone_3278:
 32E4: C2 40 1F    jp   nz,$1F40
 32E7: C9          ret
 
+player_basket_falls_32e8:
 32E8: 21 84 8A    ld   hl,player_y_8A84
 32EB: 34          inc  (hl)
 32EC: 34          inc  (hl)
 32ED: 7E          ld   a,(hl)
 32EE: FE DB       cp   $DB
-32F0: 30 04       jr   nc,$32F6
-32F2: CD D7 23    call $23D7
+32F0: 30 04       jr   nc,player_basket_crashed_32f6
+32F2: CD D7 23    call sync_player_coords_with_bow_coords_23d7
 32F5: C9          ret
+
+player_basket_crashed_32f6:
 32F6: CD 30 0F    call $0F30
 32F9: 3A 83 80    ld   a,($8083)
 32FC: A7          and  a
@@ -5899,6 +6108,8 @@ code_clone_3278:
 3302: 21 24 8F    ld   hl,$8F24
 3305: 34          inc  (hl)
 3306: C9          ret
+
+update_4x4_block_3307:
 3307: 01 1D 00    ld   bc,$001D
 330A: C5          push bc
 330B: 06 03       ld   b,$03
@@ -5913,7 +6124,7 @@ code_clone_3278:
 3318: 3C          inc  a
 3319: 32 0B 8F    ld   ($8F0B),a
 331C: FE 03       cp   $03
-331E: 20 E7       jr   nz,$3307
+331E: 20 E7       jr   nz,update_4x4_block_3307
 3320: AF          xor  a
 3321: 32 0B 8F    ld   ($8F0B),a
 3324: C9          ret
@@ -5921,7 +6132,7 @@ code_clone_3278:
 ; < DE: input char data
 ; < HL: screen address
 write_4x4_tile_block_3325:
-3325: 01 20 00    ld   bc,$0020		; to previous char
+3325: 01 20 00    ld   bc,$20		; to previous char
 3328: 1A          ld   a,(de)
 3329: 77          ld   (hl),a		; store video
 332A: 13          inc  de
@@ -5939,6 +6150,7 @@ write_4x4_tile_block_3325:
 3336: C9          ret
 
 
+update_wolves_3377:
 3377: DD 21 E0 8A ld   ix,$8AE0
 337B: 11 18 00    ld   de,$0018
 337E: 06 0E       ld   b,$0E
@@ -5957,25 +6169,26 @@ write_4x4_tile_block_3325:
 3397: FE 11       cp   $11
 3399: D0          ret  nc
 339A: EF          rst  $28
-	.word	$33BD
-	.word	$3423
-	.word	$3536
-	.word	$355B
-	.word	$3865
-	.word	$39AF
-	.word	$3BE3
+	.word	wolf_landing_on_top_ledge_33bd
+	.word	wolf_walking_on_top_ledge_3423
+	.word	wolf_shot_exploding_3536
+	.word	wolf_walking_below_355b
+	.word	wolf_updates_balloon_3865
+	.word	wolf_vertical_movement_39af
+	.word	wolf_walking_to_ladders_3be3
 	.word	$3C92
-	.word	$3D18
-	.word	$3D5C
-	.word	$3D8F
-	.word	$3E69
-	.word	$3E9C
+	.word	wolf_hit_3d18
+	.word	wolf_balloon_exploding_3d5c
+	.word	wolf_shot_by_arrow_falls_3d8f
+	.word	flying_wolf_prepares_to_shoot_3e69
+	.word	flying_wolf_shoots_3e9c
 	.word	$3F5C
 	.word	$3F72
-	.word	$3F7C
-	.word	$3FE9
+	.word	wolf_falling_3f7c
+	.word	rom_check_3fe9
 
 
+wolf_landing_on_top_ledge_33bd:
 33BD: DD 35 11    dec  (ix+$11)
 33C0: C0          ret  nz
 33C1: DD 34 02    inc  (ix+$02)
@@ -5994,7 +6207,7 @@ write_4x4_tile_block_3325:
 33E2: 3C          inc  a
 33E3: 11 38 38    ld   de,$3838
 33E6: DD 77 08    ld   (ix+$08),a
-33E9: C3 1E 38    jp   $381E
+33E9: C3 1E 38    jp   store_de_in_struct_381e
 33EC: DD 7E 09    ld   a,(ix+$09)
 33EF: DD BE 05    cp   (ix+$05)
 33F2: 38 EF       jr   c,$33E3
@@ -6025,7 +6238,8 @@ table_3418:
 	.byte	$00
 	.byte	$00
 
-3423: CD 06 40    call $4006
+wolf_walking_on_top_ledge_3423:
+3423: CD 06 40    call auto_animate_sprite_ix_4006
 3426: DD CB 01 46 bit  0,(ix+$01)
 342A: 28 0B       jr   z,$3437
 342C: 3A 63 8F    ld   a,($8F63)
@@ -6051,7 +6265,7 @@ table_3418:
 3458: 28 0A       jr   z,$3464
 345A: DD 36 08 01 ld   (ix+$08),$01
 345E: 11 38 38    ld   de,$3838
-3461: C3 1E 38    jp   $381E
+3461: C3 1E 38    jp   store_de_in_struct_381e
 3464: A7          and  a
 3465: CA B0 34    jp   z,$34B0
 3468: 3A 0A 88    ld   a,(in_game_sub_state_880A)
@@ -6100,13 +6314,14 @@ table_3418:
 34BF: 35          dec  (hl)
 34C0: 3A 0A 88    ld   a,(in_game_sub_state_880A)
 34C3: FE 04       cp   $04
-34C5: 20 02       jr   nz,$34C9
+34C5: 20 02       jr   nz,write_number_of_remaining_wolves_34c9
 34C7: 2C          inc  l
 34C8: 34          inc  (hl)
+write_number_of_remaining_wolves_34c9:
 34C9: 3A 01 89    ld   a,(nb_wolves_8901)
 34CC: 47          ld   b,a
 34CD: 21 43 87    ld   hl,$8743
-34D0: 11 20 00    ld   de,$0020
+34D0: 11 20 00    ld   de,$20
 34D3: FE 0A       cp   $0A
 34D5: 38 0C       jr   c,$34E3
 34D7: 3A 50 8F    ld   a,($8F50)
@@ -6163,7 +6378,9 @@ table_3418:
 3531: B8          cp   b
 3532: D8          ret  c
 3533: C3 73 34    jp   $3473
-3536: CD 06 40    call $4006
+
+wolf_shot_exploding_3536:
+3536: CD 06 40    call auto_animate_sprite_ix_4006
 3539: DD 35 11    dec  (ix+$11)
 353C: C0          ret  nz
 353D: DD 7E 07    ld   a,(ix+$07)
@@ -6184,7 +6401,9 @@ table_3418:
 3557: 06 17       ld   b,$17
 3559: D7          rst  $10
 355A: C9          ret
-355B: CD 06 40    call $4006
+
+wolf_walking_below_355b:
+355B: CD 06 40    call auto_animate_sprite_ix_4006
 355E: DD 7E 08    ld   a,(ix+$08)
 3561: A7          and  a
 3562: C2 57 37    jp   nz,$3757
@@ -6204,7 +6423,7 @@ table_3418:
 3585: 3A 07 89    ld   a,($8907)
 3588: E6 0F       and  $0F
 358A: CB 3F       srl  a
-358C: CD 45 0C    call $0C45
+358C: CD 45 0C    call load_16bit_rom_pointer_0c45
 358F: EB          ex   de,hl
 3590: 3A 41 8D    ld   a,($8D41)
 3593: E6 07       and  $07
@@ -6220,7 +6439,7 @@ table_3418:
 35A8: DD CB 07 4E bit  1,(ix+$07)
 35AC: 28 03       jr   z,$35B1
 35AE: 11 56 38    ld   de,$3856
-35B1: C3 1E 38    jp   $381E
+35B1: C3 1E 38    jp   store_de_in_struct_381e
 35B4: DD CB 07 56 bit  2,(ix+$07)
 35B8: 28 08       jr   z,$35C2
 35BA: 2A 6F 8D    ld   hl,($8D6F)
@@ -6271,7 +6490,7 @@ table_35C7:
 364F: FE 80       cp   $80
 3651: D0          ret  nc
 3652: EB          ex   de,hl
-3653: 21 8E 36    ld   hl,$368E
+3653: 21 8E 36    ld   hl,table_368E
 3656: 3A 07 89    ld   a,($8907)
 3659: E6 07       and  $07
 365B: E7          rst  $20
@@ -6333,7 +6552,7 @@ table_35C7:
 36D0: DD 36 11 28 ld   (ix+$11),$28
 36D4: DD 36 02 04 ld   (ix+$02),$04
 36D8: CD DE 36    call $36DE
-36DB: C3 9D 37    jp   $379D
+36DB: C3 9D 37    jp   copy_wolf_coords_in_balloon_379d
 36DE: 3A 07 89    ld   a,($8907)
 36E1: FE 10       cp   $10
 36E3: 38 02       jr   c,$36E7
@@ -6397,11 +6616,13 @@ table_35C7:
 3789: DD CB 07 4E bit  1,(ix+$07)
 378D: 28 03       jr   z,$3792
 378F: 11 47 38    ld   de,$3847
-3792: C3 1E 38    jp   $381E
+3792: C3 1E 38    jp   store_de_in_struct_381e
 3795: DD 7E 06    ld   a,(ix+$06)
 3798: A7          and  a
 3799: C0          ret  nz
 379A: C3 53 35    jp   $3553
+
+copy_wolf_coords_in_balloon_379d:
 379D: FD 36 00 01 ld   (iy+$00),$01
 37A1: FD 36 02 04 ld   (iy+$02),$04
 37A5: FD 71 14    ld   (iy+$14),c
@@ -6444,7 +6665,7 @@ table_35C7:
 37FF: 0F          rrca
 3800: 0F          rrca
 3801: 0F          rrca
-3802: CD 45 0C    call $0C45
+3802: CD 45 0C    call load_16bit_rom_pointer_0c45
 3805: DD 7E 0B    ld   a,(ix+$0b)
 3808: A7          and  a
 3809: 28 03       jr   z,$380E
@@ -6454,12 +6675,15 @@ table_35C7:
 3814: FD 72 0D    ld   (iy+$0d),d
 3817: FD 36 11 28 ld   (iy+$11),$28
 381B: C3 E3 0E    jp   $0EE3
+
+store_de_in_struct_381e:
 381E: DD 73 0C    ld   (ix+$0c),e
 3821: DD 72 0D    ld   (ix+$0d),d
 3824: DD 36 0E 00 ld   (ix+$0e),$00
 3828: C9          ret
 
-3865: CD 06 40    call $4006                                          
+wolf_updates_balloon_3865:
+3865: CD 06 40    call auto_animate_sprite_ix_4006                                          
 3868: DD 35 11    dec  (ix+$11)
 386B: C0          ret  nz
 386C: DD 34 02    inc  (ix+$02)
@@ -6499,10 +6723,11 @@ table_35C7:
 38A3: 34          inc  (hl)
 38A4: C9          ret
 
-39AF: CD 06 40    call $4006
+wolf_vertical_movement_39af:
+39AF: CD 06 40    call auto_animate_sprite_ix_4006
 39B2: 3A 07 89    ld   a,($8907)
 39B5: E6 01       and  $01
-39B7: CA 87 3B    jp   z,$3B87
+39B7: CA 87 3B    jp   z,wolf_descending_with_balloon_3b87
 39BA: DD 7E 0A    ld   a,(ix+$0a)
 39BD: ED 44       neg
 39BF: 47          ld   b,a
@@ -6585,7 +6810,7 @@ table_35C7:
 3A52: FE 02       cp   $02
 3A54: D0          ret  nc
 3A55: 11 D1 3B    ld   de,$3BD1
-3A58: CD 1E 38    call $381E
+3A58: CD 1E 38    call store_de_in_struct_381e
 3A5B: DD 36 02 02 ld   (ix+$02),$02
 3A5F: DD 36 11 28 ld   (ix+$11),$28
 3A63: C9          ret
@@ -6617,7 +6842,7 @@ table_35C7:
 3A99: 28 03       jr   z,$3A9E
 3A9B: 21 47 3B    ld   hl,$3B47
 3A9E: 79          ld   a,c
-3A9F: CD 45 0C    call $0C45
+3A9F: CD 45 0C    call load_16bit_rom_pointer_0c45
 3AA2: 1A          ld   a,(de)
 3AA3: FD 77 12    ld   (iy+$12),a
 3AA6: 13          inc  de
@@ -6633,7 +6858,7 @@ table_35C7:
 3AC0: FE 30       cp   $30
 3AC2: 20 03       jr   nz,$3AC7
 3AC4: 11 A0 39    ld   de,$39A0
-3AC7: CD 1E 38    call $381E
+3AC7: CD 1E 38    call store_de_in_struct_381e
 3ACA: DD 7E 08    ld   a,(ix+$08)
 3ACD: D6 10       sub  $10
 3ACF: DD 77 08    ld   (ix+$08),a
@@ -6673,6 +6898,7 @@ table_35C7:
 3B26: DD 77 15    ld   (ix+$15),a
 3B29: C9          ret
 
+wolf_descending_with_balloon_3b87:
 3B87: DD CB 08 46 bit  0,(ix+$08)                                     
 3B8B: C2 BA 39    jp   nz,$39BA
 3B8E: DD 7E 03    ld   a,(ix+$03)
@@ -6686,8 +6912,10 @@ table_35C7:
 3BA3: CA CA 3B    jp   z,$3BCA
 3BA6: 78          ld   a,b
 3BA7: FE 1D       cp   $1D
-3BA9: 30 03       jr   nc,$3BAE
+3BA9: 30 03       jr   nc,wolf_reaches_ground_3bae
 3BAB: C3 E0 39    jp   $39E0
+
+wolf_reaches_ground_3bae:
 3BAE: DD 34 02    inc  (ix+$02)
 3BB1: AF          xor  a
 3BB2: DD 77 00    ld   (ix+$00),a
@@ -6696,13 +6924,14 @@ table_35C7:
 3BBD: DD 36 09 20 ld   (ix+$09),$20
 3BC1: DD 77 14    ld   (ix+$14),a
 3BC4: 11 29 38    ld   de,$3829
-3BC7: C3 1E 38    jp   $381E
+3BC7: C3 1E 38    jp   store_de_in_struct_381e
 3BCA: 78          ld   a,b
 3BCB: FE 1B       cp   $1B
 3BCD: D4 53 35    call nc,$3553
 3BD0: C9          ret
 
-3BE3: CD 06 40    call $4006
+wolf_walking_to_ladders_3be3:
+3BE3: CD 06 40    call auto_animate_sprite_ix_4006
 3BE6: DD CB 08 46 bit  0,(ix+$08)
 3BEA: 20 24       jr   nz,$3C10
 3BEC: DD 7E 05    ld   a,(ix+$05)
@@ -6786,7 +7015,7 @@ table_35C7:
 3C8D: 21 ED 89    ld   hl,$89ED
 3C90: 34          inc  (hl)
 3C91: C9          ret
-3C92: CD 06 40    call $4006
+3C92: CD 06 40    call auto_animate_sprite_ix_4006
 3C95: DD 35 11    dec  (ix+$11)
 3C98: C0          ret  nz
 3C99: FD 21 30 8C ld   iy,$8C30
@@ -6812,7 +7041,7 @@ table_35C7:
 3CCF: DD 36 08 01 ld   (ix+$08),$01
 3CD3: DD 36 0A E8 ld   (ix+$0a),$E8
 3CD7: 11 38 38    ld   de,$3838
-3CDA: CD 1E 38    call $381E
+3CDA: CD 1E 38    call store_de_in_struct_381e
 3CDD: DD 7E 04    ld   a,(ix+$04)
 3CE0: D6 01       sub  $01
 3CE2: FD 77 04    ld   (iy+$04),a
@@ -6825,7 +7054,7 @@ table_35C7:
 3CF6: FD 77 05    ld   (iy+$05),a
 3CF9: FD 36 08 01 ld   (iy+$08),$01
 3CFD: FD 36 0A E8 ld   (iy+$0a),$E8
-3D01: CD 3C 40    call $403C
+3D01: CD 3C 40    call auto_animate_sprite_iy_403c
 3D04: FD E5       push iy
 3D06: E1          pop  hl
 3D07: DD 75 14    ld   (ix+$14),l
@@ -6839,6 +7068,7 @@ table_35C7:
 10 FF   
 0F      
 3D      
+wolf_hit_3d18:
 3D18: 06 20       ld   b,$20
 3D1A: DD 4E 17    ld   c,(ix+$17)
 3D1D: 3A 45 8D    ld   a,($8D45)
@@ -6870,10 +7100,11 @@ table_35C7:
 3D4D: 3E 03       ld   a,$03
 3D4F: 81          add  a,c
 3D50: 21 D3 3D    ld   hl,$3DD3
-3D53: CD 45 0C    call $0C45
-3D56: CD 1E 38    call $381E
+3D53: CD 45 0C    call load_16bit_rom_pointer_0c45
+3D56: CD 1E 38    call store_de_in_struct_381e
 3D59: DD 34 02    inc  (ix+$02)
-3D5C: CD 06 40    call $4006
+wolf_balloon_exploding_3d5c:
+3D5C: CD 06 40    call auto_animate_sprite_ix_4006
 3D5F: DD 35 11    dec  (ix+$11)
 3D62: C0          ret  nz
 3D63: DD 7E 16    ld   a,(ix+$16)
@@ -6891,13 +7122,14 @@ table_35C7:
 3D79: 79          ld   a,c
 3D7A: FE 04       cp   $04
 3D7C: 20 0A       jr   nz,$3D88
-3D7E: CD 45 0C    call $0C45
-3D81: CD 1E 38    call $381E
+3D7E: CD 45 0C    call load_16bit_rom_pointer_0c45
+3D81: CD 1E 38    call store_de_in_struct_381e
 3D84: DD 36 11 30 ld   (ix+$11),$30
 3D88: 0C          inc  c
 3D89: DD 71 13    ld   (ix+$13),c
 3D8C: DD 34 02    inc  (ix+$02)
-3D8F: CD 06 40    call $4006
+wolf_shot_by_arrow_falls_3d8f:
+3D8F: CD 06 40    call auto_animate_sprite_ix_4006
 3D92: DD 35 11    dec  (ix+$11)
 3D95: C0          ret  nz
 3D96: C3 53 35    jp   $3553
@@ -6906,11 +7138,11 @@ table_35C7:
 3D9C: DD 7E 07    ld   a,(ix+$07)
 3D9F: E6 03       and  $03
 3DA1: 3D          dec  a
-3DA2: CD 45 0C    call $0C45
-3DA5: CD 1E 38    call $381E
+3DA2: CD 45 0C    call load_16bit_rom_pointer_0c45
+3DA5: CD 1E 38    call store_de_in_struct_381e
 3DA8: DD 36 09 40 ld   (ix+$09),$40
 3DAC: DD 36 02 0F ld   (ix+$02),$0F
-3DB0: C3 D6 0E    jp   $0ED6
+3DB0: C3 D6 0E    jp   play_wolf_falling_sound_0ed6
 
 ;3DBB  3DC1  3DC7  3DCD  3042  FFF0  3DBB  3041 
 ;FFF0  3DC1  3049  FFF0  3DC7  3040  FFF0  3DCD 
@@ -6927,6 +7159,7 @@ table_35C7:
 
 
 
+flying_wolf_prepares_to_shoot_3e69:
 3E69: DD 35 11    dec  (ix+$11)
 3E6C: C0          ret  nz
 3E6D: DD 6E 14    ld   l,(ix+$14)
@@ -6953,7 +7186,8 @@ table_35C7:
 3E92: DD 77 06    ld   (ix+$06),a
 3E95: DD 36 15 00 ld   (ix+$15),$00
 3E99: DD 34 02    inc  (ix+$02)
-3E9C: CD 06 40    call $4006
+flying_wolf_shoots_3e9c:
+3E9C: CD 06 40    call auto_animate_sprite_ix_4006
 3E9F: DD CB 01 46 bit  0,(ix+$01)
 3EA3: C2 1D 3F    jp   nz,$3F1D
 3EA6: DD 6E 12    ld   l,(ix+$12)
@@ -6983,7 +7217,7 @@ table_35C7:
 3EDE: FE A0       cp   $A0
 3EE0: D0          ret  nc
 3EE1: 11 B4 40    ld   de,$40B4
-3EE4: CD 1E 38    call $381E
+3EE4: CD 1E 38    call store_de_in_struct_381e
 3EE7: DD 36 11 0A ld   (ix+$11),$0A
 3EEB: DD 36 02 02 ld   (ix+$02),$02
 3EEF: DD 36 00 00 ld   (ix+$00),$00
@@ -7041,26 +7275,27 @@ table_35C7:
 3F5F: DD 7E 07    ld   a,(ix+$07)
 3F62: E6 03       and  $03
 3F64: 3D          dec  a
-3F65: CD 45 0C    call $0C45
-3F68: CD 1E 38    call $381E
+3F65: CD 45 0C    call load_16bit_rom_pointer_0c45
+3F68: CD 1E 38    call store_de_in_struct_381e
 3F6B: DD 36 09 40 ld   (ix+$09),$40
 3F6F: DD 34 02    inc  (ix+$02)
-3F72: CD 06 40    call $4006
+3F72: CD 06 40    call auto_animate_sprite_ix_4006
 3F75: DD 35 11    dec  (ix+$11)
 3F78: C0          ret  nz
 3F79: DD 34 02    inc  (ix+$02)
-3F7C: CD 06 40    call $4006
-3F7F: CD D5 3F    call $3FD5
+wolf_falling_3f7c:
+3F7C: CD 06 40    call auto_animate_sprite_ix_4006
+3F7F: CD D5 3F    call move_wolf_down_3fd5
 3F82: D8          ret  c
 3F83: 21 A4 40    ld   hl,$40A4
 3F86: DD 7E 07    ld   a,(ix+$07)
 3F89: E6 03       and  $03
 3F8B: 3D          dec  a
-3F8C: CD 45 0C    call $0C45
-3F8F: CD 1E 38    call $381E
+3F8C: CD 45 0C    call load_16bit_rom_pointer_0c45
+3F8F: CD 1E 38    call store_de_in_struct_381e
 3F92: DD 36 02 02 ld   (ix+$02),$02
 3F96: DD 36 11 20 ld   (ix+$11),$20
-3F9A: CD DA 0E    call $0EDA
+3F9A: CD DA 0E    call play_wolf_crashed_on_ground_sound_0eda
 3F9D: 21 40 8D    ld   hl,$8D40
 3FA0: 35          dec  (hl)
 3FA1: 21 01 89    ld   hl,nb_wolves_8901
@@ -7070,10 +7305,10 @@ table_35C7:
 3FAB: A7          and  a
 3FAC: C8          ret  z
 3FAD: 35          dec  (hl)
-3FAE: C3 C9 34    jp   $34C9
+3FAE: C3 C9 34    jp   write_number_of_remaining_wolves_34c9
 3FB1: 36 00       ld   (hl),$00
 3FB3: 3E 01       ld   a,$01
-3FB5: CD C9 34    call $34C9
+3FB5: CD C9 34    call write_number_of_remaining_wolves_34c9
 ; another rom check
 3FB8: 01 8B 42    ld   bc,$428B
 3FBB: 2E 00       ld   l,$00
@@ -7093,6 +7328,8 @@ table_35C7:
 3FCF: 3E 01       ld   a,$01
 3FD1: 32 EB 89    ld   ($89EB),a
 3FD4: C9          ret
+
+move_wolf_down_3fd5:
 3FD5: DD 7E 03    ld   a,(ix+$03)
 3FD8: DD 86 09    add  a,(ix+$09)
 3FDB: 30 03       jr   nc,$3FE0
@@ -7102,8 +7339,9 @@ table_35C7:
 3FE6: FE 1E       cp   $1E
 3FE8: C9          ret
 
+rom_check_3fe9:
 3FE9: 11 80 77    ld   de,$7780
-3FEC: 01 10 00    ld   bc,$0010
+3FEC: 01 10 00    ld   bc,$10
 3FEF: 1A          ld   a,(de)
 3FF0: 1B          dec  de
 3FF1: 80          add  a,b
@@ -7119,6 +7357,8 @@ table_35C7:
 4001: 21 39 8A    ld   hl,$8A39
 4004: 34          inc  (hl)
 4005: C9          ret
+
+auto_animate_sprite_ix_4006:
 4006: DD 7E 0E    ld   a,(ix+$0e)
 4009: A7          and  a
 400A: 28 04       jr   z,$4010
@@ -7128,7 +7368,7 @@ table_35C7:
 4013: DD 66 0D    ld   h,(ix+$0d)
 4016: 7E          ld   a,(hl)
 4017: FE FF       cp   $FF
-4019: 28 15       jr   z,$4030
+4019: 28 15       jr   z,reload_animation_pointer_4030
 401B: DD 77 10    ld   (ix+$10),a
 401E: 23          inc  hl
 401F: 7E          ld   a,(hl)
@@ -7140,6 +7380,8 @@ table_35C7:
 4029: DD 75 0C    ld   (ix+$0c),l
 402C: DD 74 0D    ld   (ix+$0d),h
 402F: C9          ret
+
+reload_animation_pointer_4030:
 4030: 23          inc  hl
 4031: 7E          ld   a,(hl)
 4032: DD 77 0C    ld   (ix+$0c),a
@@ -7147,6 +7389,7 @@ table_35C7:
 4036: 7E          ld   a,(hl)
 4037: DD 77 0D    ld   (ix+$0d),a
 403A: 18 D4       jr   $4010
+auto_animate_sprite_iy_403c:
 403C: FD 7E 0E    ld   a,(iy+$0e)
 403F: A7          and  a
 4040: 28 04       jr   z,$4046
@@ -7176,6 +7419,7 @@ table_35C7:
 406D: FD 77 0D    ld   (iy+$0d),a
 4070: 18 D4       jr   $4046
 
+handle_loose_balloons_40bd:
 40BD: DD 21 30 8C ld   ix,$8C30
 40C1: 11 18 00    ld   de,$0018
 40C4: 06 04       ld   b,$04
@@ -7195,27 +7439,28 @@ table_35C7:
 40DF: D0          ret  nc
 40E0: EF          rst  $28
 jump_table_40E1:
-	 .word	$4103
-	 .word	$4137 
-	 .word	$416F  
-	 .word	$4179 
-	 .word	$4179 
-	 .word	$4179 
-	 .word	$4179 
-	 .word	$4179
+	 .word	animate_loose_balloon_inflating_4103
+	 .word	loose_balloon_rises_4137 
+	 .word	balloon_reaches_top_explodes_416f  
+	 .word	do_nothing_4179 
+	 .word	do_nothing_4179 
+	 .word	do_nothing_4179 
+	 .word	do_nothing_4179 
+	 .word	do_nothing_4179
      .word	$40F1
-	 .word	$417A 
-	 .word	$418D 
-	 .word	$4179 
+	 .word	pop_lonely_balloon_417a 
+	 .word	pop_lonely_balloon_418d 
+	 .word	do_nothing_4179 
 	 .word	$4221 
 	 .word	$4350 
 	 .word	$4364
-	 .word	$4378 
-	 .word	$4378
+	 .word	do_nothing_4378 
+	 .word	do_nothing_4378
      .word	$4101 
-	 .word	$4378 
+	 .word	do_nothing_4378 
 
-4103: CD 06 40    call $4006
+animate_loose_balloon_inflating_4103:
+4103: CD 06 40    call auto_animate_sprite_ix_4006
 4106: DD 35 11    dec  (ix+$11)
 4109: C0          ret  nz
 410A: DD 34 02    inc  (ix+$02)
@@ -7247,7 +7492,8 @@ jump_table_40E1:
 4135: 34          inc  (hl)
 4136: C9          ret
 
-4137: CD 06 40    call $4006
+loose_balloon_rises_4137:
+4137: CD 06 40    call auto_animate_sprite_ix_4006
 413A: DD 7E 0A    ld   a,(ix+$0a)
 413D: ED 44       neg
 413F: 47          ld   b,a
@@ -7268,20 +7514,27 @@ jump_table_40E1:
 415E: DD 36 02 02 ld   (ix+$02),$02
 4162: DD 36 11 18 ld   (ix+$11),$18
 4166: 21 B1 41    ld   hl,$41B1
-4169: CD 45 0C    call $0C45
-416C: C3 1E 38    jp   $381E
-416F: CD 06 40    call $4006
+4169: CD 45 0C    call load_16bit_rom_pointer_0c45
+416C: C3 1E 38    jp   store_de_in_struct_381e
+
+balloon_reaches_top_explodes_416f:
+416F: CD 06 40    call auto_animate_sprite_ix_4006
 4172: DD 35 11    dec  (ix+$11)
 4175: C0          ret  nz
 4176: C3 53 35    jp   $3553
+
+do_nothing_4179:
 4179: C9          ret
+
+pop_lonely_balloon_417a:
 417A: DD 7E 17    ld   a,(ix+$17)
 417D: 21 B1 41    ld   hl,$41B1
-4180: CD 45 0C    call $0C45
-4183: CD 1E 38    call $381E
+4180: CD 45 0C    call load_16bit_rom_pointer_0c45
+4183: CD 1E 38    call store_de_in_struct_381e
 4186: DD 36 11 30 ld   (ix+$11),$30
 418A: DD 34 02    inc  (ix+$02)
-418D: CD 06 40    call $4006
+pop_lonely_balloon_418d:
+418D: CD 06 40    call auto_animate_sprite_ix_4006
 4190: DD 35 11    dec  (ix+$11)
 4193: C0          ret  nz
 4194: DD 7E 16    ld   a,(ix+$16)
@@ -7297,9 +7550,9 @@ jump_table_40E1:
 41A6: 0C          inc  c
 41A7: DD 71 13    ld   (ix+$13),c
 41AA: DD 36 02 02 ld   (ix+$02),$02
-41AE: C3 6F 41    jp   $416F
+41AE: C3 6F 41    jp   balloon_reaches_top_explodes_416f
 
-4221: CD 06 40    call $4006
+4221: CD 06 40    call auto_animate_sprite_ix_4006
 4224: DD CB 08 46 bit  0,(ix+$08)
 4228: 20 1A       jr   nz,$4244
 422A: CD 3E 34    call $343E
@@ -7311,7 +7564,7 @@ jump_table_40E1:
 423A: 11 12 42    ld   de,$4212
 423D: AF          xor  a
 423E: 32 4B 8D    ld   ($8D4B),a
-4241: C3 1E 38    jp   $381E
+4241: C3 1E 38    jp   store_de_in_struct_381e
 4244: CD F2 34    call $34F2
 4247: DD 7E 06    ld   a,(ix+$06)
 424A: E6 1F       and  $1F
@@ -7421,19 +7674,19 @@ jump_table_40E1:
 430B: CB 3F       srl  a
 430D: 3D          dec  a
 430E: E6 03       and  $03
-4310: CD 45 0C    call $0C45
-4313: CD 75 5C    call $5C75
+4310: CD 45 0C    call load_16bit_rom_pointer_0c45
+4313: CD 75 5C    call store_animation_sequence_in_object_5c75
 4316: AF          xor  a
 4317: 32 5B 8D    ld   ($8D5B),a
 431A: 11 47 43    ld   de,$4347
-431D: CD 1E 38    call $381E
+431D: CD 1E 38    call store_de_in_struct_381e
 4320: DD 36 11 30 ld   (ix+$11),$30
 4324: FD 36 11 04 ld   (iy+$11),$04
 4328: DD 34 02    inc  (ix+$02)
 432B: F1          pop  af
 432C: C9          ret
 
-4350: CD 06 40    call $4006
+4350: CD 06 40    call auto_animate_sprite_ix_4006
 4353: DD 35 11    dec  (ix+$11)
 4356: C0          ret  nz
 4357: DD 35 02    dec  (ix+$02)
@@ -7445,10 +7698,12 @@ jump_table_40E1:
 4368: 28 04       jr   z,$436E
 436A: DD 35 11    dec  (ix+$11)
 436D: C9          ret
-436E: CD 06 40    call $4006
-4371: CD D5 3F    call $3FD5
+436E: CD 06 40    call auto_animate_sprite_ix_4006
+4371: CD D5 3F    call move_wolf_down_3fd5
 4374: D8          ret  c
 4375: C3 53 35    jp   $3553
+
+do_nothing_4378:
 4378: C9          ret
 4379: 
 10 11      
@@ -7457,6 +7712,7 @@ jump_table_40E1:
 14         
 15         
 16 17      
+write_column_to_screen_4381:
 4381: 06 1D       ld   b,$1D
 4383: 3A 20 89    ld   a,($8920)
 4386: 2A 43 8F    ld   hl,($8F43)
@@ -7515,6 +7771,7 @@ jump_table_40E1:
 43DF: 18 C7       jr   $43A8
 
 
+update_wolves_pushing_rock_4a0b:
 4A0B: 3A 07 89    ld   a,($8907)
 4A0E: CB 47       bit  0,a
 4A10: C8          ret  z
@@ -7522,13 +7779,15 @@ jump_table_40E1:
 4A14: 32 43 8D    ld   ($8D43),a
 4A17: 32 34 89    ld   ($8934),a
 4A1A: A7          and  a
-4A1B: 20 0F       jr   nz,$4A2C
+4A1B: 20 0F       jr   nz,write_pushing_wolf_tiles_4a2c
 4A1D: 21 E3 86    ld   hl,$86E3
 4A20: 22 32 89    ld   ($8932),hl
 4A23: 2E 82       ld   l,$82
 4A25: 11 54 27    ld   de,$2754
-4A28: CD 07 33    call $3307
+4A28: CD 07 33    call update_4x4_block_3307
 4A2B: C9          ret
+
+write_pushing_wolf_tiles_4a2c:
 4A2C: 47          ld   b,a
 4A2D: 21 A3 86    ld   hl,$86A3
 4A30: 22 32 89    ld   ($8932),hl
@@ -7546,10 +7805,11 @@ jump_table_40E1:
 4A46: 1E BF       ld   e,$BF
 4A48: 19          add  hl,de
 4A49: 11 54 27    ld   de,$2754
-4A4C: CD 07 33    call $3307
+4A4C: CD 07 33    call update_4x4_block_3307
 4A4F: C9          ret
 
 ; another ROM check
+rom_protection_check_50f1:
 50F1: 3A FB 89    ld   a,($89FB)
 50F4: A7          and  a
 50F5: 20 22       jr   nz,$5119
@@ -7585,7 +7845,7 @@ jump_table_40E1:
 512B: 3A 61 8F    ld   a,($8F61)
 512E: A7          and  a
 512F: 28 04       jr   z,$5135
-5131: CD 71 11    call $1171
+5131: CD 71 11    call try_to_spawn_wolf_1171
 5134: C9          ret
 5135: CD 46 51    call $5146
 5138: 3A 6D 8D    ld   a,($8D6D)
@@ -7597,8 +7857,8 @@ jump_table_40E1:
 5141: CD B0 53    call $53B0
 5144: 18 EF       jr   $5135
 5146: CD 50 51    call $5150
-5149: CD F6 52    call $52F6
-514C: CD 34 53    call $5334
+5149: CD F6 52    call compute_number_of_free_wolf_slots_52f6
+514C: CD 34 53    call spawn_walking_wolves_5334
 514F: C9          ret
 5150: 3A 6D 8D    ld   a,($8D6D)
 5153: A7          and  a
@@ -7606,7 +7866,7 @@ jump_table_40E1:
 5155: 21 9A 51    ld   hl,$519A
 5158: 3A 07 89    ld   a,($8907)
 515B: E6 0F       and  $0F
-515D: CD 45 0C    call $0C45
+515D: CD 45 0C    call load_16bit_rom_pointer_0c45
 5160: EB          ex   de,hl
 5161: 3A 01 89    ld   a,(nb_wolves_8901)
 5164: FE 07       cp   $07
@@ -7623,20 +7883,21 @@ jump_table_40E1:
 5174: 47          ld   b,a
 5175: 32 74 8D    ld   ($8D74),a
 5178: 21 64 52    ld   hl,$5264
-517B: CD 45 0C    call $0C45
+517B: CD 45 0C    call load_16bit_rom_pointer_0c45
 517E: 1A          ld   a,(de)
 517F: 32 73 8D    ld   ($8D73),a
 5182: 13          inc  de
 5183: ED 53 71 8D ld   ($8D71),de
 5187: 78          ld   a,b
 5188: 21 B0 52    ld   hl,$52B0
-518B: CD 45 0C    call $0C45
+518B: CD 45 0C    call load_16bit_rom_pointer_0c45
 518E: ED 53 6F 8D ld   ($8D6F),de
 5192: AF          xor  a
 5193: 32 7B 8D    ld   ($8D7B),a
 5196: 32 7E 8D    ld   ($8D7E),a
 5199: C9          ret
 
+compute_number_of_free_wolf_slots_52f6:
 52F6: 3A 6D 8D    ld   a,($8D6D)
 52F9: A7          and  a
 52FA: C8          ret  z
@@ -7676,6 +7937,8 @@ jump_table_40E1:
 532F: 21 E8 89    ld   hl,$89E8
 5332: 34          inc  (hl)
 5333: C9          ret
+
+spawn_walking_wolves_5334:
 5334: 3A 6E 8D    ld   a,($8D6E)
 5337: A7          and  a
 5338: C8          ret  z
@@ -7763,7 +8026,7 @@ table_53A6:
 53E6: 2F          cpl
 53E7: 32 4B 8D    ld   ($8D4B),a
 53EA: 11 03 42    ld   de,$4203
-53ED: CD 1E 38    call $381E
+53ED: CD 1E 38    call store_de_in_struct_381e
 53F0: 3A 07 89    ld   a,($8907)
 53F3: CB 3F       srl  a
 53F5: 3C          inc  a
@@ -7808,7 +8071,7 @@ table_5407:   FF  20 18  0C  0C	0B
 5445: DD 36 03 60 ld   (ix+$03),$60
 5449: DD 36 04 1B ld   (ix+$04),$1B
 544D: DD 77 0E    ld   (ix+$0e),a
-5450: 21 D4 55    ld   hl,$55D4
+5450: 21 D4 55    ld   hl,table_55d4
 5453: 3A 01 8D    ld   a,($8D01)
 5456: 4F          ld   c,a
 5457: E7          rst  $20
@@ -7820,15 +8083,15 @@ table_5407:   FF  20 18  0C  0C	0B
 5462: DD 77 0A    ld   (ix+$0a),a
 5465: 21 1F 56    ld   hl,$561F
 5468: 79          ld   a,c
-5469: CD 45 0C    call $0C45
+5469: CD 45 0C    call load_16bit_rom_pointer_0c45
 546C: 1A          ld   a,(de)
 546D: DD 77 17    ld   (ix+$17),a
 5470: 21 57 56    ld   hl,$5657
-5473: CD 45 0C    call $0C45
+5473: CD 45 0C    call load_16bit_rom_pointer_0c45
 5476: DD 73 0C    ld   (ix+$0c),e
 5479: DD 72 0D    ld   (ix+$0d),d
 547C: DD 36 11 40 ld   (ix+$11),$40
-5480: CD 06 40    call $4006
+5480: CD 06 40    call auto_animate_sprite_ix_4006
 5483: 79          ld   a,c
 5484: 3C          inc  a
 5485: 32 01 8D    ld   ($8D01),a
@@ -7843,8 +8106,8 @@ table_5407:   FF  20 18  0C  0C	0B
 549F: DD 7E 17    ld   a,(ix+$17)
 54A2: 4F          ld   c,a
 54A3: 21 57 56    ld   hl,$5657
-54A6: CD 45 0C    call $0C45
-54A9: CD 1E 38    call $381E
+54A6: CD 45 0C    call load_16bit_rom_pointer_0c45
+54A9: CD 1E 38    call store_de_in_struct_381e
 54AC: DD 36 11 40 ld   (ix+$11),$40
 54B0: 79          ld   a,c
 54B1: 21 D7 55    ld   hl,$55D7
@@ -7995,6 +8258,8 @@ table_55B5:
 55CF: DD 19       add  ix,de
 55D1: 10 C1       djnz $5594
 55D3: C9          ret
+
+table_55d4:
 55D4: 
 0B        
 0F        
@@ -8095,7 +8360,7 @@ table_55B5:
 578E: ED 44       neg
 5790: DD 77 0A    ld   (ix+$0a),a
 5793: 11 29 38    ld   de,$3829
-5796: CD 1E 38    call $381E
+5796: CD 1E 38    call store_de_in_struct_381e
 5799: 21 9B 58    ld   hl,$589B
 579C: 3A 07 89    ld   a,($8907)
 579F: E6 01       and  $01
@@ -8196,7 +8461,7 @@ table_55B5:
 5847: DD 77 16    ld   (ix+$16),a
 584A: DD 36 07 02 ld   (ix+$07),$02
 584E: 11 47 38    ld   de,$3847
-5851: CD 1E 38    call $381E
+5851: CD 1E 38    call store_de_in_struct_381e
 ; another checksum routine
 5854: 21 B5 0B    ld   hl,$0BB5
 5857: 06 52       ld   b,$52
@@ -8246,7 +8511,7 @@ table_55B5:
 59F7: CD 56 5A    call $5A56
 59FA: CD 1F 5A    call $5A1F
 59FD: CD 9C 5A    call $5A9C
-5A00: CD 6D 7E    call $7E6D
+5A00: CD 6D 7E    call perform_rom_checksum_7e6d
 5A03: C3 C0 5A    jp   $5AC0
 5A06: 3A 10 88    ld   a,($8810)
 5A09: 0F          rrca
@@ -8258,7 +8523,7 @@ table_55B5:
 5A12: E6 07       and  $07
 5A14: FE 01       cp   $01
 5A16: C0          ret  nz
-5A17: CD 09 0F    call $0F09
+5A17: CD 09 0F    call play_credit_sound_0f09
 5A1A: 3E 01       ld   a,$01
 5A1C: C3 8C 5A    jp   $5A8C
 5A1F: 3A 10 88    ld   a,($8810)
@@ -8271,7 +8536,7 @@ table_55B5:
 5A2C: FE 01       cp   $01
 5A2E: C0          ret  nz
 5A2F: EB          ex   de,hl
-5A30: CD 09 0F    call $0F09
+5A30: CD 09 0F    call play_credit_sound_0f09
 5A33: 21 26 88    ld   hl,$8826
 5A36: 34          inc  (hl)
 5A37: EB          ex   de,hl
@@ -8306,7 +8571,7 @@ table_55B5:
 5A62: FE 01       cp   $01
 5A64: C0          ret  nz
 5A65: EB          ex   de,hl
-5A66: CD 09 0F    call $0F09
+5A66: CD 09 0F    call play_credit_sound_0f09
 5A69: 21 24 88    ld   hl,$8824
 5A6C: 34          inc  (hl)
 5A6D: EB          ex   de,hl
@@ -8385,18 +8650,20 @@ table_55B5:
 5ADF: 21 26 88    ld   hl,$8826
 5AE2: 35          dec  (hl)
 5AE3: C9          ret
-5AE4: CD 78 5E    call $5E78
-5AE7: CD 6A 5F    call $5F6A
-5AEA: CD 2F 60    call $602F
-5AED: CD 68 63    call $6368
-5AF0: CD F7 5D    call $5DF7
-5AF3: CD 06 5B    call $5B06
-5AF6: CD 4D 5D    call $5D4D
-5AF9: CD 86 5B    call $5B86
+5AE4: CD 78 5E    call level_2_balloon_collision_5e78
+5AE7: CD 6A 5F    call meat_enemy_collision_5f6a
+5AEA: CD 2F 60    call arrow_balloon_collision_602f
+5AED: CD 68 63    call unknown_6368
+5AF0: CD F7 5D    call handle_player_killed_by_big_rock_5df7
+5AF3: CD 06 5B    call rom_checksum_5b06
+5AF6: CD 4D 5D    call unknown_5d4d
+5AF9: CD 86 5B    call check_wolves_just_avoiding_arrow_5b86
 5AFC: CD 04 64    call $6404
-5AFF: CD 0B 5D    call $5D0B
+5AFF: CD 0B 5D    call handle_balloon_shields_5d0b
 5B02: CD 2C 5B    call $5B2C
 5B05: C9          ret
+
+rom_checksum_5b06:
 5B06: 3A 07 89    ld   a,($8907)
 5B09: FE 05       cp   $05
 5B0B: C0          ret  nz
@@ -8469,15 +8736,19 @@ table_55B5:
 5B81: D0          ret  nc
 5B82: CD 6C 3A    call $3A6C
 5B85: C9          ret
+
+check_wolves_just_avoiding_arrow_5b86:
 5B86: DD 21 E0 8A ld   ix,$8AE0
 5B8A: 11 18 00    ld   de,$0018
 5B8D: 06 06       ld   b,$06
 5B8F: D9          exx
-5B90: CD 99 5B    call $5B99
+5B90: CD 99 5B    call wolf_arrow_almost_collision_detection_5b99
 5B93: D9          exx
 5B94: DD 19       add  ix,de
 5B96: 10 F7       djnz $5B8F
 5B98: C9          ret
+
+wolf_arrow_almost_collision_detection_5b99:
 5B99: DD CB 0B 46 bit  0,(ix+$0b)
 5B9D: 20 06       jr   nz,$5BA5
 5B9F: 3A 07 89    ld   a,($8907)
@@ -8494,9 +8765,9 @@ table_55B5:
 5BB8: FD 21 90 8C ld   iy,$8C90
 5BBC: 06 02       ld   b,$02
 5BBE: FD CB 00 46 bit  0,(iy+$00)
-5BC2: CA 46 5C    jp   z,$5C46
+5BC2: CA 46 5C    jp   z,next_arrow_5c46
 5BC5: FD CB 00 4E bit  1,(iy+$00)
-5BC9: 20 7B       jr   nz,$5C46
+5BC9: 20 7B       jr   nz,next_arrow_5c46
 5BCB: 1E 10       ld   e,$10
 5BCD: 3A 1F 88    ld   a,($881F)
 5BD0: A7          and  a
@@ -8515,7 +8786,7 @@ table_55B5:
 5BE8: 30 02       jr   nc,$5BEC
 5BEA: ED 44       neg
 5BEC: FE 10       cp   $10
-5BEE: 30 56       jr   nc,$5C46
+5BEE: 30 56       jr   nc,next_arrow_5c46
 5BF0: 2C          inc  l
 5BF1: 2C          inc  l
 5BF2: 1E 16       ld   e,$16
@@ -8536,12 +8807,12 @@ table_55B5:
 5C10: 30 02       jr   nc,$5C14
 5C12: ED 44       neg
 5C14: FE 09       cp   $09
-5C16: 30 30       jr   nc,$5C48
+5C16: 30 30       jr   nc,next_arrow_5c48
 5C18: 11 80 5C    ld   de,$5C80
 5C1B: DD CB 07 4E bit  1,(ix+$07)
 5C1F: 28 03       jr   z,$5C24
 5C21: 11 89 5C    ld   de,$5C89
-5C24: CD 1E 38    call $381E
+5C24: CD 1E 38    call store_de_in_struct_381e
 5C27: DD 36 12 10 ld   (ix+$12),$10
 5C2B: DD 36 16 02 ld   (ix+$16),$02
 5C2F: FD 21 70 8B ld   iy,$8B70
@@ -8554,8 +8825,11 @@ table_55B5:
 5C42: 10 F4       djnz $5C38
 5C44: F1          pop  af
 5C45: C9          ret
+
+next_arrow_5c46:
 5C46: 2C          inc  l
 5C47: 2C          inc  l
+next_arrow_5c48:
 5C48: 2C          inc  l
 5C49: 2C          inc  l
 5C4A: 11 18 00    ld   de,$0018
@@ -8570,29 +8844,34 @@ table_55B5:
 5C5D: 0F          rrca
 5C5E: 0F          rrca
 5C5F: 0F          rrca
-5C60: CD 45 0C    call $0C45
+5C60: CD 45 0C    call load_16bit_rom_pointer_0c45
 5C63: FD CB 0B 46 bit  0,(iy+$0b)
 5C67: 28 03       jr   z,$5C6C
 5C69: 11 F9 5C    ld   de,$5CF9
 5C6C: FD 36 16 02 ld   (iy+$16),$02
-5C70: CD 75 5C    call $5C75
+5C70: CD 75 5C    call store_animation_sequence_in_object_5c75
 5C73: F1          pop  af
 5C74: C9          ret
+
+store_animation_sequence_in_object_5c75:
 5C75: FD 73 0C    ld   (iy+$0c),e
 5C78: FD 72 0D    ld   (iy+$0d),d
 5C7B: FD 36 0E 00 ld   (iy+$0e),$00
 5C7F: C9          ret
 
                                     
+handle_balloon_shields_5d0b:
 5D0B: DD 21 E0 8A ld   ix,$8AE0
 5D0F: 11 18 00    ld   de,$0018
 5D12: 06 06       ld   b,$06
 5D14: D9          exx
-5D15: CD 1E 5D    call $5D1E
+5D15: CD 1E 5D    call handle_high_ballon_shield_5d1e
 5D18: D9          exx
 5D19: DD 19       add  ix,de
 5D1B: 10 F7       djnz $5D14
 5D1D: C9          ret
+
+handle_high_ballon_shield_5d1e:
 5D1E: DD CB 0B 46 bit  0,(ix+$0b)
 5D22: 20 06       jr   nz,$5D2A
 5D24: 3A 07 89    ld   a,($8907)
@@ -8613,6 +8892,8 @@ table_55B5:
 5D47: C9          ret
 5D48: DD 36 16 00 ld   (ix+$16),$00
 5D4C: C9          ret
+
+unknown_5d4d:
 5D4D: DD 21 9C 88 ld   ix,$889C
 5D51: FD 21 7C 88 ld   iy,sprite_shadow_ram_8840+$3C
 5D55: 21 E8 8B    ld   hl,$8BE8
@@ -8670,6 +8951,7 @@ table_55B5:
 5DC0: F1          pop  af
 5DC1: C9          ret
 
+handle_player_killed_by_big_rock_5df7:
 5DF7: 3A 32 8D    ld   a,($8D32)
 5DFA: A7          and  a
 5DFB: C0          ret  nz
@@ -8725,14 +9007,16 @@ table_55B5:
 5E5A: E5          push hl
 5E5B: DD E1       pop  ix
 5E5D: 11 B4 40    ld   de,$40B4
-5E60: CD 1E 38    call $381E
+5E60: CD 1E 38    call store_de_in_struct_381e
 5E63: DD 36 11 0A ld   (ix+$11),$0A
 5E67: DD 36 00 00 ld   (ix+$00),$00
 5E6B: DD 36 01 01 ld   (ix+$01),$01
 5E6F: DD 36 02 02 ld   (ix+$02),$02
-5E73: CD 15 0F    call $0F15
+5E73: CD 15 0F    call play_player_kill_blow_sound_0f15
 5E76: F1          pop  af
 5E77: C9          ret
+
+level_2_balloon_collision_5e78:
 5E78: 3A 07 89    ld   a,($8907)
 5E7B: E6 01       and  $01
 5E7D: C8          ret  z
@@ -8800,7 +9084,7 @@ table_55B5:
 5EFC: 2A 65 8D    ld   hl,($8D65)
 5EFF: 06 17       ld   b,$17
 5F01: D7          rst  $10
-5F02: CD F1 0E    call $0EF1
+5F02: CD F1 0E    call play_balloon_popping_sound_0ef1
 5F05: C9          ret
 5F06: 11 04 00    ld   de,$0004
 5F09: DD 19       add  ix,de
@@ -8854,19 +9138,23 @@ table_55B5:
 5F65: C6 08       add  a,$08
 5F67: FE E0       cp   $E0
 5F69: C9          ret
+
+meat_enemy_collision_5f6a:
 5F6A: FD 21 48 88 ld   iy,$8848
 5F6E: 06 02       ld   b,$02
 5F70: 11 04 00    ld   de,$0004
 5F73: AF          xor  a
 5F74: ED 47       ld   i,a
 5F76: D9          exx
-5F77: CD 83 5F    call $5F83
+5F77: CD 83 5F    call meat_enemy_collision_5f83
 5F7A: D9          exx
 5F7B: FD 19       add  iy,de
 5F7D: 78          ld   a,b
 5F7E: ED 47       ld   i,a
 5F80: 10 F4       djnz $5F76
 5F82: C9          ret
+
+meat_enemy_collision_5f83:
 5F83: DD 21 90 8C ld   ix,$8C90
 5F87: ED 57       ld   a,i
 5F89: A7          and  a
@@ -8959,19 +9247,23 @@ table_55B5:
 6028: 21 45 8D    ld   hl,$8D45
 602B: 34          inc  (hl)
 602C: C3 3D 61    jp   $613D
+
+arrow_balloon_collision_602f:
 602F: FD 21 48 88 ld   iy,$8848
 6033: 06 02       ld   b,$02
 6035: AF          xor  a
 6036: ED 47       ld   i,a
 6038: 11 04 00    ld   de,$0004
 603B: D9          exx
-603C: CD 48 60    call $6048
+603C: CD 48 60    call arrow_balloon_collision_6048
 603F: D9          exx
 6040: FD 19       add  iy,de
 6042: 78          ld   a,b
 6043: ED 47       ld   i,a
 6045: 10 F4       djnz $603B
 6047: C9          ret
+
+arrow_balloon_collision_6048:
 6048: DD 21 90 8C ld   ix,$8C90
 604C: ED 57       ld   a,i
 604E: A7          and  a
@@ -9048,7 +9340,7 @@ table_55B5:
 60E1: FD 2B       dec  iy
 60E3: FD 36 00 01 ld   (iy+$00),$01
 60E7: 11 04 04    ld   de,$0404
-60EA: CD 9F 61    call $619F
+60EA: CD 9F 61    call related_to_burst_balloon_619f
 60ED: 11 FD FF    ld   de,$FFFD
 60F0: 18 2D       jr   $611F
 60F2: 11 04 00    ld   de,$0004
@@ -9082,7 +9374,7 @@ table_55B5:
 6133: 3A 44 8D    ld   a,($8D44)
 6136: FE 03       cp   $03
 6138: C8          ret  z
-6139: CD F1 0E    call $0EF1
+6139: CD F1 0E    call play_balloon_popping_sound_0ef1
 613C: C9          ret
 613D: FD CB 00 46 bit  0,(iy+$00)
 6141: 28 47       jr   z,$618A
@@ -9111,7 +9403,7 @@ table_55B5:
 6180: 3A 44 8D    ld   a,($8D44)
 6183: FE 03       cp   $03
 6185: 20 13       jr   nz,$619A
-6187: CD FD 0E    call $0EFD
+6187: CD FD 0E    call play_balloon_burst_sound_0efd
 618A: AF          xor  a
 618B: 32 44 8D    ld   ($8D44),a
 618E: F1          pop  af
@@ -9119,14 +9411,15 @@ table_55B5:
 6190: DD 36 08 01 ld   (ix+$08),$01
 6194: DD 36 0A D0 ld   (ix+$0a),$D0
 6198: 18 CC       jr   $6166
-619A: CD F1 0E    call $0EF1
+619A: CD F1 0E    call play_balloon_popping_sound_0ef1
 619D: 18 EB       jr   $618A
+related_to_burst_balloon_619f:
 619F: 36 00       ld   (hl),$00
 61A1: 23          inc  hl
 61A2: 36 01       ld   (hl),$01
 61A4: 23          inc  hl
 61A5: 36 08       ld   (hl),$08
-61A7: 01 10 00    ld   bc,$0010
+61A7: 01 10 00    ld   bc,$10
 61AA: 09          add  hl,bc
 61AB: 36 FF       ld   (hl),$FF
 61AD: 0E 04       ld   c,$04
@@ -9198,7 +9491,7 @@ table_55B5:
 622D: E5          push hl
 622E: DD E1       pop  ix
 6230: 11 43 63    ld   de,$6343
-6233: CD 1E 38    call $381E
+6233: CD 1E 38    call store_de_in_struct_381e
 6236: 21 58 63    ld   hl,$6358
 6239: 3A 07 89    ld   a,($8907)
 623C: E6 07       and  $07
@@ -9234,7 +9527,7 @@ table_55B5:
 627E: 06 18       ld   b,$18
 6280: AF          xor  a
 6281: D7          rst  $10
-6282: CD F1 0E    call $0EF1
+6282: CD F1 0E    call play_balloon_popping_sound_0ef1
 6285: F1          pop  af
 6286: C9          ret
 6287: 4F          ld   c,a
@@ -9268,7 +9561,7 @@ table_55B5:
 62BF: E5          push hl
 62C0: DD E1       pop  ix
 62C2: 11 49 63    ld   de,$6349
-62C5: CD 1E 38    call $381E
+62C5: CD 1E 38    call store_de_in_struct_381e
 62C8: 21 60 63    ld   hl,$6360
 62CB: 3A 07 89    ld   a,($8907)
 62CE: E6 07       and  $07
@@ -9298,7 +9591,7 @@ table_55B5:
 62FF: FD 77 0A    ld   (iy+$0a),a
 6302: FD CB 16 EE set  5,(iy+$16)
 6306: 11 4F 63    ld   de,$634F
-6309: CD 75 5C    call $5C75
+6309: CD 75 5C    call store_animation_sequence_in_object_5c75
 630C: C3 74 62    jp   $6274
 630F: 1E 06       ld   e,$06
 6311: 3A 1F 88    ld   a,($881F)
@@ -9326,6 +9619,7 @@ table_55B5:
 633D: D2 F2 60    jp   nc,$60F2
 6340: C3 D9 60    jp   $60D9
 
+unknown_6368:
 6368: FD 21 48 88 ld   iy,$8848
 636C: 06 02       ld   b,$02
 636E: 11 04 00    ld   de,$0004
@@ -9383,8 +9677,8 @@ table_55B5:
 63DB: 21 1C 8D    ld   hl,$8D1C
 63DE: 36 01       ld   (hl),$01
 63E0: 11 FB 63    ld   de,$63FB
-63E3: CD 1E 38    call $381E
-63E6: CD F9 0E    call $0EF9
+63E3: CD 1E 38    call store_de_in_struct_381e
+63E6: CD F9 0E    call play_extra_sound_wolf_hit_0ef9
 63E9: 11 15 03    ld   de,$0315
 63EC: FF          rst  $38
 63ED: F1          pop  af
@@ -9471,8 +9765,8 @@ table_55B5:
 649C: 21 1C 8D    ld   hl,$8D1C
 649F: 36 01       ld   (hl),$01
 64A1: 11 DF 64    ld   de,$64DF
-64A4: CD 1E 38    call $381E
-64A7: CD F5 0E    call $0EF5
+64A4: CD 1E 38    call store_de_in_struct_381e
+64A7: CD F5 0E    call play_wolf_shot_destroyed_sound_0ef5
 64AA: 3A 50 8F    ld   a,($8F50)
 64AD: A7          and  a
 64AE: 20 04       jr   nz,$64B4
@@ -9497,7 +9791,7 @@ table_55B5:
 64CE: F1          pop  af
 64CF: C9          ret
 
-64E2: CD 13 6B    call $6B13                                          
+64E2: CD 13 6B    call animate_pigs_in_house_intro_6b13                                          
 64E5: DD 21 78 8C ld   ix,$8C78
 64E9: CD FB 64    call $64FB
 64EC: DD 21 E0 8A ld   ix,$8AE0
@@ -9508,11 +9802,12 @@ table_55B5:
 64FB: DD 7E 02    ld   a,(ix+$02)
 64FE: EF          rst  $28
 jump_table_64FF:
-	.word	$6505
-	.word	$6566
-	.word	$6666
+	.word	game_intro_init_6505
+	.word	game_intro_pigs_arrive_6566
+	.word	game_intro_wolves_arrive_6666
 
 
+game_intro_init_6505:
 6505: 21 29 89    ld   hl,$8929
 6508: 36 1C       ld   (hl),$1C
 650A: 11 E8 FF    ld   de,$FFE8
@@ -9525,7 +9820,7 @@ jump_table_64FF:
 6518: DD 34 02    inc  (ix+$02)
 651B: DD 19       add  ix,de
 651D: 10 F4       djnz $6513
-651F: CD 88 0F    call $0F88
+651F: CD 88 0F    call play_game_intro_tune_0f88
 6522: C9          ret
 6523: DD 7E 00    ld   a,(ix+$00)
 6526: DD B6 01    or   (ix+$01)
@@ -9556,6 +9851,7 @@ jump_table_64FF:
 6564: FF          rst  $38
 6565: C9          ret
 
+game_intro_pigs_arrive_6566:
 6566: 21 2F 89    ld   hl,$892F
 6569: 7E          ld   a,(hl)
 656A: A7          and  a
@@ -9603,7 +9899,7 @@ jump_table_64FF:
 65D2: DD 77 D6    ld   (ix-$2a),a
 65D5: 2E 2C       ld   l,$2C
 65D7: CB 46       bit  0,(hl)
-65D9: 21 BF 66    ld   hl,$66BF
+65D9: 21 BF 66    ld   hl,table_66BF
 65DC: 28 03       jr   z,$65E1
 65DE: 21 C2 66    ld   hl,$66C2
 65E1: 11 E8 FF    ld   de,$FFE8
@@ -9671,6 +9967,7 @@ jump_table_64FF:
 6662: C2 05 20    jp   nz,$2005	; bogus
 6665: C9          ret
 
+game_intro_wolves_arrive_6666:
 6666: 11 E8 FF    ld   de,$FFE8
 6669: 06 03       ld   b,$03
 666B: D9          exx
@@ -9707,13 +10004,15 @@ jump_table_64FF:
 66AA: 23          inc  hl
 66AB: 34          inc  (hl)
 66AC: CB 46       bit  0,(hl)
-66AE: 21 BF 66    ld   hl,$66BF
+66AE: 21 BF 66    ld   hl,table_66BF
 66B1: 28 03       jr   z,$66B6
 66B3: 21 C2 66    ld   hl,$66C2
 66B6: 11 E8 FF    ld   de,$FFE8
 66B9: 06 03       ld   b,$03
 66BB: CD 14 25    call $2514
 66BE: C9          ret
+
+table_66BF:
 66BF: 
 03 
 03 
@@ -9750,11 +10049,12 @@ jump_table_64FF:
 66F1: DD 7E 02    ld   a,(ix+$02)
 66F4: EF          rst  $28
 jump_table_66F5:
-	.word	$66FD
-	.word	$672A
-	.word	$67A0
-	.word	$67DF
+	.word	l_game_intro_sequence_init_66FD
+	.word	l_game_intro_wolves_arriving_672a
+	.word	l_game_intro_wolves_departing_67a0
+	.word	game_intro_sequence_end_67df
 
+l_game_intro_sequence_init_66FD:
 66FD: 3A 30 89    ld   a,($8930)
 6700: A7          and  a
 6701: C8          ret  z
@@ -9772,10 +10072,12 @@ jump_table_66F5:
 6717: DD 36 04 15 ld   (ix+$04),$15
 671B: DD 36 06 02 ld   (ix+$06),$02
 671F: 11 29 38    ld   de,$3829
-6722: CD 1E 38    call $381E
+6722: CD 1E 38    call store_de_in_struct_381e
 6725: DD 36 09 2C ld   (ix+$09),$2C
 6729: C9          ret
-672A: CD 06 40    call $4006
+
+l_game_intro_wolves_arriving_672a:
+672A: CD 06 40    call auto_animate_sprite_ix_4006
 672D: DD 7E 05    ld   a,(ix+$05)
 6730: DD 86 09    add  a,(ix+$09)
 6733: 30 03       jr   nc,$6738
@@ -9819,15 +10121,17 @@ jump_table_66F5:
 6792: DD 34 02    inc  (ix+$02)
 6795: DD 36 09 18 ld   (ix+$09),$18
 6799: 11 38 38    ld   de,$3838
-679C: CD 1E 38    call $381E
+679C: CD 1E 38    call store_de_in_struct_381e
 679F: C9          ret
+
+l_game_intro_wolves_departing_67a0:
 67A0: 21 29 89    ld   hl,$8929
 67A3: 7E          ld   a,(hl)
 67A4: A7          and  a
 67A5: 28 02       jr   z,$67A9
 67A7: 35          dec  (hl)
 67A8: C9          ret
-67A9: CD 06 40    call $4006
+67A9: CD 06 40    call auto_animate_sprite_ix_4006
 67AC: DD 6E 07    ld   l,(ix+$07)
 67AF: DD 66 08    ld   h,(ix+$08)
 67B2: 7C          ld   a,h
@@ -9850,6 +10154,8 @@ jump_table_66F5:
 67DA: C0          ret  nz
 67DB: DD 34 02    inc  (ix+$02)
 67DE: C9          ret
+
+game_intro_sequence_end_67df:
 67DF: 21 BC 82    ld   hl,$82BC
 67E2: 11 E0 FF    ld   de,$FFE0
 67E5: 01 00 0A    ld   bc,$0A00
@@ -9860,7 +10166,7 @@ jump_table_66F5:
 67EC: 10 FA       djnz $67E8
 67EE: 3E 5A       ld   a,$5A
 67F0: B9          cp   c
-67F1: 20 AD       jr   nz,$67A0
+67F1: 20 AD       jr   nz,l_game_intro_wolves_departing_67a0
 67F3: 3E 01       ld   a,$01
 67F5: 32 04 89    ld   ($8904),a
 67F8: 32 08 88    ld   ($8808),a
@@ -9894,10 +10200,11 @@ jump_table_66F5:
 6830: DD 7E 02    ld   a,(ix+$02)
 6833: EF          rst  $28
 jump_table_6834:
-	.word	$683A
-	.word	$6857
-	.word	$68AC
+	.word	intro_mama_arrives_init_683a
+	.word	intro_mama_arrives_6857
+	.word	video_ram_checksum_68ac
 
+intro_mama_arrives_init_683a:
 683A: DD 34 02    inc  (ix+$02)
 683D: AF          xor  a
 683E: DD 77 03    ld   (ix+$03),a
@@ -9905,10 +10212,12 @@ jump_table_6834:
 6844: DD 36 04 08 ld   (ix+$04),$08
 6848: DD 36 06 1E ld   (ix+$06),$1E
 684C: 11 EF 68    ld   de,$68EF
-684F: CD 1E 38    call $381E
+684F: CD 1E 38    call store_de_in_struct_381e
 6852: DD 36 09 18 ld   (ix+$09),$18
 6856: C9          ret
-6857: CD 06 40    call $4006
+
+intro_mama_arrives_6857:
+6857: CD 06 40    call auto_animate_sprite_ix_4006
 685A: DD 7E 05    ld   a,(ix+$05)
 685D: DD 96 09    sub  (ix+$09)
 6860: 30 03       jr   nc,$6865
@@ -9946,11 +10255,12 @@ jump_table_6834:
 6897: 10 F5       djnz $688E
 6899: 1A          ld   a,(de)
 689A: 81          add  a,c
-689B: C2 B3 08    jp   nz,$08B3
+689B: C2 B3 08    jp   nz,init_title_screens_08B3
 689E: 11 13 06    ld   de,$0613
 68A1: FF          rst  $38
 68A2: C9          ret
 
+video_ram_checksum_68ac:
 68AC: 21 55 8F    ld   hl,$8F55
 68AF: 7E          ld   a,(hl)
 68B0: A7          and  a
@@ -10043,7 +10353,7 @@ jump_table_6834:
 6967: DD 36 09 24 ld   (ix+$09),$24
 696B: FD 36 09 24 ld   (iy+$09),$24
 696F: 11 38 38    ld   de,$3838
-6972: CD 1E 38    call $381E
+6972: CD 1E 38    call store_de_in_struct_381e
 6975: 3E 10       ld   a,$10
 6977: 32 29 89    ld   ($8929),a
 697A: 3A 2D 89    ld   a,($892D)
@@ -10072,7 +10382,7 @@ jump_table_6834:
 69A0: 7B          ld   a,e
 69A1: E6 0F       and  $0F
 69A3: 77          ld   (hl),a
-69A4: CD 97 0F    call $0F97
+69A4: CD 97 0F    call play_level_1_completed_tune_0f97
 69A7: 21 2D 89    ld   hl,$892D
 69AA: 34          inc  (hl)
 69AB: F1          pop  af
@@ -10094,7 +10404,7 @@ jump_table_6834:
 69CB: DD 7E 02    ld   a,(ix+$02)
 69CE: A7          and  a
 69CF: C0          ret  nz
-69D0: CD 06 40    call $4006
+69D0: CD 06 40    call auto_animate_sprite_ix_4006
 69D3: FD 7E 05    ld   a,(iy+$05)
 69D6: FD 96 09    sub  (iy+$09)
 69D9: 30 03       jr   nc,$69DE
@@ -10179,7 +10489,7 @@ jump_table_6834:
 6A72: 11 EF 68    ld   de,$68EF
 6A75: 18 03       jr   $6A7A
 6A77: 11 0A 6B    ld   de,$6B0A
-6A7A: CD 1E 38    call $381E
+6A7A: CD 1E 38    call store_de_in_struct_381e
 6A7D: F1          pop  af
 6A7E: C9          ret
 6A7F: 3A 2B 89    ld   a,($892B)
@@ -10202,10 +10512,11 @@ jump_table_6834:
 6AA1: E6 03       and  $03
 6AA3: EF          rst  $28
 jump_table_6AA4:
-	.word	$6AA8
-	.word	$67DF
+	.word	intermission_pigs_arrive_6aa8
+	.word	game_intro_sequence_end_67df
 
-6AA8: CD 06 40    call $4006
+intermission_pigs_arrive_6aa8:
+6AA8: CD 06 40    call auto_animate_sprite_ix_4006
 6AAB: DD 7E 05    ld   a,(ix+$05)
 6AAE: DD 96 09    sub  (ix+$09)
 6AB1: 30 03       jr   nc,$6AB6
@@ -10261,6 +10572,7 @@ jump_table_6AA4:
 ; end ram checksum
 6B09: C9          ret
 
+animate_pigs_in_house_intro_6b13:
 6B13: 21 06 8F    ld   hl,$8F06
 6B16: 7E          ld   a,(hl)
 6B17: A7          and  a
@@ -10610,7 +10922,7 @@ jump_table_6DAA:
 	.word	$705F 
 
 
-6DB8: CD BC 0F    call $0FBC
+6DB8: CD BC 0F    call play_bonus_stage_tune_0fbc
 6DBB: 3A 07 89    ld   a,($8907)
 6DBE: CB 3F       srl  a
 6DC0: CB 3F       srl  a
@@ -10619,7 +10931,7 @@ jump_table_6DAA:
 6DC6: 3E 07       ld   a,$07
 6DC8: E6 07       and  $07
 6DCA: 21 F3 70    ld   hl,$70F3
-6DCD: CD 45 0C    call $0C45
+6DCD: CD 45 0C    call load_16bit_rom_pointer_0c45
 6DD0: ED 53 4A 8F ld   ($8F4A),de
 6DD4: 3E 40       ld   a,$40
 6DD6: 32 48 8F    ld   ($8F48),a
@@ -10631,7 +10943,7 @@ jump_table_6DAA:
 6DE4: CB 3F       srl  a
 6DE6: D0          ret  nc
 ; protection again?? checksum
-6DE7: 21 C8 0A    ld   hl,$0AC8
+6DE7: 21 C8 0A    ld   hl,animate_characters_0ac8
 6DEA: 11 F9 6D    ld   de,$6DF9
 6DED: 06 60       ld   b,$60
 6DEF: 1A          ld   a,(de)
@@ -10690,7 +11002,7 @@ jump_table_6DAA:
 6E4C: 23          inc  hl
 6E4D: 7E          ld   a,(hl)
 6E4E: BA          cp   d
-6E4F: C2 EA 76    jp   nz,$76EA         ; legit but bogus
+6E4F: C2 EA 76    jp   nz,intro_balloons_rise_76ea         ; legit but bogus
 6E52: 23          inc  hl
 6E53: 22 48 8F    ld   ($8F48),hl
 6E56: C9          ret
@@ -10698,13 +11010,13 @@ jump_table_6DAA:
 
 6E59: CD 83 15    call $1583
 6E5C: CD 75 6E    call $6E75
-6E5F: CD 55 1E    call $1E55
+6E5F: CD 55 1E    call read_controls_1e55
 6E62: CD D4 20    call $20D4
 6E65: CD EF 02    call update_sprite_shadows_02EF
-6E68: CD DA 18    call $18DA
+6E68: CD DA 18    call handle_extra_life_award_18da
 6E6B: CD 1C 19    call $191C
 6E6E: CD 04 64    call $6404
-6E71: CD 64 0E    call $0E64
+6E71: CD 64 0E    call handle_queued_sounds_0e64
 6E74: C9          ret
 
 6E75: 21 1E 88    ld   hl,checksum_failed_881E
@@ -10751,7 +11063,7 @@ jump_table_6DAA:
 6EC8: C9          ret
 6EC9: DD 36 02 06 ld   (ix+$02),$06
 6ECD: 11 6A 39    ld   de,$396A
-6ED0: CD 1E 38    call $381E
+6ED0: CD 1E 38    call store_de_in_struct_381e
 6ED3: CD 6C 3A    call $3A6C
 6ED6: 21 49 8F    ld   hl,$8F49
 6ED9: 34          inc  (hl)
@@ -10801,14 +11113,14 @@ jump_table_6DAA:
 6F2C: C9          ret
 6F2D: DD 7E 02    ld   a,(ix+$02)
 6F30: FE 02       cp   $02
-6F32: CA 36 35    jp   z,$3536
+6F32: CA 36 35    jp   z,wolf_shot_exploding_3536
 6F35: D6 0B       sub  $0B
 6F37: 30 04       jr   nc,$6F3D
-6F39: CD 06 40    call $4006
+6F39: CD 06 40    call auto_animate_sprite_ix_4006
 6F3C: C9          ret
 6F3D: EF          rst  $28                                            
-	.word	$3E69  
-	.word	$3E9C  
+	.word	flying_wolf_prepares_to_shoot_3e69  
+	.word	flying_wolf_shoots_3e9c  
 
 
 6F42: 21 51 8F    ld   hl,$8F51                                       
@@ -10818,15 +11130,15 @@ jump_table_6DAA:
 6F48: A7          and  a
 6F49: 28 04       jr   z,$6F4F
 6F4B: 47          ld   b,a
-6F4C: CD 31 11    call $1131
+6F4C: CD 31 11    call convert_number_to_bcd_1131
 6F4F: 21 34 86    ld   hl,$8634
-6F52: CD 19 11    call $1119
+6F52: CD 19 11    call write_2_digits_to_screen_1119
 6F55: 09          add  hl,bc
 6F56: 09          add  hl,bc
 6F57: 7B          ld   a,e
 6F58: 87          add  a,a
 6F59: 27          daa
-6F5A: CD 19 11    call $1119
+6F5A: CD 19 11    call write_2_digits_to_screen_1119
 6F5D: C9          ret
 6F5E: 21 48 8F    ld   hl,$8F48
 6F61: 7E          ld   a,(hl)
@@ -10851,7 +11163,7 @@ jump_table_6DAA:
 6F80: FE 03       cp   $03
 6F82: C2 98 6F    jp   nz,$6F98
 ; protection checksum again...
-6F85: 21 32 0B    ld   hl,$0B32
+6F85: 21 32 0B    ld   hl,character_introduction_related_0b32
 6F88: 11 71 70    ld   de,$7071
 6F8B: 06 79       ld   b,$79
 6F8D: 1A          ld   a,(de)
@@ -10895,7 +11207,7 @@ jump_table_6DAA:
 6FD5: DD 24       inc  ixh
 6FD7: 23          inc  hl
 6FD8: 10 EE       djnz $6FC8
-6FDA: CD 44 0F    call $0F44
+6FDA: CD 44 0F    call play_bonus_stage_jingle_0f44
 6FDD: 11 27 06    ld   de,$0627
 6FE0: FF          rst  $38
 6FE1: C9          ret
@@ -10979,7 +11291,7 @@ jump_table_6DAA:
 705F: 21 48 8F    ld   hl,$8F48
 7062: 35          dec  (hl)
 7063: C0          ret  nz
-7064: CD CF 0E    call $0ECF
+7064: CD CF 0E    call play_null_sound_0ecf
 7067: AF          xor  a
 7068: 32 52 8F    ld   ($8F52),a
 706B: 3E 06       ld   a,$06
@@ -10991,7 +11303,7 @@ jump_table_6DAA:
 7079: 7E          ld   a,(hl)
 707A: 19          add  hl,de
 707B: BE          cp   (hl)
-707C: C2 B3 08    jp   nz,$08B3
+707C: C2 B3 08    jp   nz,init_title_screens_08B3
 707F: 10 F8       djnz $7079
 7081: 21 41 8D    ld   hl,$8D41
 7084: 35          dec  (hl)
@@ -11007,7 +11319,7 @@ jump_table_6DAA:
 7096: 3A 53 8E    ld   a,($8E53)
 7099: 3D          dec  a
 709A: 21 AB 0B    ld   hl,$0BAB
-709D: CD 45 0C    call $0C45
+709D: CD 45 0C    call load_16bit_rom_pointer_0c45
 70A0: ED 53 56 8E ld   ($8E56),de
 70A4: 21 53 8E    ld   hl,$8E53
 70A7: 35          dec  (hl)
@@ -11040,11 +11352,11 @@ jump_table_6DAA:
 70CD: 2A 48 8F    ld   hl,($8F48)
 70D0: 7B          ld   a,e
 70D1: BE          cp   (hl)
-70D2: C2 B3 08    jp   nz,$08B3
+70D2: C2 B3 08    jp   nz,init_title_screens_08B3
 70D5: 23          inc  hl
 70D6: 7E          ld   a,(hl)
 70D7: BA          cp   d
-70D8: C2 E9 08    jp   nz,$08E9
+70D8: C2 E9 08    jp   nz,title_display_play_08E9
 70DB: AF          xor  a
 70DC: 32 48 8F    ld   ($8F48),a
 70DF: 32 49 8F    ld   ($8F49),a
@@ -11280,7 +11592,7 @@ jump_table_72DB:
 736B: CB 5F       bit  3,a
 736D: 20 1B       jr   nz,$738A
 736F: 11 86 40    ld   de,$4086
-7372: CD 1E 38    call $381E
+7372: CD 1E 38    call store_de_in_struct_381e
 7375: DD 36 09 40 ld   (ix+$09),$40
 7379: 21 39 8F    ld   hl,$8F39
 737C: 34          inc  (hl)
@@ -11294,10 +11606,10 @@ jump_table_72DB:
 7388: FF          rst  $38
 7389: C9          ret
 738A: 11 03 74    ld   de,$7403
-738D: CD 1E 38    call $381E
+738D: CD 1E 38    call store_de_in_struct_381e
 7390: DD 36 09 38 ld   (ix+$09),$38
 7394: C9          ret
-7395: CD 06 40    call $4006
+7395: CD 06 40    call auto_animate_sprite_ix_4006
 7398: DD 7D       ld   a,ixl
 739A: CB 5F       bit  3,a
 739C: 20 18       jr   nz,$73B6
@@ -11377,10 +11689,11 @@ pigs_arrive_during_title_7442:
 7445: E6 03       and  $03
 7447: EF          rst  $28
 jump_table_7448:
-	.word	$744E
-	.word	$7517
-	.word	$755D
+	.word	init_intro_744e
+	.word	display_intro_tiles_7517
+	.word	init_intro_pigs_755d
 
+init_intro_744e:
 744E: AF          xor  a
 744F: 32 B7 88    ld   ($88B7),a
 7452: 11 F0 4A    ld   de,$4AF0
@@ -11407,7 +11720,7 @@ jump_table_7448:
 7484: 06 74       ld   b,$74
 7486: DD 7E 00    ld   a,(ix+$00)
 7489: BE          cp   (hl)
-748A: C2 DF 67    jp   nz,$67DF
+748A: C2 DF 67    jp   nz,game_intro_sequence_end_67df
 748D: 23          inc  hl
 748E: DD 2C       inc  ixl
 7490: DD 7D       ld   a,ixl
@@ -11488,7 +11801,8 @@ jump_table_7448:
 7511: 09          add  hl,bc
 7512: C9          ret
 32 00 A0 CD
-7517: CD 81 43    call $4381       
+display_intro_tiles_7517:
+7517: CD 81 43    call write_column_to_screen_4381       
 751A: 21 B7 88    ld   hl,$88B7
 751D: 34          inc  (hl)
 751E: 7E          ld   a,(hl)
@@ -11526,12 +11840,13 @@ jump_table_7448:
 7552: C2 2C 46    jp   nz,$462C
 7555: 21 21 89    ld   hl,$8921
 7558: 34          inc  (hl)
-7559: CD B2 0F    call $0FB2
+7559: CD B2 0F    call play_intro_tune_0fb2
 755C: C9          ret
 
+init_intro_pigs_755d:
 755D: CD 6D 75    call $756D
 7560: CD 21 76    call $7621
-7563: CD 13 6B    call $6B13
+7563: CD 13 6B    call animate_pigs_in_house_intro_6b13
 7566: CD AF 76    call $76AF
 7569: CD EF 02    call update_sprite_shadows_02EF
 756C: C9          ret
@@ -11578,7 +11893,7 @@ jump_table_7448:
 75CC: E7          rst  $20
 75CD: FD 77 17    ld   (iy+$17),a
 75D0: 21 57 56    ld   hl,$5657
-75D3: CD 45 0C    call $0C45
+75D3: CD 45 0C    call load_16bit_rom_pointer_0c45
 75D6: FD 73 0C    ld   (iy+$0c),e
 75D9: FD 72 0D    ld   (iy+$0d),d
 75DC: FD 36 09 18 ld   (iy+$09),$18
@@ -11600,7 +11915,7 @@ jump_table_7448:
 7603: 11 DD 76    ld   de,$76DD
 7606: 30 03       jr   nc,$760B
 7608: 11 D4 76    ld   de,$76D4
-760B: CD 1E 38    call $381E
+760B: CD 1E 38    call store_de_in_struct_381e
 760E: 3A 2D 89    ld   a,($892D)
 7611: 87          add  a,a
 7612: 87          add  a,a
@@ -11625,14 +11940,15 @@ jump_table_7448:
 763B: E6 03       and  $03
 763D: EF          rst  $28
 jump_table_763E:
-	.word	$7644
-	.word	$7675
-	.word	$76A6
+	.word	move_intro_pigs_to_left_7644
+	.word	intro_balloons_related_7675
+	.word	intro_balloons_related_76a6
 
+move_intro_pigs_to_left_7644:
 7644: DD 7E 00    ld   a,(ix+$00)
 7647: A7          and  a
 7648: C8          ret  z
-7649: CD 06 40    call $4006
+7649: CD 06 40    call auto_animate_sprite_ix_4006
 764C: DD 7E 05    ld   a,(ix+$05)
 764F: DD 96 09    sub  (ix+$09)
 7652: 30 03       jr   nc,$7657
@@ -11651,7 +11967,9 @@ jump_table_763E:
 7671: 10 F9       djnz $766C
 7673: F1          pop  af
 7674: C9          ret
-7675: CD 06 40    call $4006
+
+intro_balloons_related_7675:
+7675: CD 06 40    call auto_animate_sprite_ix_4006
 7678: 21 2E 89    ld   hl,$892E
 767B: 7E          ld   a,(hl)
 767C: A7          and  a
@@ -11677,10 +11995,12 @@ jump_table_763E:
 76A1: 32 51 8E    ld   (title_sub_state_8E51),a
 76A4: F1          pop  af
 76A5: C9          ret
+
+intro_balloons_related_76a6:
 76A6: 3A 58 8D    ld   a,($8D58)
 76A9: A7          and  a
 76AA: C0          ret  nz
-76AB: CD 06 40    call $4006
+76AB: CD 06 40    call auto_animate_sprite_ix_4006
 76AE: C9          ret
 76AF: 21 2A 89    ld   hl,$892A
 76B2: 7E          ld   a,(hl)
@@ -11724,6 +12044,7 @@ jump_table_763E:
 76E7: 46          ld   b,(hl)
 76E8: 46          ld   b,(hl)
 76E9: 3F          ccf
+intro_balloons_rise_76ea:
 76EA: CD F4 76    call $76F4
 76ED: CD 25 76    call $7625
 76F0: CD EF 02    call update_sprite_shadows_02EF
@@ -11745,10 +12066,11 @@ jump_table_763E:
 7712: E6 03       and  $03
 7714: EF          rst  $28
 jump_table_7715:
-	.word	$771D
-	.word	$7740
-	.word	$7790
-	.word	$7881
+	.word	intro_wait_and_release_balloons_771D
+	.word	intro_balloons_related_7740
+	.word	intro_balloons_exploding_into_title_7790
+	.word	wait_while_title_displayed_7881
+intro_wait_and_release_balloons_771D:
 771D: DD 35 11    dec  (ix+$11)
 7720: C0          ret  nz
 7721: 21 57 8D    ld   hl,$8D57
@@ -11767,7 +12089,8 @@ jump_table_7715:
 7738: 3E EC       ld   a,$EC
 773A: DD 77 0A    ld   (ix+$0a),a
 773D: DD 34 02    inc  (ix+$02)
-7740: CD 06 40    call $4006
+intro_balloons_related_7740:
+7740: CD 06 40    call auto_animate_sprite_ix_4006
 7743: DD 7E 0A    ld   a,(ix+$0a)
 7746: ED 44       neg
 7748: 47          ld   b,a
@@ -11784,11 +12107,11 @@ jump_table_7715:
 7760: D0          ret  nc
 7761: DD 34 02    inc  (ix+$02)
 7764: DD 36 11 18 ld   (ix+$11),$18
-7768: CD F1 0E    call $0EF1
+7768: CD F1 0E    call play_balloon_popping_sound_0ef1
 776B: DD 7E 17    ld   a,(ix+$17)
 776E: 21 B1 41    ld   hl,$41B1
-7771: CD 45 0C    call $0C45
-7774: CD 1E 38    call $381E
+7771: CD 45 0C    call load_16bit_rom_pointer_0c45
+7774: CD 1E 38    call store_de_in_struct_381e
 ; another code checksum...
 7777: 11 B3 0B    ld   de,$0BB3
 777A: 06 05       ld   b,$05
@@ -11807,23 +12130,25 @@ jump_table_7715:
 778B: 21 E9 89    ld   hl,$89E9
 778E: 34          inc  (hl)
 778F: C9          ret
-7790: CD 06 40    call $4006
+
+intro_balloons_exploding_into_title_7790:
+7790: CD 06 40    call auto_animate_sprite_ix_4006
 7793: DD 35 11    dec  (ix+$11)
 7796: C0          ret  nz
 7797: DD 7E 13    ld   a,(ix+$13)
 779A: 21 21 78    ld   hl,$7821
-779D: CD 45 0C    call $0C45
+779D: CD 45 0C    call load_16bit_rom_pointer_0c45
 77A0: DD 6E 15    ld   l,(ix+$15)
 77A3: DD 66 16    ld   h,(ix+$16)
-77A6: CD 0F 78    call $780F
+77A6: CD 0F 78    call write_title_letter_colors_780f
 77A9: 21 41 78    ld   hl,$7841
 77AC: DD 7E 13    ld   a,(ix+$13)
-77AF: CD 45 0C    call $0C45
+77AF: CD 45 0C    call load_16bit_rom_pointer_0c45
 77B2: DD 6E 15    ld   l,(ix+$15)
 77B5: DD 66 16    ld   h,(ix+$16)
 77B8: 01 00 FC    ld   bc,$FC00
 77BB: 09          add  hl,bc
-77BC: CD 0F 78    call $780F
+77BC: CD 0F 78    call write_title_letter_colors_780f
 77BF: 21 58 8D    ld   hl,$8D58
 77C2: 7E          ld   a,(hl)
 77C3: A7          and  a
@@ -11860,6 +12185,8 @@ jump_table_7715:
 780A: BE          cp   (hl)
 780B: C2 34 23    jp   nz,$2334		; bogus
 780E: C9          ret
+
+write_title_letter_colors_780f:
 780F: 01 E0 FF    ld   bc,$FFE0
 7812: 1A          ld   a,(de)
 7813: 77          ld   (hl),a
@@ -11878,6 +12205,7 @@ jump_table_7715:
 7820: C9          ret
 
 
+wait_while_title_displayed_7881:
 7881: DD 35 11    dec  (ix+$11)
 7884: C0          ret  nz
 ; another rom compare check
@@ -11912,7 +12240,7 @@ jump_table_7715:
 78B9: 32 51 8E    ld   (title_sub_state_8E51),a
 78BC: FD 21 48 85 ld   iy,$8548
 78C0: 21 00 00    ld   hl,$0000
-78C3: 11 20 00    ld   de,$0020
+78C3: 11 20 00    ld   de,$20
 78C6: 0E 04       ld   c,$04
 78C8: 06 0C       ld   b,$0C
 78CA: FD 7E 00    ld   a,(iy+$00)
@@ -12013,7 +12341,7 @@ jump_table_7715:
 7960: 11 09 06    ld   de,$0609
 7963: FF          rst  $38
 ; another rom check!!
-7964: DD 21 01 29 ld   ix,$2901
+7964: DD 21 01 29 ld   ix,l_player_basket_goes_to_ground_2901
 7968: 21 00 00    ld   hl,$0000
 796B: 5D          ld   e,l
 796C: 53          ld   d,e
@@ -12086,7 +12414,7 @@ jump_table_7715:
 79E5: 23          inc  hl
 79E6: 10 F9       djnz $79E1
 79E8: C9          ret
-79E9: 21 AC 68    ld   hl,$68AC
+79E9: 21 AC 68    ld   hl,video_ram_checksum_68ac
 79EC: 11 00 00    ld   de,$0000
 79EF: 7E          ld   a,(hl)
 79F0: FE C9       cp   $C9		; check for RET there! another rom check!!!
@@ -12339,14 +12667,20 @@ str_7dc4:
 	.byte	146,134
 	.ascii	"@TWO@WOLVES."
 	.byte	116,134
-	.ascii	"@@400800@PTS?"
+	.ascii	"@@400"
+	.byte	131
+	.ascii	"800@PTS?"
 str_7de2:
 	.byte	146,134
 	.ascii	"@SOME@WOLVES."
 	.byte	116,134
-	.ascii	"@@400800@."
+	.ascii	"@@400"
+	.byte	131
+	.ascii	"800@."
 	.byte	86,134
-	.ascii	"@@@1600@PTS?"
+	.ascii	"@@@"
+	.byte	131
+	.ascii 	"1600@PTS?"
 str_7e0d:
 	.byte	205,134
 	.ascii	"BONUS@@POINT."
@@ -12391,6 +12725,7 @@ str_7e5a:
 	.ascii	"PERFECT?"
 
 
+perform_rom_checksum_7e6d:
 7E6D: 3A 88 89    ld   a,($8988)
 7E70: FE 04       cp   $04
 7E72: D8          ret  c
@@ -12430,10 +12765,11 @@ str_7e5a:
 7EA8: 3A 26 8E    ld   a,($8E26)
 7EAB: EF          rst  $28
 jump_table_7EAC:
-	.word	$7EB2      
-	.word	$7F0E      
+	.word	high_score_entry_init_7eb2      
+	.word	high_score_entry_update_7f0e      
 	.word	$7F5D      
 
+high_score_entry_init_7eb2:
 7EB2: 21 65 85    ld   hl,$8565
 7EB5: 22 27 8E    ld   ($8E27),hl
 7EB8: 3E 03       ld   a,$03
@@ -12472,6 +12808,8 @@ jump_table_7EAC:
 7F08: 3E 0C       ld   a,$0C
 7F0A: 32 24 8E    ld   ($8E24),a
 7F0D: C9          ret
+
+high_score_entry_update_7f0e:
 7F0E: 2A 2B 8E    ld   hl,($8E2B)
 7F11: 2B          dec  hl
 7F12: 22 2B 8E    ld   ($8E2B),hl
@@ -12551,7 +12889,7 @@ jump_table_7EAC:
 7FA2: 3E 11       ld   a,$11
 7FA4: 32 23 8E    ld   ($8E23),a
 7FA7: C9          ret
-7FA8: CD CF 0E    call $0ECF
+7FA8: CD CF 0E    call play_null_sound_0ecf
 7FAB: 3A 25 8E    ld   a,($8E25)
 7FAE: A7          and  a
 7FAF: 28 16       jr   z,$7FC7
@@ -12593,6 +12931,6 @@ jump_table_7EAC:
 7FF5: E6 18       and  $18
 7FF7: A7          and  a
 7FF8: C8          ret  z
-7FF9: CD CF 0E    call $0ECF
-7FFC: C3 78 0D    jp   $0D78
+7FF9: CD CF 0E    call play_null_sound_0ecf
+7FFC: C3 78 0D    jp   continue_0d78
 

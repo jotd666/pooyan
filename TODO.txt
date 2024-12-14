@@ -1,18 +1,13 @@
 minor
 - round 3: drum music not played on level completion
 - sometimes starts with credits=30 and score=13!!!
+- problem with bonus music loop: fix and report!
 - wolf on ladder: sometimes "0" character on top right!
 - push start: $8496 written with "4"!!!
-- during tutorial, one character is off before "400"
-- level 2 music should become more "dramatic" when wolves are about to push rock
+- level 2 music should become more "dramatic" when wolves are about to push rock: debug on MAME
 
 
 turn off sfx: bpset E8F,A!=$15 && A!=$16,{PC=$79E8;g}
 
-maybe fixed:
 
-converter: don't warn about flags on ld with i or r as target
-converter: lf address >= 0xFC00 consider as negative data
-converter: postproc: 	move.b	d0,(ax) and addq.w #1,ax => (ax)+
-converter: postproc: 	subq.w #1,ax and move.b d0,(ax) => -(ax)
-converter: create dummy LOAD_D1D2_FROM_D1_16 macros
+
