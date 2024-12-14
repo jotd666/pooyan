@@ -15814,13 +15814,12 @@ high_score_entry_update_7f0e:
 	LOAD_WORD	high_score_entry_timer_8e2b(a6),d5             	| [$7f0e: ld   hl,($8E2B)]
 	subq.w	#1,d5                           	| [$7f11: dec  hl]
 	STORE_WORD	d5,high_score_entry_timer_8e2b(a6)            	| [$7f12: ld   ($8E2B),hl]
-	
-	move.b	d5,d0                           	| [$7f15: ld   a,h]
+	tst.w	d5                           	| [$7f15: ld   a,h]
 	                               	| [$7f16: and  a]
 	jne	l_7f20                             	| [$7f17: jr   nz,$7F20]
-	move.b	d6,d0                           	| [$7f19: ld   a,l]
-	                               	| [$7f1a: and  a]
-	jne	l_7f20                             	| [$7f1b: jr   nz,$7F20]
+											| [$7f19: ld   a,l]
+									| [$7f1a: and  a]
+											| [$7f1b: jr   nz,$7F20]
 	jra	l_7fa8                             	| [$7f1d: jp   $7FA8]
 l_7f20:
 	LOAD_RAM_POINTER	ram_pointer_8e21(a6),a0             	| [$7f20: ld   hl,($8E21)]

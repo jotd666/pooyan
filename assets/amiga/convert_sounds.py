@@ -54,6 +54,7 @@ def convert():
     "LEVEL_1_COMPLETED_TUNE_SND"                :{"index":0x1E,"pattern":0x14,"volume":32,"loops":False,"ticks":480},
     "LEVEL_2_COMPLETED_TUNE_SND"                :{"index":0x22,"pattern":0x7,"volume":32,"loops":False,"ticks":520},
     "LEVEL_2_COMPLETED_2_TUNE_SND"                :{"index":0x23,"pattern":0x1B,"volume":32,"loops":False,"ticks":500},  # suzannah
+    "HIGH_SCORE_ENTRY_TUNE_SND"                :{"index":0x29,"pattern":0x1F,"volume":32,"loops":True},
     "GAME_OVER_TUNE_SND"                :{"index":0x1D,"pattern":0x13,"volume":32,'loops':False,"ticks":180},
     "BONUS_STAGE_TUNE_SND"                :{"index":0x28,"pattern":0x15,"volume":32,'loops':True},
 
@@ -169,7 +170,7 @@ def convert():
                 amp_ratio = max(maxsigned,abs(minsigned))/128
 
                 # JOTD: for that one, I'm using maxxed out sfx by no9, no amp
-                amp_ratio = 0
+                amp_ratio = 0.9
 
                 wav = os.path.splitext(wav_name)[0]
                 if amp_ratio > 1:
@@ -178,10 +179,12 @@ def convert():
                 sound_table[sound_index] = "    SOUND_ENTRY {},{},{},{},{},{}\n".format(wav,len(signed_data)//2,channel,used_sampling_rate,int(64*amp_ratio),used_priority)
                 sound_table_set_1[sound_index] = f"\t.word\t1,{int(details.get('loops',0))}\n\t.long\t{wav}_sound"
 
-                if amp_ratio > 0:
-                    maxed_contents = [int(x/amp_ratio) for x in signed_data]
-                else:
-                    maxed_contents = signed_data
+##                if amp_ratio > 0:
+##                    maxed_contents = [int(x/amp_ratio) for x in signed_data]
+##                else:
+##                    maxed_contents = signed_data
+
+                maxed_contents = signed_data
 
                 signed_contents = bytes([x if x >= 0 else 256+x for x in maxed_contents])
                 # pre-pad with 0W, used by ptplayer for idling

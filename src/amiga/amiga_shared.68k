@@ -30,13 +30,12 @@ osd_read_high_scores:
 	move.l	_resload,d0
 	beq.b	0f
 	move.l	d0,a2
-	move.l	a0,a3
 	bsr		get_hiscore_name
  	jsr		resload_GetFileSize(a2)		
 	tst.l	d0
 	beq.b	1f
 	bsr		get_hiscore_name
-	move.l	a3,a1
+	lea		high_score_buffer(pc),a1
 	jsr		resload_LoadFile(a2)	
 	bra.b	2f
 0:
@@ -44,7 +43,6 @@ osd_read_high_scores:
 	beq.b	1f
 2:
 	* from DOS: just copy buffer
-	lea		high_score_buffer(pc),a1
 	GET_RAM_START_IN_A6
 	* first just copy buffer as contiguous 
 
@@ -110,10 +108,9 @@ osd_write_high_scores:
 	beq.b	0f
 	move.l	d0,a2
 	move.l	#SCORE_FILE_SIZE,d0
-	move.l	a0,a1
+	lea		high_score_buffer(pc),a1
 	bsr		get_hiscore_name
 	jsr		resload_SaveFile(a2)
-	bra.b	1f
 0:
 
 	movem.l	(a7)+,d0-d7/a0-a6
@@ -197,6 +194,11 @@ osd_sound_start:
 	movem.l	d0/d1/a0/a6,-(a7)
 	lea		_custom,a6
 	and.w	#0xFF,d0
+	jne		0f
+	* null sound: stop
+	jbsr	osd_music_stop
+	jra		10f
+0:
 	* original sound stop commands have bit 7 set. But if we follow them, they'll kill the
 	btst	#7,d0
 	jeq		1f
@@ -205,6 +207,9 @@ osd_sound_start:
 	jbsr	_mt_stopfx
 	jra		10f
 1:
+	cmp.b	#WOLF_FALLING_SND,d0		| this fucks up the music and has little interest: skip it!
+	jeq		10f
+	
 	* ongoing sfx when killing the music, so we have to ignore them and use a hack
 	jbsr		is_game_playing
 	jne		1f
