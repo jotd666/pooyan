@@ -821,7 +821,7 @@ jump_table_0242:
   .long	display_score_056B 
   .long	display_string_05b2 
   .long	display_credits_05EE
-  .long	rom_check_0644
+  .long	rom_check_0644			| does nothing now!
 
 l_0254:
 	move.b	main_timer_1_883F(a6),d0					| [$0254: ld   a,($883F)    ]
@@ -1492,30 +1492,133 @@ l_060b:
  	| [$0629: ret]
 
 * convert credit number from normal to BCD
-* a bunch of X clear were inserted to make computation OK
+* jotd: switched to simple table, as it's faster and the
+* original routine uses carry & daa in a Z80 specific way which makes it
+* difficult to convert
+
 convert_to_bcd_062a:
-	CLEAR_XC_FLAGS
-	move.b	d0,d1                           	| [$062a: ld   b,a]
-	and.b	#0x0F,d0                         	| [$062b: and  $0F]
-	moveq	#0,d7
-	abcd	d7,d0                        	| [$062d: add  a,$00] + daa
-	move.b	d0,d2                           	| [$0630: ld   c,a]
-	move.b	d1,d0                           	| [$0631: ld   a,b]
-	CLEAR_XC_FLAGS
-	and.b	#0xF0,d0                         	| [$0632: and  $F0]
-	jeq	l_0641                             	| [$0634: jr   z,$0641]
-	ror.b	#4,d0                            	| [$0636: rrca] * 4
-	move.b	d0,d1                           	| [$063a: ld   b,a]
-	subq	#1,d1
-	CLEAR_XC_FLAGS                         	| [$063b: xor  a]
-	clr.b	d0                               	| [$063b: xor  a]
-	move.b	#0x16,d7
-l_063c:
-	abcd	d7,d0                         	| [$063c: add  a,$16] + daa
-	dbf	d1,l_063c                             	| [$063f: djnz $063C]
-l_0641:
-	abcd	d2,d0                            	| [$0641: add  a,c] + daa
-	rts                                    	| [$0643: ret]
+	lea	bcd_table(pc),a0
+	and.w	#0xFF,d0
+	move.b	(a0,d0.w),d0
+	rts
+	
+					| [$062a: ld   b,a]
+					| [$062b: and  $0F]		
+				| [$062d: add  a,$00] + daa
+					| [$0630: ld   c,a]
+					| [$0631: ld   a,b]
+					| [$0632: and  $F0]
+				| [$0634: jr   z,$0641]
+					| [$0636: rrca] * 4
+					| [$063a: ld   b,a]	
+				| [$063b: xor  a]
+					| [$063b: xor  a]	
+				| [$063c: add  a,$16] + daa
+					| [$063f: djnz $063C]
+					| [$0641: add  a,c] + daa
+				| [$0643: ret]
+
+bcd_table:
+	.byte  0x00
+	.byte  0x01
+	.byte  0x02
+	.byte  0x03
+	.byte  0x04
+	.byte  0x05
+	.byte  0x06
+	.byte  0x07
+	.byte  0x08
+	.byte  0x09
+	.byte  0x10
+	.byte  0x11
+	.byte  0x12
+	.byte  0x13
+	.byte  0x14
+	.byte  0x15
+	.byte  0x16
+	.byte  0x17
+	.byte  0x18
+	.byte  0x19
+	.byte  0x20
+	.byte  0x21
+	.byte  0x22
+	.byte  0x23
+	.byte  0x24
+	.byte  0x25
+	.byte  0x26
+	.byte  0x27
+	.byte  0x28
+	.byte  0x29
+	.byte  0x30
+	.byte  0x31
+	.byte  0x32
+	.byte  0x33
+	.byte  0x34
+	.byte  0x35
+	.byte  0x36
+	.byte  0x37
+	.byte  0x38
+	.byte  0x39
+	.byte  0x40
+	.byte  0x41
+	.byte  0x42
+	.byte  0x43
+	.byte  0x44
+	.byte  0x45
+	.byte  0x46
+	.byte  0x47
+	.byte  0x48
+	.byte  0x49
+	.byte  0x50
+	.byte  0x51
+	.byte  0x52
+	.byte  0x53
+	.byte  0x54
+	.byte  0x55
+	.byte  0x56
+	.byte  0x57
+	.byte  0x58
+	.byte  0x59
+	.byte  0x60
+	.byte  0x61
+	.byte  0x62
+	.byte  0x63
+	.byte  0x64
+	.byte  0x65
+	.byte  0x66
+	.byte  0x67
+	.byte  0x68
+	.byte  0x69
+	.byte  0x70
+	.byte  0x71
+	.byte  0x72
+	.byte  0x73
+	.byte  0x74
+	.byte  0x75
+	.byte  0x76
+	.byte  0x77
+	.byte  0x78
+	.byte  0x79
+	.byte  0x80
+	.byte  0x81
+	.byte  0x82
+	.byte  0x83
+	.byte  0x84
+	.byte  0x85
+	.byte  0x86
+	.byte  0x87
+	.byte  0x88
+	.byte  0x89
+	.byte  0x90
+	.byte  0x91
+	.byte  0x92
+	.byte  0x93
+	.byte  0x94
+	.byte  0x95
+	.byte  0x96
+	.byte  0x97
+	.byte  0x98
+	.byte  0x99
 	
 rom_check_0644:
 										| [$0644: ld   ix,$778A]
@@ -1543,7 +1646,7 @@ rom_check_0644:
 
     	| [$0667: ld   a,$01]
                   	| [$0669: ld   ($8DF8),a] checksum_failed_8DF8
-	rts                                    	| [$066c: ret]
+	                                    	| [$066c: ret]
 
 pooyan_irq:
 irq_066D:

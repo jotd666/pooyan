@@ -1,11 +1,7 @@
 minor
 - round 3: drum music not played on level completion
-- sometimes starts with credits=30 and score=13!!!
-- problem with bonus music loop: fix and report!
-- wolf on ladder: sometimes "0" character on top right!
-- push start: $8496 written with "4"!!!
 - level 2 music should become more "dramatic" when wolves are about to push rock: debug on MAME
-
+- maybe use hw sprites would allow 50Hz... or chained blitter routine?
 
 turn off sfx: bpset E8F,A!=$15 && A!=$16,{PC=$79E8;g}
 

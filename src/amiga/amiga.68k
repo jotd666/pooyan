@@ -967,6 +967,7 @@ blit_background:
 * instead of 0x400 each frame.
 
 really_update_tiles:
+	lea		_custom,a5
 	WAIT_BLIT
 	GET_RAM_START_IN_A6
 	lea		(0x400,a6),a5
@@ -1791,6 +1792,8 @@ osd_w_videoram:
 	cmp.b	d1,d0
 	beq.b	0b		| already the proper value
 3:
+
+
 	move.b	d0,(a0)	| update logical grid
 	* now set the flag for tile refresh in copper interrupt (so it doesn't
 	* interfere with blits. This game uses a lot of tile animation in the background
