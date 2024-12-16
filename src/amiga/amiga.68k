@@ -1605,8 +1605,8 @@ platform_init:
     move.w #0x200+(NB_PLAYFIELD_PLANES<<12),bplcon0(a5)
 
  	*         VVHH
-    move.w #0x1C99,diwstrt(a5)
-    move.w #0x1C79,diwstop(a5)
+    move.w #0x2099,diwstrt(a5)
+    move.w #0x2079,diwstop(a5)
 *	cmp.l	#NTSC_MONITOR_ID,monitor
 *	jne		0f
 *    move.w #0xFC81,diwstop(a5)
@@ -2676,7 +2676,7 @@ intreq_block_game:
 
 	* pal limit
     .word  0xFFDF,0xFFFE       | PAL wait
-	.word	0x0E01,0xFFFE
+	.word	0x1201,0xFFFE
 
 	| no bobs from now on, get a LOT of drawing time
 	.word	 intreq,0x8010

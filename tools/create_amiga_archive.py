@@ -30,3 +30,5 @@ for file in ["readme.md",f"{gamename}.slave"]:  #f"{gamename}.slave",
 exename = gamename
 shutil.copy(os.path.join(progdir,exename),outdir)
 subprocess.check_output(["cranker_windows.exe","-f",os.path.join(progdir,exename),"-o",os.path.join(progdir,f"{exename}.rnc")])
+
+subprocess.check_call(cmd_prefix+["clean"],cwd=os.path.join(progdir,"src"))
