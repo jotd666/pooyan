@@ -1363,7 +1363,6 @@ blit_planes_any_internal_cookie_cut:
 
 	move.w d2,bltamod(a5)		|A modulo=bytes to skip between lines
 	move.w d2,bltbmod(a5)		|B modulo=bytes to skip between lines
-	move.l d7,bltcon0(a5)	| sets con0 and con1: full cookie cut 2 sources & 1 mask
 	
     move.w  d0,bltcmod(a5)	|C modulo
     move.w  d0,bltdmod(a5)	|D modulo
@@ -1605,8 +1604,8 @@ platform_init:
     move.w #0x200+(NB_PLAYFIELD_PLANES<<12),bplcon0(a5)
 
  	*         VVHH
-    move.w #0x2099,diwstrt(a5)
-    move.w #0x2079,diwstop(a5)
+    move.w #0x2499,diwstrt(a5)
+    move.w #0x2479,diwstop(a5)
 *	cmp.l	#NTSC_MONITOR_ID,monitor
 *	jne		0f
 *    move.w #0xFC81,diwstop(a5)
@@ -2676,7 +2675,7 @@ intreq_block_game:
 
 	* pal limit
     .word  0xFFDF,0xFFFE       | PAL wait
-	.word	0x1201,0xFFFE
+	.word	0x1601,0xFFFE
 
 	| no bobs from now on, get a LOT of drawing time
 	.word	 intreq,0x8010

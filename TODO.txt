@@ -1,5 +1,11 @@
 minor
 - round 3: drum music not played on level completion
+- sfx on channels 1 & 3 instead of 2 & 3
+- sfx in sync with highscore music using E8 command:
+_mt_E8Trigger
+This byte reflects the value of the last E8 command.
+It is reset to 0 after _mt_init. 
+
 - level 2 music should become more "dramatic" when wolves are about to push rock: debug on MAME
 - maybe use hw sprites would allow 50Hz... or chained blitter routine?
 - test command line (non-whdload)
