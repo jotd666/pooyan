@@ -7,7 +7,7 @@ This byte reflects the value of the last E8 command.
 It is reset to 0 after _mt_init. 
 
 - level 2 music should become more "dramatic" when wolves are about to push rock: debug on MAME
-- maybe use hw sprites would allow 50Hz... or chained blitter routine?
+- maybe use hw sprites would allow 50Hz...
 - test command line (non-whdload)
 
 turn off sfx: bpset E8F,A!=$15 && A!=$16,{PC=$79E8;g}

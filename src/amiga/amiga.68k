@@ -1016,42 +1016,6 @@ really_update_sprites:
 update_bobs_and_hw_sprites:
 
 	
-	*****************************
-	* position hardware sprites *
-	*****************************
-	
-	lea		sprite_ram_9000+0x10,a0	
-*    lea sprite_translation_table,A6
-*	lea		hw_sprite_table,a4
-*	lea	HW_SpriteYTable_16(pc),a1
-	lea	game_sprites+2,a2			| copperlist
-*
-*	| start by the end (drawing priority), except for last sprite
-*	| which has top priority (strange hardware!)
-*	move.l	a0,-(a7)
-*	add.w	#(NB_TARGET_SPRITES-1)*4,a0		| last sprite
-*	* last sprite
-*	jbsr	update_one_hw_sprite
-*	move.l	(a7)+,a0
-*	moveq	#NB_TARGET_SPRITES-2,d7
-*1:
-*	jbsr	update_one_hw_sprite
-*	addq.w	#4,a0
-*	cmp.l	#game_sprites_end,a2
-*	bcc		2f	
-*	dbf		d7,1b
-*
-	* pad last sprite entries with blank
-	move.l	#blank_sprite,d0
-1:
-	move.w	d0,(4,a2)
-	swap	d0
-	move.w	d0,(a2)
-	swap	d0
-	addq	#8,a2
-	cmp.l	#game_sprites_end,a2
-	bcs		1b
-2:
 	***********************
 	* erase previous BOBs *
 	***********************
@@ -1164,7 +1128,15 @@ update_one_bob:
 101:
 	move.w	(a0)+,d4		| height
 	move.w	(a0)+,d5		| width
-	add.w	(a0)+,d1		| add offset to Y
+	move.w	(a0)+,d2		| Y-offset
+	btst	#6,d3
+	jne		101f
+	* flipped: offset is different: it's 16-height-offset
+	neg.w	d2
+	sub.w	d4,d2
+	add.w	#0x10,d2
+101:
+	add.w	d2,d1
 	* A0 points on the first bitplane of the bob
 
 	move.l		playfield_drawed_screen_ptr(pc),a1
@@ -1637,12 +1609,26 @@ platform_init:
 	move.l	a0,cop1lc(a5)
 
 	
-	* set sprite registers in copperlist
+	* set sprite registers to blank sprite in copperlist
+	* we don't use sprites at all in that game
+	* it's too complicated to use them because most
+	* sprites have more than 3 colors. Blitter manages
+	* very well.
+	* we could have used attached sprites for main character
 	
-	* attached sprites for main character & car
-	lea		game_sprites,a0
-	*bsr		init_game_sprite_bank
-	
+	lea	game_sprites+2,a2			| copperlist
+
+	* pad last sprite entries with blank
+	move.l	#blank_sprite,d0
+1:
+	move.w	d0,(4,a2)
+	swap	d0
+	move.w	d0,(a2)
+	swap	d0
+	addq	#8,a2
+	cmp.l	#game_sprites_end,a2
+	bcs		1b
+2:	
 
 
 
