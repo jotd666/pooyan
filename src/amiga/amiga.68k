@@ -935,6 +935,8 @@ blit_background:
 
     * now just wait for blitter ready to write all registers
 	WAIT_BLIT
+	* set blitter parameters once and for all
+    move.l  #-1,bltafwm(a5)
     
     * blitter registers set
 
@@ -1325,16 +1327,19 @@ blit_planes_any_internal_cookie_cut:
     lsr.w   #1,d2
     add.w   d2,d4       | blit height
     * always the same settings (ATM)
-	moveq	#0,d2
+	moveq	#-2,d2
 	add.w	d5,a3			| apply y offset to mask too (y offset looks wrong)
 	
     * now just wait for blitter ready to write all registers
 	WAIT_BLIT
+	* set blitter parameters once and for all
     
     * blitter registers set
 
 	move.w d2,bltamod(a5)		|A modulo=bytes to skip between lines
 	move.w d2,bltbmod(a5)		|B modulo=bytes to skip between lines
+	moveq	#0,d2
+    move.w  d2,bltalwm(a5)
 	
     move.w  d0,bltcmod(a5)	|C modulo
     move.w  d0,bltdmod(a5)	|D modulo
@@ -1574,7 +1579,7 @@ platform_init:
 	lea		_custom,a5
 	move.w	#0x7FFF,dmacon(a5)
 	move.w	#0x7FFF,intena(a5)
-	* set blitter parameters once and for all
+	* set blitter parameters
     move.l  #-1,bltafwm(a5)
 	
 	move.l	monitor,d0

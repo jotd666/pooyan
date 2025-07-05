@@ -254,7 +254,7 @@ def read_tileset(img_set_list,palette,plane_orientation_flags,cache,is_bob):
                             y_start,wtile = bitplanelib.autocrop_y(wtile)
                             height = wtile.size[1]
                             actual_nb_planes += 1
-                            bitplane_data = bitplanelib.palette_image2raw(wtile,None,palette,generate_mask=True,blit_pad=True)
+                            bitplane_data = bitplanelib.palette_image2raw(wtile,None,palette,generate_mask=True,blit_pad=False)
                         else:
                             height = 8
                             y_start = 0
