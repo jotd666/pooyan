@@ -23,7 +23,7 @@ else:
 for file in ["readme.md",f"{gamename}.slave"]:  #f"{gamename}.slave",
     shutil.copy(os.path.join(progdir,file),outdir)
 
-#shutil.copy(os.path.join(progdir,"assets","amiga","MoonPatrolGlowIcon.info"),outdir)
+shutil.copy(os.path.join(progdir,"assets","amiga","Pooyan.info"),outdir)
 
 
 

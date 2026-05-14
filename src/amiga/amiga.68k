@@ -923,7 +923,11 @@ blit_background:
 	move.w	#NB_BYTES_PER_ROW,d1		| blit modulo
 
     sub.w   d2,d1       | blit modulo
+ 	move.w	d4,d6		| save height
+	subq	#1,d6       | for cpu restore mode
     lsl.w   #6,d4
+	lea		copy_function_table,a4
+	add.w	(a4,d2.w),a4	| pick proper erase func (4,6,8 width are the only cases here)
     lsr.w   #1,d2		| blit width
     add.w   d2,d4       | blit height
 	
@@ -931,8 +935,7 @@ blit_background:
 
     * now just wait for blitter ready to write all registers
 	WAIT_BLIT
-	* set blitter parameters once and for all
-    move.l  #-1,bltafwm(a5)
+
     
     * blitter registers set
 
@@ -948,15 +951,69 @@ blit_background:
 	.rept	NB_PLAYFIELD_PLANES-1
 	lea	(RESTORE_SCREEN_PLANE_SIZE,a0),a0
 	lea	(SCREEN_PLANE_SIZE,a1),a1
-	WAIT_BLIT
+	btst	#6,(dmaconr,a5)
+	jeq		0f
+
+	* if blitter is running, we'll use cpu copy instead. We cannot do it if we
+	* attempt to use blitter interrupts of course
+	jbsr 	(a4)
+	jra		1f
+0:
 	* second bitplane
 	move.l a0,bltapt(a5)	|source graphic top left corner
 	move.l a1,bltdpt(a5)	|destination top (bottom) left corner
 	move.w  d4,bltsize(a5)	|rectangle size, starts blit
+1:
 	.endr
 	
 	movem.l	(a7)+,d2-d6/a0-a5
 	rts
+copy_function_table:
+	.word	copy_none-copy_function_table
+	.word	copy_16-copy_function_table		| not reached here
+	.word	copy_32-copy_function_table
+	.word	copy_48-copy_function_table
+	.word	copy_64-copy_function_table
+	* probably never reached, just in case!
+	.word	copy_none-copy_function_table
+	.word	copy_none-copy_function_table
+	.macro	CPU_COPY_PRE
+	move.w	d6,d5
+	move.l	a1,a3
+	move.l	a0,a2
+0:
+	.endm
+	.macro	CPU_COPY_POST
+	add.w	d1,a2   | next row using modulus
+	add.w	d1,a3
+	dbf		d6,0b
+	move.w	d5,d6
+	rts	
+	.endm
+* should not be called
+copy_none:
+	.ifndef	RELEASE
+	ILLEGAL
+	.endif
+	rts
+copy_16:
+	CPU_COPY_PRE
+	move.w	(a2)+,(a3)+	
+	CPU_COPY_POST
+copy_32:
+	CPU_COPY_PRE
+	move.l	(a2)+,(a3)+	
+	CPU_COPY_POST
+copy_48:
+	CPU_COPY_PRE
+	move.l	(a2)+,(a3)+	
+	move.w	(a2)+,(a3)+	
+	CPU_COPY_POST
+copy_64:
+	CPU_COPY_PRE
+	move.l	(a2)+,(a3)+	
+	move.l	(a2)+,(a3)+	
+	CPU_COPY_POST
 
 * we're going to scan for dirty tiles (0x400 array)
 * an optimization is to also have flags for 0x20-size regions
@@ -1021,6 +1078,9 @@ update_bobs_and_hw_sprites:
 
 	move.l	bob_previous_drawed_sprites(pc),a4
 	lea		_custom,a5
+	WAIT_BLIT
+	* set bltalwm to all ones as BOB blit set them to 0
+	move.w  #-1,bltalwm(a5)
 	
 
 	* clear previous positions
@@ -1037,7 +1097,7 @@ update_bobs_and_hw_sprites:
 	move.w	(a4),d4			| height
 	move.w	(2,a4),d2		| width
 	clr.l	(a4)+			| ack deletion
-	bsr		blit_background
+	jbsr		blit_background
 	dbf		d7,1b	
 	bra.b	12f
 11:
