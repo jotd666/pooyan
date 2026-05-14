@@ -1,5 +1,5 @@
 # pooyan
-remake of Pooyan for Amiga
+port of Pooyan arcade game for Amiga
 
 Requires a joystick, or the keyboard
 
@@ -17,8 +17,8 @@ Credits:
 
 Instructions:
 
-5: insert coin
-1/2: start game
+5/fire: insert coin
+1/2/up/down: start game
 arrows/joystick: move
-red/ctrl: fire
-
+ctrl/joyfire: fire
+P: pause

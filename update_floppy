@@ -5,7 +5,7 @@ set radix pooyan
 
 
 set game ${radix}
-copy $game DF0:$game
+copy ${game}.rnc DF0:$game
 protect DF0:$game RWED
 
 if exists df0:$game.high
